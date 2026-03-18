@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>文件掃描器</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --accent: #00e5ff;
+    --accent2: #7b5ea7;
+    --green: #00ff88;
+    --red: #ff4466;
+    --text: #e8e8f0;
+    --text-dim: #6b6b85;
+    --border: rgba(255,255,255,0.07);
+    --glow: 0 0 30px rgba(0,229,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 16px; letter-spacing: -0.3px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .page-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  /* Main area */
+  main { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* Camera / Drop Zone */
+  .scanner-zone {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    aspect-ratio: 3/4;
+    max-height: 60dvh;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .scanner-zone.drag-over { border-color: var(--accent); box-shadow: var(--glow); }
+
+  #videoEl {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+  }
+
+  #previewCanvas {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: none;
+    background: #000;
+  }
+
+  .placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    padding: 30px; text-align: center;
+  }
+
+  .placeholder-icon {
+    width: 72px; height: 72px;
+    border: 2px dashed var(--accent2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    animation: pulse-ring 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(123,94,167,0.4); }
+    50% { box-shadow: 0 0 0 14px rgba(123,94,167,0); }
+  }
+
+  .placeholder h2 { font-size: 17px; font-weight: 600; }
+  .placeholder p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* Corner overlay for edge detection */
+  .corners-overlay {
+    position: absolute; inset: 0; pointer-events: none;
+    display: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--accent);
+    border-style: solid;
+  }
+
+  .corner.tl { top: 12px; left: 12px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+  .corner.tr { top: 12px; right: 12px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+  .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+  .corner.br { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+  /* Edge detection SVG overlay */
+  #edgeCanvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    display: none;
+  }
+
+  /* Scan line animation */
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 12px var(--accent);
+    display: none;
+    animation: scan 2s ease-in-out infinite;
+  }
+
+  @keyframes scan { 0% { top: 10%; } 100% { top: 90%; } }
+
+  /* Status badge */
+  .status-badge {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 20px;
+    display: none;
+    white-space: nowrap;
+  }
+
+  .status-badge.detecting {
+    background: rgba(0,229,255,0.12);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+  }
+
+  .status-badge.found {
+    background: rgba(0,255,136,0.12);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--green);
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+
+  .btn {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    position: relative; overflow: hidden;
+  }
+
+  .btn:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0099bb);
+    color: #000;
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-danger {
+    background: rgba(255,68,102,0.12);
+    color: var(--red);
+    border: 1px solid rgba(255,68,102,0.25);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--green), #00bb66);
+    color: #000;
+    grid-column: 1 / -1;
+  }
+
+  .btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Thumbnails */
+  .thumbs-section { display: none; }
+  .thumbs-section h3 {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .thumbs-grid {
+    display: flex; gap: 10px; overflow-x: auto;
+    padding-bottom: 6px; scroll-snap-type: x mandatory;
+  }
+
+  .thumbs-grid::-webkit-scrollbar { height: 3px; }
+  .thumbs-grid::-webkit-scrollbar-track { background: var(--surface); border-radius: 2px; }
+  .thumbs-grid::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 2px; }
+
+  .thumb-item {
+    flex: 0 0 80px; scroll-snap-align: start;
+    position: relative;
+  }
+
+  .thumb-item img {
+    width: 80px; height: 104px;
+    object-fit: cover; border-radius: 8px;
+    border: 2px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .thumb-item img:hover { border-color: var(--accent); }
+
+  .thumb-num {
+    position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    background: rgba(0,0,0,0.7); color: var(--text-dim);
+    padding: 1px 6px; border-radius: 6px;
+  }
+
+  .thumb-del {
+    position: absolute; top: -6px; right: -6px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--red); color: #fff;
+    border: none; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; line-height: 1;
+  }
+
+  /* Hidden file input */
+  #fileInput { display: none; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 12px 20px; border-radius: 12px;
+    font-size: 13px; font-weight: 500;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 999; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(0,255,136,0.3); color: var(--green); }
+  .toast.error { border-color: rgba(255,68,102,0.3); color: var(--red); }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px; z-index: 200; display: none;
+  }
+
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 14px; color: var(--text-dim); }
+
+  /* Crop handles overlay */
+  #cropOverlay {
+    position: absolute; inset: 0;
+    display: none;
+    touch-action: none;
+  }
+
+  .crop-poly {
+    fill: rgba(0,229,255,0.08);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .crop-handle {
+    fill: var(--accent);
+    stroke: #000; stroke-width: 2;
+    cursor: grab;
+    r: 10;
+  }
+
+  .crop-handle:active { cursor: grabbing; }
+
+  /* Mode tabs */
+  .mode-tabs {
+    display: flex; gap: 8px;
+    background: var(--surface);
+    padding: 4px; border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .mode-tab {
+    flex: 1; padding: 10px;
+    border-radius: 8px; border: none;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    background: transparent; color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  .mode-tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* Enhancement options */
+  .enhance-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+
+  .enhance-chip {
+    padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text-dim);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  .enhance-chip.active {
+    border-color: var(--accent2);
+    color: var(--accent);
+    background: rgba(123,94,167,0.12);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📄</div>
+    文件掃描器
+  </div>
+  <div class="page-count" id="pageCountBadge">0 頁</div>
+</header>
+
+<main>
+  <!-- Mode Tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabCamera" onclick="setMode('camera')">
+      📷 相機
+    </button>
+    <button class="mode-tab" id="tabFile" onclick="setMode('file')">
+      🖼 上傳圖片
+    </button>
+  </div>
+
+  <!-- Scanner Zone -->
+  <div class="scanner-zone" id="scannerZone"
+       onclick="handleZoneClick()"
+       ondragover="handleDragOver(event)"
+       ondragleave="handleDragLeave(event)"
+       ondrop="handleDrop(event)">
+
+    <video id="videoEl" autoplay playsinline muted></video>
+    <canvas id="previewCanvas"></canvas>
+
+    <!-- Crop SVG overlay -->
+    <svg id="cropOverlay" xmlns="http://www.w3.org/2000/svg">
+      <polygon id="cropPoly" class="crop-poly" points=""/>
+      <circle class="crop-handle" id="h0" cx="0" cy="0"/>
+      <circle class="crop-handle" id="h1" cx="0" cy="0"/>
+      <circle class="crop-handle" id="h2" cx="0" cy="0"/>
+      <circle class="crop-handle" id="h3" cx="0" cy="0"/>
+    </svg>
+
+    <!-- Corner decorations -->
+    <div class="corners-overlay" id="cornersOverlay">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="scan-line" id="scanLine"></div>
+    <div class="status-badge detecting" id="statusBadge">🔍 偵測邊緣中...</div>
+
+    <div class="placeholder" id="placeholder">
+      <div class="placeholder-icon">📷</div>
+      <h2>點擊開啟相機</h2>
+      <p>自動偵測文件邊緣<br>支援拖曳圖片上傳</p>
+    </div>
+  </div>
+
+  <!-- Enhancement Options -->
+  <div class="enhance-row" id="enhanceRow" style="display:none">
+    <span style="font-size:12px;color:var(--text-dim);align-self:center;font-weight:600;">增強：</span>
+    <button class="enhance-chip active" onclick="toggleEnhance('auto')" id="chipAuto">✨ 自動</button>
+    <button class="enhance-chip" onclick="toggleEnhance('bw')" id="chipBw">⚫ 黑白</button>
+    <button class="enhance-chip" onclick="toggleEnhance('gray')" id="chipGray">🔘 灰階</button>
+    <button class="enhance-chip" onclick="toggleEnhance('none')" id="chipNone">🎨 原色</button>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="btn-row" id="btnRow">
+    <button class="btn btn-primary" id="btnCapture" onclick="captureOrScan()" disabled>
+      📸 拍照
+    </button>
+    <button class="btn btn-secondary" id="btnRetake" onclick="retake()" style="display:none">
+      🔄 重拍
+    </button>
+    <button class="btn btn-secondary" id="btnAddPage" onclick="addCurrentPage()" disabled style="display:none">
+      ➕ 加入
+    </button>
+    <button class="btn btn-secondary" onclick="triggerFile()">
+      🖼 選圖片
+    </button>
+  </div>
+
+  <!-- Export Button -->
+  <button class="btn btn-success" id="btnExport" onclick="exportPDF()" disabled>
+    ⬇ 匯出 PDF
+  </button>
+
+  <!-- Thumbnails -->
+  <div class="thumbs-section" id="thumbsSection">
+    <h3>已掃描頁面</h3>
+    <div class="thumbs-grid" id="thumbsGrid"></div>
+  </div>
+</main>
+
+<input type="file" id="fileInput" accept="image/*" multiple onchange="handleFileInput(event)">
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">處理中...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== State =====
+let mode = 'camera';
+let stream = null;
+let pages = []; // { dataUrl }
+let currentProcessed = null;
+let isCapturing = false;
+let enhanceMode = 'auto';
+let cropPoints = null; // [{x,y}] in canvas coords (relative to display)
+let isDraggingHandle = -1;
+let detectInterval = null;
+
+const videoEl = document.getElementById('videoEl');
+const previewCanvas = document.getElementById('previewCanvas');
+const ctx = previewCanvas.getContext('2d');
+const placeholder = document.getElementById('placeholder');
+const scanLine = document.getElementById('scanLine');
+const cornersOverlay = document.getElementById('cornersOverlay');
+const statusBadge = document.getElementById('statusBadge');
+const cropOverlay = document.getElementById('cropOverlay');
+const btnCapture = document.getElementById('btnCapture');
+const btnRetake = document.getElementById('btnRetake');
+const btnAddPage = document.getElementById('btnAddPage');
+const btnExport = document.getElementById('btnExport');
+const enhanceRow = document.getElementById('enhanceRow');
+const thumbsSection = document.getElementById('thumbsSection');
+
+// ===== Mode switching =====
+function setMode(m) {
+  mode = m;
+  document.getElementById('tabCamera').classList.toggle('active', m === 'camera');
+  document.getElementById('tabFile').classList.toggle('active', m === 'file');
+  stopCamera();
+  resetScannerState();
+}
+
+function handleZoneClick() {
+  if (mode === 'file') { triggerFile(); return; }
+  if (!stream && !currentProcessed) startCamera();
+}
+
+// ===== Camera =====
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+    videoEl.srcObject = stream;
+    videoEl.style.display = 'block';
+    placeholder.style.display = 'none';
+    cornersOverlay.style.display = 'block';
+    scanLine.style.display = 'block';
+    statusBadge.style.display = 'block';
+    btnCapture.disabled = false;
+    btnCapture.textContent = '📸 拍照';
+    startEdgeDetection();
+  } catch (e) {
+    showToast('無法開啟相機：' + e.message, 'error');
+  }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  videoEl.style.display = 'none';
+  clearInterval(detectInterval);
+}
+
+// ===== Edge Detection (lightweight JS implementation) =====
+function startEdgeDetection() {
+  clearInterval(detectInterval);
+  detectInterval = setInterval(detectEdgesFromVideo, 600);
+}
+
+function detectEdgesFromVideo() {
+  if (!stream || !videoEl.videoWidth) return;
+  const w = videoEl.videoWidth;
+  const h = videoEl.videoHeight;
+  const offscreen = document.createElement('canvas');
+  offscreen.width = w; offscreen.height = h;
+  const octx = offscreen.getContext('2d');
+  octx.drawImage(videoEl, 0, 0, w, h);
+  const quad = findDocumentQuad(octx, w, h);
+  if (quad) {
+    statusBadge.className = 'status-badge found';
+    statusBadge.style.display = 'block';
+    statusBadge.textContent = '✅ 已偵測到文件';
+  } else {
+    statusBadge.className = 'status-badge detecting';
+    statusBadge.textContent = '🔍 偵測邊緣中...';
+  }
+}
+
+// Simplified document quad detection using edge + gradient analysis
+function findDocumentQuad(octx, w, h) {
+  const imageData = octx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+
+  // Convert to grayscale
+  const gray = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    gray[i] = 0.299 * data[i*4] + 0.587 * data[i*4+1] + 0.114 * data[i*4+2];
+  }
+
+  // Simple Sobel edge detection
+  const edges = new Float32Array(w * h);
+  let maxEdge = 0;
+  for (let y = 1; y < h-1; y++) {
+    for (let x = 1; x < w-1; x++) {
+      const gx = -gray[(y-1)*w+x-1] + gray[(y-1)*w+x+1]
+                 -2*gray[y*w+x-1]   + 2*gray[y*w+x+1]
+                 -gray[(y+1)*w+x-1] + gray[(y+1)*w+x+1];
+      const gy = -gray[(y-1)*w+x-1] - 2*gray[(y-1)*w+x] - gray[(y-1)*w+x+1]
+                 +gray[(y+1)*w+x-1] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+x+1];
+      const e = Math.sqrt(gx*gx + gy*gy);
+      edges[y*w+x] = e;
+      if (e > maxEdge) maxEdge = e;
+    }
+  }
+
+  if (maxEdge < 30) return null; // Low contrast scene
+
+  // Check edge density — if enough strong edges exist, we assume a doc is present
+  const threshold = maxEdge * 0.25;
+  let edgeCount = 0;
+  for (let i = 0; i < edges.length; i++) if (edges[i] > threshold) edgeCount++;
+  const density = edgeCount / (w * h);
+
+  return density > 0.01 && density < 0.4;
+}
+
+// ===== Capture =====
+function captureOrScan() {
+  if (mode === 'camera' && stream) {
+    captureFromCamera();
+  }
+}
+
+function captureFromCamera() {
+  const w = videoEl.videoWidth || 1280;
+  const h = videoEl.videoHeight || 720;
+  const offscreen = document.createElement('canvas');
+  offscreen.width = w; offscreen.height = h;
+  const octx = offscreen.getContext('2d');
+  octx.drawImage(videoEl, 0, 0, w, h);
+
+  // Show processing
+  scanLine.style.display = 'none';
+  stopCamera();
+  stream = null;
+
+  processImage(offscreen.toDataURL('image/jpeg', 0.95));
+}
+
+// ===== Process Image =====
+function processImage(dataUrl) {
+  showLoading('分析文件邊緣...');
+
+  const img = new Image();
+  img.onload = () => {
+    const w = img.width;
+    const h = img.height;
+
+    // Detect crop region
+    const offscreen = document.createElement('canvas');
+    offscreen.width = w; offscreen.height = h;
+    const octx = offscreen.getContext('2d');
+    octx.drawImage(img, 0, 0);
+
+    const quad = detectDocumentBounds(octx, w, h);
+
+    hideLoading();
+
+    // Show in preview with crop handles
+    showPreview(img, w, h, quad);
+  };
+  img.src = dataUrl;
+}
+
+function detectDocumentBounds(octx, w, h) {
+  const imageData = octx.getImageData(0, 0, w, h);
+  const d = imageData.data;
+
+  // Convert to grayscale
+  const gray = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    gray[i] = Math.round(0.299*d[i*4] + 0.587*d[i*4+1] + 0.114*d[i*4+2]);
+  }
+
+  // Gaussian blur (3x3 approximation)
+  const blurred = new Uint8Array(w * h);
+  for (let y = 1; y < h-1; y++) {
+    for (let x = 1; x < w-1; x++) {
+      const sum = gray[(y-1)*w+x-1] + 2*gray[(y-1)*w+x] + gray[(y-1)*w+x+1]
+                + 2*gray[y*w+x-1]   + 4*gray[y*w+x]     + 2*gray[y*w+x+1]
+                + gray[(y+1)*w+x-1] + 2*gray[(y+1)*w+x] + gray[(y+1)*w+x+1];
+      blurred[y*w+x] = sum >> 4;
+    }
+  }
+
+  // Canny-like edges
+  const edges = new Uint8Array(w * h);
+  let maxE = 0;
+  const gMag = new Float32Array(w * h);
+  for (let y = 1; y < h-1; y++) {
+    for (let x = 1; x < w-1; x++) {
+      const gx = blurred[y*w+x+1] - blurred[y*w+x-1];
+      const gy = blurred[(y+1)*w+x] - blurred[(y-1)*w+x];
+      const m = Math.sqrt(gx*gx + gy*gy);
+      gMag[y*w+x] = m;
+      if (m > maxE) maxE = m;
+    }
+  }
+
+  const threshold = Math.max(30, maxE * 0.2);
+  for (let i = 0; i < w*h; i++) if (gMag[i] > threshold) edges[i] = 255;
+
+  // Find bounding box of strong edges (document region)
+  let minX = w, maxX = 0, minY = h, maxY = 0;
+  let found = false;
+
+  // Sample edges to find document corners
+  // Use edge projection on x and y axes
+  const xProj = new Float32Array(w);
+  const yProj = new Float32Array(h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (edges[y*w+x]) { xProj[x]++; yProj[y]++; }
+  }
+
+  // Find significant edge rows/cols
+  const margin = 0.05;
+  const xThresh = h * 0.03, yThresh = w * 0.03;
+
+  // Scan from edges inward
+  let left = Math.floor(w*margin), right = Math.floor(w*(1-margin));
+  let top = Math.floor(h*margin), bottom = Math.floor(h*(1-margin));
+
+  for (let x = Math.floor(w*margin); x < w/2; x++) if (xProj[x] > xThresh) { left = x; break; }
+  for (let x = Math.floor(w*(1-margin)); x > w/2; x--) if (xProj[x] > xThresh) { right = x; break; }
+  for (let y = Math.floor(h*margin); y < h/2; y++) if (yProj[y] > yThresh) { top = y; break; }
+  for (let y = Math.floor(h*(1-margin)); y > h/2; y--) if (yProj[y] > yThresh) { bottom = y; break; }
+
+  // Add small padding
+  const pad = 10;
+  left = Math.max(0, left - pad);
+  top = Math.max(0, top - pad);
+  right = Math.min(w-1, right + pad);
+  bottom = Math.min(h-1, bottom + pad);
+
+  // If bounds are too small or basically full image, use default with margin
+  const areaPct = (right-left) * (bottom-top) / (w*h);
+  if (areaPct < 0.1 || areaPct > 0.98) {
+    const mx = Math.floor(w * 0.06);
+    const my = Math.floor(h * 0.06);
+    return [
+      {x: mx, y: my}, {x: w-mx, y: my},
+      {x: w-mx, y: h-my}, {x: mx, y: h-my}
+    ];
+  }
+
+  return [
+    {x: left, y: top},
+    {x: right, y: top},
+    {x: right, y: bottom},
+    {x: left, y: bottom}
+  ];
+}
+
+// ===== Show Preview with crop handles =====
+let origImg = null, origW = 0, origH = 0;
+
+function showPreview(img, w, h, quad) {
+  origImg = img; origW = w; origH = h;
+
+  previewCanvas.width = w;
+  previewCanvas.height = h;
+  ctx.drawImage(img, 0, 0);
+
+  videoEl.style.display = 'none';
+  previewCanvas.style.display = 'block';
+  placeholder.style.display = 'none';
+  cornersOverlay.style.display = 'none';
+  scanLine.style.display = 'none';
+  statusBadge.style.display = 'none';
+  enhanceRow.style.display = 'flex';
+
+  // Setup crop overlay
+  const zone = document.getElementById('scannerZone');
+  const rect = zone.getBoundingClientRect();
+  const scaleX = rect.width / w;
+  const scaleY = rect.height / h;
+
+  // Convert image coords to display coords
+  cropPoints = quad.map(p => ({
+    x: p.x * scaleX,
+    y: p.y * scaleY,
+    ix: p.x, iy: p.y // original image coords
+  }));
+
+  drawCropOverlay();
+  setupCropHandles();
+
+  // Show action buttons
+  btnCapture.style.display = 'none';
+  btnRetake.style.display = 'flex';
+  btnAddPage.style.display = 'flex';
+  btnAddPage.disabled = false;
+
+  // Apply enhancement preview
+  applyEnhancement();
+}
+
+function drawCropOverlay() {
+  const poly = document.getElementById('cropPoly');
+  const pts = cropPoints.map(p => `${p.x},${p.y}`).join(' ');
+  poly.setAttribute('points', pts);
+
+  cropPoints.forEach((p, i) => {
+    const h = document.getElementById('h'+i);
+    h.setAttribute('cx', p.x);
+    h.setAttribute('cy', p.y);
+  });
+
+  cropOverlay.style.display = 'block';
+}
+
+function setupCropHandles() {
+  const zone = document.getElementById('scannerZone');
+
+  // Touch events on handles
+  [0,1,2,3].forEach(i => {
+    const h = document.getElementById('h'+i);
+    h.addEventListener('mousedown', e => { isDraggingHandle = i; e.stopPropagation(); });
+    h.addEventListener('touchstart', e => { isDraggingHandle = i; e.stopPropagation(); e.preventDefault(); }, {passive:false});
+  });
+
+  window.addEventListener('mousemove', moveCropHandle);
+  window.addEventListener('touchmove', moveCropHandle, {passive:false});
+  window.addEventListener('mouseup', () => { isDraggingHandle = -1; });
+  window.addEventListener('touchend', () => { isDraggingHandle = -1; });
+}
+
+function moveCropHandle(e) {
+  if (isDraggingHandle < 0) return;
+  e.preventDefault();
+  const zone = document.getElementById('scannerZone');
+  const rect = zone.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+  const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+  const scaleX = rect.width / origW;
+  const scaleY = rect.height / origH;
+
+  cropPoints[isDraggingHandle] = {
+    x, y,
+    ix: x / scaleX,
+    iy: y / scaleY
+  };
+  drawCropOverlay();
+}
+
+// ===== Enhancement =====
+function toggleEnhance(mode) {
+  enhanceMode = mode;
+  ['auto','bw','gray','none'].forEach(m => {
+    document.getElementById('chip'+m.charAt(0).toUpperCase()+m.slice(1))
+      .classList.toggle('active', m === mode);
+  });
+  applyEnhancement();
+}
+
+function applyEnhancement() {
+  if (!origImg) return;
+  const w = origW, h = origH;
+  previewCanvas.width = w; previewCanvas.height = h;
+  ctx.drawImage(origImg, 0, 0);
+
+  if (enhanceMode === 'none') return;
+
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const d = imageData.data;
+
+  if (enhanceMode === 'bw') {
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      const bw = g > 128 ? 255 : 0;
+      d[i] = d[i+1] = d[i+2] = bw;
+    }
+  } else if (enhanceMode === 'gray') {
+    for (let i = 0; i < d.length; i += 4) {
+      const g = Math.min(255, (0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]) * 1.15 + 10);
+      d[i] = d[i+1] = d[i+2] = g;
+    }
+  } else if (enhanceMode === 'auto') {
+    // Auto: increase contrast and sharpen slightly
+    for (let i = 0; i < d.length; i += 4) {
+      d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.3 + 128 + 15));
+      d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.3 + 128 + 10));
+      d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.2 + 128 + 5));
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+// ===== Perspective transform (4-point crop) =====
+function perspectiveTransform(sourceImg, srcPts, targetW, targetH) {
+  // Simple bilinear warp using the 4 control points
+  const dst = document.createElement('canvas');
+  dst.width = targetW; dst.height = targetH;
+  const dctx = dst.getContext('2d');
+
+  // Get source image pixels
+  const srcCanvas = document.createElement('canvas');
+  srcCanvas.width = sourceImg.width; srcCanvas.height = sourceImg.height;
+  const sctx = srcCanvas.getContext('2d');
+  sctx.drawImage(sourceImg, 0, 0);
+
+  // Apply enhancement to source
+  applyEnhancementToCtx(sctx, sourceImg.width, sourceImg.height);
+
+  const sData = sctx.getImageData(0, 0, sourceImg.width, sourceImg.height);
+  const dData = dctx.createImageData(targetW, targetH);
+
+  const [p0, p1, p2, p3] = srcPts; // TL, TR, BR, BL
+
+  for (let y = 0; y < targetH; y++) {
+    for (let x = 0; x < targetW; x++) {
+      const u = x / targetW;
+      const v = y / targetH;
+
+      // Bilinear interpolation in source
+      const sx = (1-u)*(1-v)*p0.x + u*(1-v)*p1.x + u*v*p2.x + (1-u)*v*p3.x;
+      const sy = (1-u)*(1-v)*p0.y + u*(1-v)*p1.y + u*v*p2.y + (1-u)*v*p3.y;
+
+      const ix = Math.round(sx), iy = Math.round(sy);
+      if (ix < 0 || ix >= sourceImg.width || iy < 0 || iy >= sourceImg.height) continue;
+
+      const si = (iy * sourceImg.width + ix) * 4;
+      const di = (y * targetW + x) * 4;
+      dData.data[di]   = sData.data[si];
+      dData.data[di+1] = sData.data[si+1];
+      dData.data[di+2] = sData.data[si+2];
+      dData.data[di+3] = 255;
+    }
+  }
+
+  dctx.putImageData(dData, 0, 0);
+  return dst;
+}
+
+function applyEnhancementToCtx(c, w, h) {
+  if (enhanceMode === 'none') return;
+  const imageData = c.getImageData(0, 0, w, h);
+  const d = imageData.data;
+  if (enhanceMode === 'bw') {
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+      d[i]=d[i+1]=d[i+2]=g>128?255:0;
+    }
+  } else if (enhanceMode === 'gray') {
+    for (let i = 0; i < d.length; i += 4) {
+      const g = Math.min(255,(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])*1.15+10);
+      d[i]=d[i+1]=d[i+2]=g;
+    }
+  } else if (enhanceMode === 'auto') {
+    for (let i = 0; i < d.length; i += 4) {
+      d[i]  =Math.min(255,Math.max(0,(d[i]  -128)*1.3+128+15));
+      d[i+1]=Math.min(255,Math.max(0,(d[i+1]-128)*1.3+128+10));
+      d[i+2]=Math.min(255,Math.max(0,(d[i+2]-128)*1.2+128+5));
+    }
+  }
+  c.putImageData(imageData, 0, 0);
+}
+
+// ===== Add Page =====
+function addCurrentPage() {
+  if (!origImg || !cropPoints) return;
+  showLoading('裁切並儲存頁面...');
+
+  setTimeout(() => {
+    try {
+      const pts = cropPoints.map(p => ({x: p.ix, y: p.iy}));
+      // Compute target size based on crop region
+      const w1 = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+      const w2 = Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y);
+      const h1 = Math.hypot(pts[3].x-pts[0].x, pts[3].y-pts[0].y);
+      const h2 = Math.hypot(pts[2].x-pts[1].x, pts[2].y-pts[1].y);
+      const targetW = Math.round(Math.max(w1, w2));
+      const targetH = Math.round(Math.max(h1, h2));
+
+      const cropped = perspectiveTransform(origImg, pts, targetW, targetH);
+      const dataUrl = cropped.toDataURL('image/jpeg', 0.92);
+      pages.push({ dataUrl });
+      addThumb(dataUrl, pages.length - 1);
+      updatePageCount();
+      btnExport.disabled = false;
+      showToast(`✅ 第 ${pages.length} 頁已加入`, 'success');
+      retake();
+    } catch(e) {
+      showToast('處理失敗：' + e.message, 'error');
+    }
+    hideLoading();
+  }, 50);
+}
+
+// ===== Thumbnails =====
+function addThumb(dataUrl, idx) {
+  thumbsSection.style.display = 'block';
+  const grid = document.getElementById('thumbsGrid');
+  const item = document.createElement('div');
+  item.className = 'thumb-item';
+  item.id = 'thumb-' + idx;
+  item.innerHTML = `
+    <img src="${dataUrl}" alt="頁面 ${idx+1}">
+    <span class="thumb-num">${idx+1}</span>
+    <button class="thumb-del" onclick="deletePage(${idx})" title="刪除">×</button>
+  `;
+  grid.appendChild(item);
+}
+
+function deletePage(idx) {
+  pages.splice(idx, 1);
+  rebuildThumbs();
+  updatePageCount();
+  if (pages.length === 0) {
+    btnExport.disabled = true;
+    thumbsSection.style.display = 'none';
+  }
+  showToast('已刪除頁面', 'error');
+}
+
+function rebuildThumbs() {
+  const grid = document.getElementById('thumbsGrid');
+  grid.innerHTML = '';
+  pages.forEach((p, i) => addThumb(p.dataUrl, i));
+}
+
+function updatePageCount() {
+  document.getElementById('pageCountBadge').textContent = pages.length + ' 頁';
+}
+
+// ===== Retake =====
+function retake() {
+  origImg = null; origW = 0; origH = 0; cropPoints = null;
+  previewCanvas.style.display = 'none';
+  cropOverlay.style.display = 'none';
+  enhanceRow.style.display = 'none';
+  btnRetake.style.display = 'none';
+  btnAddPage.style.display = 'none';
+  btnCapture.style.display = 'flex';
+  btnCapture.disabled = true;
+
+  if (mode === 'camera') {
+    placeholder.style.display = 'flex';
+    placeholder.querySelector('h2').textContent = '點擊開啟相機';
+    startCamera();
+  } else {
+    placeholder.style.display = 'flex';
+    placeholder.querySelector('h2').textContent = '點擊或拖曳圖片';
+  }
+}
+
+function resetScannerState() {
+  origImg = null; cropPoints = null;
+  previewCanvas.style.display = 'none';
+  cropOverlay.style.display = 'none';
+  cornersOverlay.style.display = 'none';
+  scanLine.style.display = 'none';
+  statusBadge.style.display = 'none';
+  enhanceRow.style.display = 'none';
+  btnRetake.style.display = 'none';
+  btnAddPage.style.display = 'none';
+  btnCapture.style.display = 'flex';
+  btnCapture.disabled = true;
+  placeholder.style.display = 'flex';
+
+  if (mode === 'camera') {
+    placeholder.querySelector('h2').textContent = '點擊開啟相機';
+    placeholder.querySelector('p').textContent = '自動偵測文件邊緣\n支援拖曳圖片上傳';
+  } else {
+    placeholder.querySelector('h2').textContent = '點擊或拖曳圖片';
+    placeholder.querySelector('p').textContent = '支援 JPG、PNG、HEIC 格式\n自動偵測並裁切邊緣';
+  }
+}
+
+// ===== File Input =====
+function triggerFile() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFileInput(e) {
+  const files = [...e.target.files];
+  if (!files.length) return;
+  processFiles(files);
+  e.target.value = '';
+}
+
+function processFiles(files) {
+  const imageFiles = files.filter(f => f.type.startsWith('image/'));
+  if (!imageFiles.length) { showToast('請選擇圖片檔案', 'error'); return; }
+
+  if (imageFiles.length === 1) {
+    const reader = new FileReader();
+    reader.onload = e2 => processImage(e2.target.result);
+    reader.readAsDataURL(imageFiles[0]);
+  } else {
+    // Multi-file: add all directly
+    showLoading(`處理 ${imageFiles.length} 張圖片...`);
+    let done = 0;
+    imageFiles.forEach(f => {
+      const reader = new FileReader();
+      reader.onload = e2 => {
+        const img = new Image();
+        img.onload = () => {
+          const w = img.width, h = img.height;
+          const offscreen = document.createElement('canvas');
+          offscreen.width = w; offscreen.height = h;
+          const octx = offscreen.getContext('2d');
+          octx.drawImage(img, 0, 0);
+          applyEnhancementToCtx(octx, w, h);
+          const dataUrl = offscreen.toDataURL('image/jpeg', 0.92);
+          pages.push({ dataUrl });
+          addThumb(dataUrl, pages.length - 1);
+          updatePageCount();
+          btnExport.disabled = false;
+          done++;
+          if (done === imageFiles.length) {
+            hideLoading();
+            showToast(`✅ 已加入 ${done} 張圖片`, 'success');
+          }
+        };
+        img.src = e2.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+  }
+}
+
+// Drag & Drop
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('scannerZone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('scannerZone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('scannerZone').classList.remove('drag-over');
+  const files = [...e.dataTransfer.files];
+  processFiles(files);
+}
+
+// ===== PDF Export =====
+async function exportPDF() {
+  if (pages.length === 0) return;
+  showLoading('生成 PDF...');
+
+  setTimeout(async () => {
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) pdf.addPage();
+
+        const img = new Image();
+        await new Promise(res => { img.onload = res; img.src = pages[i].dataUrl; });
+
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 5;
+        const maxW = pageW - margin*2;
+        const maxH = pageH - margin*2;
+
+        const ratio = Math.min(maxW / img.width, maxH / img.height);
+        const w = img.width * ratio;
+        const h = img.height * ratio;
+        const x = (pageW - w) / 2;
+        const y = (pageH - h) / 2;
+
+        pdf.addImage(pages[i].dataUrl, 'JPEG', x, y, w, h, undefined, 'FAST');
+      }
+
+      const filename = `掃描文件_${new Date().toISOString().slice(0,10)}.pdf`;
+      pdf.save(filename);
+      showToast(`✅ PDF 已下載 (${pages.length} 頁)`, 'success');
+    } catch(e) {
+      showToast('PDF 生成失敗：' + e.message, 'error');
+    }
+    hideLoading();
+  }, 100);
+}
+
+// ===== Utils =====
+function showLoading(msg = '處理中...') {
+  document.getElementById('loadingText').textContent = msg;
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => {
+    t.classList.add('show');
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  });
+}
+
+// Init
+resetScannerState();
+</script>
+</body>
+</html>
