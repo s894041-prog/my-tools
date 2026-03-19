@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 雙向翻譯魔法師</title>
+  <!--
+    ╔══════════════════════════════════════════╗
+    ║  🎓 雙向翻譯魔法師 v2.0                    ║
+    ║  說中文 ↔ 自動變成英文！                    ║
+    ║  說英文 ↔ 自動變成中文！                    ║
+    ╚══════════════════════════════════════════╝
+    使用到的魔法：
+    1. Web Speech API (SpeechRecognition) - 聽懂你說的話
+    2. Google 翻譯 免費端點              - 翻譯文字（免費！）
+    3. Web Speech API (SpeechSynthesis)  - 念出翻譯結果
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --zh-color: #FF6B6B;
+      --zh-light: #fff0f0;
+      --en-color: #4facfe;
+      --en-light: #e8f5ff;
+      --deep: #1a1a2e;
+      --card-bg: rgba(255,255,255,0.93);
+      --shadow: 0 8px 32px rgba(0,0,0,0.13);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', '微軟正黑體', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #ffecd2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 48px;
+      overflow-x: hidden;
+    }
+
+    /* 漂浮裝飾 */
+    .deco {
+      position: fixed; pointer-events: none; z-index: 0;
+      font-size: 56px; opacity: 0.45;
+      animation: floatDeco 20s ease-in-out infinite;
+    }
+    .deco:nth-child(1){ top:4%; left:1%; animation-duration:22s; }
+    .deco:nth-child(2){ top:12%; right:2%; animation-duration:17s; animation-delay:-7s; }
+    .deco:nth-child(3){ bottom:18%; left:3%; animation-duration:25s; animation-delay:-12s; font-size:42px; }
+    @keyframes floatDeco {
+      0%,100%{ transform: translateY(0) rotate(0deg); }
+      50%{ transform: translateY(-14px) rotate(5deg); }
+    }
+
+    /* 標題 */
+    .header { text-align:center; margin-bottom:20px; position:relative; z-index:1; }
+    .header h1 {
+      font-size: clamp(1.7rem,5.5vw,2.6rem);
+      font-weight:900; color:var(--deep);
+      text-shadow: 3px 3px 0 rgba(255,255,255,0.55);
+      line-height:1.2;
+    }
+    .header h1 span { color: var(--zh-color); }
+    .header p { font-size:.98rem; color:#555; margin-top:5px; font-weight:700; }
+    .safe-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      background:#e8f8ee; border:1.5px solid #a8ddb5; color:#276847;
+      border-radius:50px; padding:4px 12px; font-size:.76rem; font-weight:800; margin-top:8px;
+    }
+
+    /* 雙按鈕區 */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      max-width: 520px;
+      z-index: 1;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .lang-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 大麥克風按鈕 */
+    .mic-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 140px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 2.8rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s, box-shadow .3s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mic-btn:hover { transform: scale(1.06); }
+    .mic-btn:active { transform: scale(0.94); }
+
+    .mic-btn.zh-btn {
+      background: linear-gradient(145deg, #FF6B6B, #ff8e53);
+      box-shadow: 0 8px 22px rgba(255,107,107,0.4);
+    }
+    .mic-btn.en-btn {
+      background: linear-gradient(145deg, #4facfe, #00c6ff);
+      box-shadow: 0 8px 22px rgba(79,172,254,0.4);
+    }
+
+    .mic-btn.recording-zh {
+      background: linear-gradient(145deg, #e63946, #c1121f);
+      animation: pulseZH 1.1s ease-out infinite;
+    }
+    .mic-btn.recording-en {
+      background: linear-gradient(145deg, #0077b6, #023e8a);
+      animation: pulseEN 1.1s ease-out infinite;
+    }
+    @keyframes pulseZH {
+      0%{ box-shadow:0 8px 22px rgba(230,57,70,.5),0 0 0 0 rgba(230,57,70,.5); }
+      70%{ box-shadow:0 8px 22px rgba(230,57,70,.2),0 0 0 22px rgba(230,57,70,0); }
+      100%{ box-shadow:0 8px 22px rgba(230,57,70,.5),0 0 0 0 rgba(230,57,70,0); }
+    }
+    @keyframes pulseEN {
+      0%{ box-shadow:0 8px 22px rgba(0,119,182,.5),0 0 0 0 rgba(0,119,182,.5); }
+      70%{ box-shadow:0 8px 22px rgba(0,119,182,.2),0 0 0 22px rgba(0,119,182,0); }
+      100%{ box-shadow:0 8px 22px rgba(0,119,182,.5),0 0 0 0 rgba(0,119,182,0); }
+    }
+
+    .mic-label {
+      font-size: .92rem; font-weight:800; color:#555; text-align:center; line-height:1.4;
+    }
+    .mic-label.recording { animation: blink .8s step-end infinite; }
+    .zh-label.recording { color: #e63946; }
+    .en-label.recording { color: #0077b6; }
+    @keyframes blink { 50%{ opacity:.3; } }
+
+    /* 中間箭頭 */
+    .mid-arrow {
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; font-size:1.8rem;
+      animation: arrowPulse 2s ease-in-out infinite;
+    }
+    @keyframes arrowPulse {
+      0%,100%{ transform:scale(1); opacity:.7; }
+      50%{ transform:scale(1.2); opacity:1; }
+    }
+
+    /* 結果卡片 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 22px 20px;
+      width: 100%; max-width: 520px;
+      z-index:1;
+      border: 2px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .bubble-label {
+      font-size:.82rem; font-weight:800; color:#888;
+      margin-bottom:5px; display:flex; align-items:center; gap:5px;
+    }
+    .text-bubble {
+      border-radius:16px; padding:13px 16px; min-height:58px;
+      font-size:1.1rem; font-weight:700; word-break:break-word;
+      border: 2.5px dashed #ddd; background:#f7f7fb;
+      transition: background .3s, border-color .3s;
+      margin-bottom:12px;
+    }
+    .text-bubble.active-zh  { background:var(--zh-light); border-color:var(--zh-color); }
+    .text-bubble.active-en  { background:var(--en-light);  border-color:var(--en-color); }
+    .text-bubble.result-zh  { background:var(--zh-light); border-color:var(--zh-color); }
+    .text-bubble.result-en  { background:var(--en-light);  border-color:var(--en-color); }
+    .placeholder-text { color:#bbb; font-style:italic; font-weight:400; }
+
+    /* 翻譯中動畫 */
+    .loading-dots { display:none; justify-content:center; gap:7px; margin:6px 0 10px; }
+    .loading-dots.show { display:flex; }
+    .dot { width:11px; height:11px; border-radius:50%; animation:dotBounce 1.2s ease-in-out infinite; }
+    .dot:nth-child(1){ background:var(--zh-color); }
+    .dot:nth-child(2){ background:#FFD93D; animation-delay:.2s; }
+    .dot:nth-child(3){ background:var(--en-color); animation-delay:.4s; }
+    @keyframes dotBounce {
+      0%,80%,100%{ transform:scale(.7); opacity:.5; }
+      40%{ transform:scale(1.25); opacity:1; }
+    }
+
+    /* 朗讀按鈕 */
+    .speak-btn {
+      width:100%; padding:12px; border-radius:14px; border:none;
+      color:#fff; font-size:1rem; font-weight:800;
+      font-family:'Nunito',sans-serif; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:7px;
+      transition: transform .15s, opacity .2s;
+      margin-top:2px;
+    }
+    .speak-btn:hover { transform:translateY(-2px); }
+    .speak-btn:active { transform:translateY(1px); }
+    .speak-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+    .speak-zh { background:linear-gradient(135deg,#FF6B6B,#ff8e53); box-shadow:0 4px 14px rgba(255,107,107,.35); }
+    .speak-en  { background:linear-gradient(135deg,#4facfe,#00c6ff); box-shadow:0 4px 14px rgba(79,172,254,.35); }
+
+    /* 訊息框 */
+    .alert-box { display:none; border-radius:14px; padding:12px 16px; font-size:.9rem; font-weight:700; margin-top:14px; line-height:1.6; }
+    .alert-box.error { background:#fff0f0; border:2px solid #ffb3b3; color:#c0392b; display:block; }
+    .alert-box.info  { background:#f0f9ff; border:2px solid #a8d8f0; color:#1a6fa8; display:block; }
+    .alert-box.warn  { background:#fffbec; border:2px solid #ffe08a; color:#856404; display:block; }
+
+    /* 歷史紀錄 */
+    .history-section { width:100%; max-width:520px; margin-top:18px; z-index:1; position:relative; }
+    .history-title { font-size:.95rem; font-weight:800; color:#666; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .history-item {
+      background:rgba(255,255,255,.88); border-radius:14px;
+      padding:11px 14px; margin-bottom:9px;
+      box-shadow:0 2px 9px rgba(0,0,0,.07);
+      animation:slideIn .4s ease;
+    }
+    .history-item.from-zh { border-left:5px solid var(--zh-color); }
+    .history-item.from-en { border-left:5px solid var(--en-color); }
+    @keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .history-src { font-size:.95rem; color:#444; font-weight:700; }
+    .history-tgt { font-size:.9rem; font-weight:700; margin-top:3px; }
+    .history-tgt.en { color:#1a6fa8; }
+    .history-tgt.zh { color:#c0392b; }
+
+    .clear-btn {
+      background:none; border:2px solid #ddd; border-radius:10px;
+      padding:5px 13px; font-size:.82rem; font-family:'Nunito',sans-serif;
+      font-weight:700; color:#999; cursor:pointer; transition:all .2s; float:right;
+    }
+    .clear-btn:hover { border-color:var(--zh-color); color:var(--zh-color); }
+
+    .footer-tip { margin-top:22px; font-size:.8rem; color:#888; text-align:center; z-index:1; font-weight:700; }
+  </style>
+</head>
+<body>
+
+  <div class="deco">☁️</div>
+  <div class="deco">⛅</div>
+  <div class="deco">🌤️</div>
+
+  <!-- 標題 -->
+  <div class="header">
+    <h1>🌟 <span>雙向</span>翻譯魔法師</h1>
+    <p>說中文變英文 ↔ 說英文變中文！</p>
+    <div class="safe-badge">🔒 兒童安全模式 ｜ 🆓 免費 Google 翻譯</div>
+  </div>
+
+  <!-- 兩個麥克風按鈕 -->
+  <div class="btn-row">
+
+    <div class="lang-panel">
+      <button class="mic-btn zh-btn" id="zhMicBtn">🇹🇼</button>
+      <span class="mic-label zh-label" id="zhHint">按我說中文！</span>
+    </div>
+
+    <div class="mid-arrow">↕️</div>
+
+    <div class="lang-panel">
+      <button class="mic-btn en-btn" id="enMicBtn">🇦🇺</button>
+      <span class="mic-label en-label" id="enHint">Speak English!</span>
+    </div>
+
+  </div>
+
+  <!-- 結果卡片 -->
+  <div class="card">
+
+    <div class="bubble-label" id="srcLabel">🎤 按上面的按鈕開始說話！</div>
+    <div class="text-bubble" id="srcText">
+      <span class="placeholder-text">按上面的按鈕開始說話吧！</span>
+    </div>
+
+    <div class="loading-dots" id="loadingDots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="bubble-label" id="tgtLabel">✨ 翻譯結果：</div>
+    <div class="text-bubble" id="tgtText">
+      <span class="placeholder-text">翻譯結果會出現在這裡～</span>
+    </div>
+
+    <button class="speak-btn speak-en" id="speakBtn" disabled>
+      🔊 念出來！
+    </button>
+
+    <div class="alert-box" id="alertBox"></div>
+
+  </div>
+
+  <!-- 歷史紀錄 -->
+  <div class="history-section">
+    <div class="history-title">
+      📚 翻譯紀錄
+      <button class="clear-btn" id="clearBtn">🗑️ 清除</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <p class="footer-tip">💡 建議使用 Google Chrome 瀏覽器，效果最好！</p>
+
+
+  <script>
+    /*
+    ╔═══════════════════════════════════════════════╗
+    ║  🧙 雙向翻譯魔法師 v2.0 程式碼                   ║
+    ║                                               ║
+    ║  🇹🇼 按紅色按鈕 → 說中文 → 翻成英文 → 念英文      ║
+    ║  🇦🇺 按藍色按鈕 → 說英文 → 翻成中文 → 念中文      ║
+    ╚═══════════════════════════════════════════════╝
+    */
+
+    // ── 找到畫面上的各個元素 ──
+    const zhMicBtn    = document.getElementById('zhMicBtn');
+    const enMicBtn    = document.getElementById('enMicBtn');
+    const zhHint      = document.getElementById('zhHint');
+    const enHint      = document.getElementById('enHint');
+    const srcLabel    = document.getElementById('srcLabel');
+    const srcText     = document.getElementById('srcText');
+    const tgtLabel    = document.getElementById('tgtLabel');
+    const tgtText     = document.getElementById('tgtText');
+    const speakBtn    = document.getElementById('speakBtn');
+    const alertBox    = document.getElementById('alertBox');
+    const loadingDots = document.getElementById('loadingDots');
+    const historyList = document.getElementById('historyList');
+    const clearBtn    = document.getElementById('clearBtn');
+
+    // ── 程式狀態變數 ──
+    let currentTranslation = ''; // 目前翻譯好的文字
+    let isRecording = false;     // 是否正在錄音中
+    let currentMode = null;      // 'zh' 或 'en'：目前哪個語言在錄音
+    let recognition = null;      // 語音辨識器物件
+
+
+    // ──────────────────────────────────────────
+    // 🔍 步驟一：檢查瀏覽器有沒有支援語音功能
+    // ──────────────────────────────────────────
+    function checkBrowserSupport() {
+      const ok = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+      if (!ok) {
+        showAlert(
+          '哎呀！😢 你的瀏覽器不支援語音功能。<br>' +
+          '請改用 <strong>Google Chrome</strong> 瀏覽器喔！',
+          'error'
+        );
+        zhMicBtn.disabled = enMicBtn.disabled = true;
+        zhMicBtn.style.opacity = enMicBtn.style.opacity = '0.4';
+      }
+      return ok;
+    }
+
+
+    // ──────────────────────────────────────────
+    // 🎤 步驟二：建立語音辨識器
+    // mode = 'zh' → 聽中文
+    // mode = 'en' → 聽英文
+    // ──────────────────────────────────────────
+    function createRecognition(mode) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const r = new SR();
+
+      // 根據模式設定要聽哪種語言
+      r.lang = (mode === 'zh') ? 'zh-TW' : 'en-US';
+      r.continuous = false;    // 說完一句就停
+      r.interimResults = true; // 邊說邊顯示文字
+
+      // 📣 開始聽的時候
+      r.onstart = () => {
+        isRecording = true;
+        if (mode === 'zh') {
+          zhMicBtn.classList.add('recording-zh');
+          zhMicBtn.textContent = '⏹️';
+          zhHint.textContent = '🔴 聆聽中... 說完稍等';
+          zhHint.classList.add('recording');
+          srcLabel.textContent = '🎤 你說了（中文）：';
+        } else {
+          enMicBtn.classList.add('recording-en');
+          enMicBtn.textContent = '⏹️';
+          enHint.textContent = '🔴 Listening...';
+          enHint.classList.add('recording');
+          srcLabel.textContent = '🎤 You said (English):';
+        }
+        srcText.className = `text-bubble active-${mode}`;
+        srcText.innerHTML = `<span class="placeholder-text">👂 ${mode==='zh'?'正在聽你說話...':'Listening...'}</span>`;
+        tgtText.innerHTML = '<span class="placeholder-text">翻譯結果會出現在這裡～</span>';
+        tgtText.className = 'text-bubble';
+        speakBtn.disabled = true;
+        hideAlert();
+      };
+
+      // 📝 聽到文字的時候（說話中途也會更新）
+      r.onresult = (event) => {
+        let t = '';
+        for (let i = 0; i < event.results.length; i++) {
+          t += event.results[i][0].transcript;
+        }
+        srcText.textContent = t;
+      };
+
+      // ✅ 說完了，停止錄音
+      r.onend = () => {
+        resetMicUI();
+        const said = srcText.textContent.trim();
+        // 確認有聽到內容才去翻譯
+        if (said && !said.includes('正在聽') && !said.includes('Listening') && !said.includes('按上面')) {
+          translateText(said, mode);
+        }
+      };
+
+      // ❌ 發生錯誤的時候
+      r.onerror = (event) => {
+        resetMicUI();
+        if (event.error === 'not-allowed') {
+          showAlert(
+            '🙅 麥克風被封鎖了！<br>' +
+            '請點瀏覽器網址列旁的 🔒 圖示 → 麥克風 → 允許，再重新整理！',
+            'error'
+          );
+        } else if (event.error === 'no-speech') {
+          showAlert('😶 好像沒聽到聲音，再試一次吧！', 'info');
+        } else if (event.error === 'network') {
+          showAlert('📡 網路有問題，請確認有連線！', 'error');
+        } else {
+          showAlert(`🔧 小問題（${event.error}），請重試！`, 'warn');
+        }
+      };
+
+      return r;
+    }
+
+
+    // ── 重設兩個按鈕的外觀 ──
+    function resetMicUI() {
+      isRecording = false; currentMode = null;
+      zhMicBtn.classList.remove('recording-zh'); zhMicBtn.textContent = '🇹🇼';
+      enMicBtn.classList.remove('recording-en'); enMicBtn.textContent = '🇦🇺';
+      zhHint.textContent = '按我說中文！'; zhHint.classList.remove('recording');
+      enHint.textContent = 'Speak English!'; enHint.classList.remove('recording');
+      srcText.classList.remove('active-zh','active-en');
+    }
+
+
+    // ──────────────────────────────────────────
+    // 🌏 步驟三：翻譯功能（Google 翻譯，完全免費！）
+    //
+    // mode = 'zh' → 中文翻英文（sl=zh-TW, tl=en）
+    // mode = 'en' → 英文翻中文（sl=en,    tl=zh-TW）
+    // ──────────────────────────────────────────
+    async function translateText(input, mode) {
+      // 先做兒童安全過濾
+      if (containsInappropriateContent(input)) {
+        showAlert('⚠️ 這句話不太適合喔！請說一些正面友善的話！', 'warn');
+        return;
+      }
+
+      // 顯示翻譯中的動畫
+      loadingDots.classList.add('show');
+      tgtText.innerHTML = '<span class="placeholder-text">✨ 翻譯中，請稍等...</span>';
+      speakBtn.disabled = true;
+      hideAlert();
+
+      // 決定翻譯方向的語言代碼
+      const sl = (mode === 'zh') ? 'zh-TW' : 'en';   // 來源語言
+      const tl = (mode === 'zh') ? 'en'    : 'zh-TW'; // 目標語言
+
+      try {
+        // 🔗 呼叫 Google 翻譯免費端點
+        // encodeURIComponent：把特殊符號轉成網址安全的格式
+        const url = `https://translate.googleapis.com/translate_a/single` +
+          `?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(input)}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Google 翻譯暫時無法使用');
+
+        // Google 回傳的資料格式：[ [ ["翻譯","原文"], ...], ... ]
+        // 我們把每一段的翻譯文字（index 0）全部拼在一起
+        const data = await res.json();
+        const translated = data[0].map(item => item[0]).filter(Boolean).join('');
+
+        if (!translated) throw new Error('翻譯結果是空的');
+
+        // 顯示翻譯結果
+        currentTranslation = translated;
+        tgtText.textContent = translated;
+
+        // 根據翻譯方向更新標籤和按鈕顏色
+        if (mode === 'zh') {
+          // 中文→英文：結果框顯示藍色，朗讀按鈕也是藍色
+          tgtLabel.textContent = '✨ 英文翻譯：';
+          tgtText.className = 'text-bubble result-en';
+          speakBtn.className = 'speak-btn speak-en';
+          speakBtn.innerHTML = '🔊 用英文念出來！';
+        } else {
+          // 英文→中文：結果框顯示紅色，朗讀按鈕也是紅色
+          tgtLabel.textContent = '✨ 中文翻譯：';
+          tgtText.className = 'text-bubble result-zh';
+          speakBtn.className = 'speak-btn speak-zh';
+          speakBtn.innerHTML = '🔊 用中文念出來！';
+        }
+        speakBtn.disabled = false;
+
+        // 加入歷史紀錄
+        addToHistory(input, translated, mode);
+
+        // 🔊 自動朗讀翻譯結果！
+        speakText(translated, mode === 'zh' ? 'en-US' : 'zh-TW');
+
+      } catch (err) {
+        console.error('翻譯錯誤：', err);
+        showAlert('😅 翻譯時出了點問題，請確認網路後再試！', 'error');
+        tgtText.innerHTML = '<span class="placeholder-text">翻譯結果會出現在這裡～</span>';
+      } finally {
+        // 不管成功失敗，關掉翻譯中動畫
+        loadingDots.classList.remove('show');
+      }
+    }
+
+
+    // ──────────────────────────────────────────
+    // 🔒 步驟四：兒童安全過濾器
+    // 中英文都會檢查！
+    // ──────────────────────────────────────────
+    function containsInappropriateContent(text) {
+      const blockedWords = [
+        // 中文不適合詞彙
+        '幹','操','屁','死','廢物','白癡','蠢','殺','打死','去死','變態','色情',
+        // 英文不適合詞彙
+        'shit','damn','hell','idiot','stupid','kill','die'
+      ];
+      const lower = text.toLowerCase();
+      return blockedWords.some(w => lower.includes(w.toLowerCase()));
+    }
+
+
+    // ──────────────────────────────────────────
+    // 🔊 步驟五：語音朗讀
+    // lang：'en-US'（英文）或 'zh-TW'（中文）
+    // ──────────────────────────────────────────
+    function speakText(text, lang) {
+      window.speechSynthesis.cancel(); // 先停止之前的聲音
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang  = lang;
+      u.rate  = (lang === 'en-US') ? 0.88 : 0.92; // 稍微慢一點，聽得清楚
+      u.pitch = 1.1; // 音調稍高，比較活潑
+      window.speechSynthesis.speak(u);
+    }
+
+
+    // ──────────────────────────────────────────
+    // 📚 歷史紀錄功能
+    // ──────────────────────────────────────────
+    function addToHistory(src, tgt, mode) {
+      const item = document.createElement('div');
+      item.className = `history-item from-${mode}`;
+      const srcFlag = mode === 'zh' ? '🇹🇼' : '🇦🇺';
+      const tgtFlag = mode === 'zh' ? '🇦🇺' : '🇹🇼';
+      const tgtClass = mode === 'zh' ? 'en' : 'zh';
+      item.innerHTML = `
+        <div class="history-src">${srcFlag} ${src}</div>
+        <div class="history-tgt ${tgtClass}">${tgtFlag} ${tgt}</div>
+      `;
+      historyList.insertBefore(item, historyList.firstChild);
+      // 最多保留 12 條紀錄
+      while (historyList.children.length > 12) historyList.removeChild(historyList.lastChild);
+    }
+
+
+    // ── 顯示 / 隱藏提示訊息 ──
+    function showAlert(msg, type) { alertBox.innerHTML = msg; alertBox.className = `alert-box ${type}`; }
+    function hideAlert() { alertBox.className = 'alert-box'; }
+
+
+    // ──────────────────────────────────────────
+    // 🖱️ 按鈕點擊事件
+    // ──────────────────────────────────────────
+
+    // 🇹🇼 紅色按鈕：說中文
+    zhMicBtn.addEventListener('click', () => {
+      if (isRecording && currentMode === 'zh') {
+        // 正在錄中文 → 再按一次就停止
+        recognition.stop();
+        return;
+      }
+      if (isRecording) recognition.stop(); // 停掉另一個語言的錄音
+      currentMode = 'zh';
+      recognition = createRecognition('zh');
+      try { recognition.start(); } catch(e) { console.log('啟動錯誤', e); }
+    });
+
+    // 🇦🇺 藍色按鈕：說英文
+    enMicBtn.addEventListener('click', () => {
+      if (isRecording && currentMode === 'en') {
+        // 正在錄英文 → 再按一次就停止
+        recognition.stop();
+        return;
+      }
+      if (isRecording) recognition.stop();
+      currentMode = 'en';
+      recognition = createRecognition('en');
+      try { recognition.start(); } catch(e) { console.log('啟動錯誤', e); }
+    });
+
+    // 🔊 朗讀按鈕：再念一次翻譯結果
+    speakBtn.addEventListener('click', () => {
+      if (!currentTranslation) return;
+      // 根據按鈕的樣式判斷要念哪種語言
+      const lang = speakBtn.classList.contains('speak-en') ? 'en-US' : 'zh-TW';
+      speakText(currentTranslation, lang);
+    });
+
+    // 🗑️ 清除歷史紀錄
+    clearBtn.addEventListener('click', () => { historyList.innerHTML = ''; });
+
+
+    // ──────────────────────────────────────────
+    // 🚀 程式啟動！
+    // ──────────────────────────────────────────
+    checkBrowserSupport();
+
+  </script>
+</body>
+</html>
