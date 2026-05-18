@@ -6,178 +6,161 @@
   <title>🎨 自訂開箱轉盤</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      min-height: 100vh;
-      color: #fff;
+      min-height: 100vh; color: #fff;
     }
-
     .page { display: none; }
     .page.active { display: block; }
 
     /* ===== 共用按鈕 ===== */
     .btn-gold {
-      padding: 12px 32px;
+      padding: 12px 28px;
       background: linear-gradient(135deg, #f7971e, #ffd200);
       border: none; border-radius: 28px;
-      font-size: 1.05rem; color: #1a1a2e; font-weight: 700;
+      font-size: 1rem; color: #1a1a2e; font-weight: 700;
       cursor: pointer; font-family: inherit;
-      transition: transform 0.25s, box-shadow 0.25s;
+      transition: transform .25s, box-shadow .25s;
     }
-    .btn-gold:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 22px rgba(247,151,30,0.5);
-    }
-    .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-gold:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 22px rgba(247,151,30,.5); }
+    .btn-gold:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
     .btn-ghost {
-      padding: 10px 22px;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.25);
-      border-radius: 22px; font-size: 0.95rem;
+      padding: 9px 20px;
+      background: rgba(255,255,255,.1);
+      border: 2px solid rgba(255,255,255,.25);
+      border-radius: 22px; font-size: .92rem;
       color: #fff; cursor: pointer; font-family: inherit;
-      transition: background 0.2s;
+      transition: background .2s;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.2); }
+    .btn-ghost:hover { background: rgba(255,255,255,.2); }
+
+    .btn-share {
+      padding: 9px 20px;
+      background: rgba(100,200,120,.15);
+      border: 2px solid rgba(100,220,140,.35);
+      border-radius: 22px; font-size: .92rem;
+      color: #7dffaa; cursor: pointer; font-family: inherit;
+      transition: background .2s;
+    }
+    .btn-share:hover { background: rgba(100,200,120,.3); }
+    .btn-share:disabled { opacity: .4; cursor: not-allowed; }
 
     /* ===== 編輯頁 ===== */
-    .edit-wrap {
-      max-width: 560px;
-      margin: 0 auto;
-      padding: 36px 20px 40px;
-    }
-
+    .edit-wrap { max-width: 560px; margin: 0 auto; padding: 36px 20px 50px; }
     .edit-title {
       text-align: center; font-size: 2rem;
       background: linear-gradient(90deg, #f7971e, #ffd200);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text; margin-bottom: 6px;
     }
-    .edit-sub {
-      text-align: center; font-size: 0.88rem;
-      color: rgba(255,255,255,0.5); margin-bottom: 28px;
-    }
+    .edit-sub { text-align: center; font-size: .88rem; color: rgba(255,255,255,.5); margin-bottom: 28px; }
 
     .items-list { display: flex; flex-direction: column; gap: 11px; margin-bottom: 6px; }
-
     .item-row {
       display: flex; align-items: center; gap: 12px;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 14px; padding: 10px 13px;
     }
-
-    /* 圖片上傳格 */
     .img-btn {
       width: 54px; height: 54px; border-radius: 10px;
-      background: rgba(255,255,255,0.1);
-      border: 2px dashed rgba(255,255,255,0.3);
+      background: rgba(255,255,255,.1);
+      border: 2px dashed rgba(255,255,255,.3);
       cursor: pointer; display: flex; align-items: center;
       justify-content: center; font-size: 1.4rem;
       overflow: hidden; flex-shrink: 0;
-      transition: border-color 0.2s; position: relative;
+      transition: border-color .2s; position: relative;
     }
     .img-btn:hover { border-color: #ffd200; }
     .img-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-    .img-btn input[type=file] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
-    }
+    .img-btn input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
     .name-input {
-      flex: 1; background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
+      flex: 1; background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.2);
       border-radius: 10px; padding: 10px 13px;
       font-size: 1rem; color: #fff; font-family: inherit; outline: none;
     }
     .name-input:focus { border-color: #ffd200; }
-    .name-input::placeholder { color: rgba(255,255,255,0.32); }
+    .name-input::placeholder { color: rgba(255,255,255,.32); }
 
     .del-btn {
       width: 34px; height: 34px;
-      background: rgba(255,80,80,0.15); border: none;
+      background: rgba(255,80,80,.15); border: none;
       border-radius: 50%; color: #ff6b6b; font-size: 1rem;
       cursor: pointer; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; transition: background 0.2s;
+      justify-content: center; flex-shrink: 0; transition: background .2s;
     }
-    .del-btn:hover { background: rgba(255,80,80,0.35); }
+    .del-btn:hover { background: rgba(255,80,80,.35); }
 
-    .edit-actions {
-      display: flex; justify-content: center;
-      gap: 14px; flex-wrap: wrap; margin-top: 22px;
+    .edit-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+    .count-hint { text-align: center; font-size: .84rem; color: rgba(255,255,255,.48); margin-top: 12px; }
+
+    /* 分享說明 */
+    .share-hint {
+      margin-top: 20px;
+      background: rgba(100,200,120,.08);
+      border: 1px solid rgba(100,220,140,.25);
+      border-radius: 14px; padding: 14px 18px;
+      font-size: .85rem; color: rgba(255,255,255,.7); line-height: 1.6;
     }
-    .count-hint {
-      text-align: center; font-size: 0.84rem;
-      color: rgba(255,255,255,0.48); margin-top: 12px;
+    .share-hint strong { color: #7dffaa; }
+    .share-url {
+      margin-top: 10px;
+      background: rgba(0,0,0,.3);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: .78rem; color: #aaa;
+      word-break: break-all; display: none;
     }
 
     /* ===== 遊戲頁標頭 ===== */
     .game-header {
       display: flex; align-items: center; justify-content: center;
-      padding: 22px 20px 0; position: relative;
+      padding: 20px 20px 0; position: relative; gap: 10px;
     }
-    .game-header .btn-ghost { position: absolute; left: 20px; font-size: 0.88rem; padding: 8px 16px; }
+    .header-left { position: absolute; left: 16px; display: flex; gap: 8px; }
     .game-title {
-      font-size: 1.75rem;
+      font-size: 1.7rem;
       background: linear-gradient(90deg, #f7971e, #ffd200);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
-    .mode-toggle {
-      display: flex; justify-content: center;
-      gap: 13px; padding: 18px 20px 0;
-    }
+    .mode-toggle { display: flex; justify-content: center; gap: 12px; padding: 16px 20px 0; }
     .mode-btn {
-      padding: 11px 26px;
-      border: 2px solid rgba(255,255,255,0.25);
-      border-radius: 26px; font-size: 0.98rem;
-      cursor: pointer; font-family: inherit;
-      background: rgba(255,255,255,0.08); color: #fff;
-      transition: all 0.3s;
+      padding: 10px 24px;
+      border: 2px solid rgba(255,255,255,.25); border-radius: 26px;
+      font-size: .97rem; cursor: pointer; font-family: inherit;
+      background: rgba(255,255,255,.08); color: #fff; transition: all .3s;
     }
     .mode-btn.active {
       background: linear-gradient(135deg, #f7971e, #ffd200);
-      border-color: transparent; color: #1a1a2e;
-      font-weight: 700; box-shadow: 0 4px 18px rgba(247,151,30,0.5);
+      border-color: transparent; color: #1a1a2e; font-weight: 700;
+      box-shadow: 0 4px 18px rgba(247,151,30,.5);
     }
-    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.18); }
+    .mode-btn:hover:not(.active) { background: rgba(255,255,255,.18); }
 
     .section { display: none; }
     .section.active { display: block; }
 
-    /* ===== 開箱遊戲 ===== */
-    .box-game {
-      max-width: 720px; margin: 0 auto;
-      padding: 22px 20px; text-align: center;
-    }
-    .box-hint { font-size: 0.92rem; color: rgba(255,255,255,0.58); margin-bottom: 22px; }
-
-    .boxes-container {
-      display: flex; justify-content: center;
-      flex-wrap: wrap; gap: 16px; margin-bottom: 26px;
-    }
+    /* ===== 開箱 ===== */
+    .box-game { max-width: 720px; margin: 0 auto; padding: 22px 20px; text-align: center; }
+    .box-hint { font-size: .92rem; color: rgba(255,255,255,.58); margin-bottom: 22px; }
+    .boxes-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-bottom: 26px; }
     .box {
       width: 108px; height: 108px;
       background: linear-gradient(135deg, #667eea, #764ba2);
       border-radius: 16px; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       cursor: pointer; user-select: none;
-      border: 2px solid rgba(255,255,255,0.2);
-      transition: transform 0.3s, box-shadow 0.3s;
+      border: 2px solid rgba(255,255,255,.2);
+      transition: transform .3s, box-shadow .3s;
     }
-    .box:hover:not(.opened) {
-      transform: translateY(-6px) scale(1.07);
-      box-shadow: 0 12px 30px rgba(102,126,234,0.55);
-    }
-    .box.opened {
-      cursor: default;
-      background: linear-gradient(135deg, #2a2a3e, #3a3a52);
-      border-color: rgba(255,215,0,0.45);
-    }
+    .box:hover:not(.opened) { transform: translateY(-6px) scale(1.07); box-shadow: 0 12px 30px rgba(102,126,234,.55); }
+    .box.opened { cursor: default; background: linear-gradient(135deg, #2a2a3e, #3a3a52); border-color: rgba(255,215,0,.45); }
     .box-icon { font-size: 2.5rem; line-height: 1; margin-bottom: 5px; }
-    .box-label { font-size: 0.76rem; opacity: 0.8; }
+    .box-label { font-size: .76rem; opacity: .8; }
     .box.opened .box-label { color: #ffd200; }
 
     @keyframes boxPop {
@@ -187,131 +170,139 @@
       75%  { transform: scale(1.05) rotate(-3deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
-    .box.popping { animation: boxPop 0.5s ease-out; }
+    .box.popping { animation: boxPop .5s ease-out; }
 
-    /* ===== 轉盤遊戲 ===== */
-    .spin-game {
-      max-width: 480px; margin: 0 auto;
-      padding: 20px; text-align: center;
-    }
+    /* ===== 轉盤 ===== */
+    .spin-game { max-width: 480px; margin: 0 auto; padding: 20px; text-align: center; }
     .wheel-wrap { position: relative; display: inline-block; }
     .wheel-pointer {
-      position: absolute; top: -4px; left: 50%;
-      transform: translateX(-50%);
+      position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
       width: 0; height: 0;
-      border-left: 13px solid transparent;
-      border-right: 13px solid transparent;
-      border-top: 32px solid #ffd200;
-      z-index: 10; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+      border-left: 13px solid transparent; border-right: 13px solid transparent;
+      border-top: 32px solid #ffd200; z-index: 10;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,.5));
     }
-    #wheelCanvas {
-      border-radius: 50%;
-      box-shadow: 0 0 30px rgba(247,151,30,0.35);
-      display: block;
-    }
+    #wheelCanvas { border-radius: 50%; box-shadow: 0 0 30px rgba(247,151,30,.35); display: block; }
     .spin-btn {
-      padding: 13px 56px;
+      padding: 13px 54px;
       background: linear-gradient(135deg, #f7971e, #ffd200);
       border: none; border-radius: 30px;
       font-size: 1.18rem; color: #1a1a2e; font-weight: 700;
       cursor: pointer; font-family: inherit; margin-top: 20px;
-      transition: transform 0.25s, box-shadow 0.25s;
+      transition: transform .25s, box-shadow .25s;
     }
-    .spin-btn:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(247,151,30,0.6);
-    }
-    .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .spin-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(247,151,30,.6); }
+    .spin-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
     /* ===== 彈窗 ===== */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.82); z-index: 1000;
+      background: rgba(0,0,0,.82); z-index: 1000;
       align-items: center; justify-content: center;
     }
     .modal-overlay.show { display: flex; }
-
     @keyframes modalIn {
-      0%   { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+      0%   { transform: scale(.4) rotate(-8deg); opacity: 0; }
       65%  { transform: scale(1.08) rotate(2deg); opacity: 1; }
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
     }
     .modal-box {
       background: linear-gradient(145deg, #1e1e38, #16213e);
-      border: 2px solid rgba(247,151,30,0.45);
+      border: 2px solid rgba(247,151,30,.45);
       border-radius: 22px; padding: 20px 20px 24px;
       text-align: center; max-width: 500px; width: 95%;
-      animation: modalIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 20px 70px rgba(0,0,0,0.75);
+      animation: modalIn .42s cubic-bezier(.175,.885,.32,1.275);
+      box-shadow: 0 20px 70px rgba(0,0,0,.75);
     }
     .modal-title { font-size: 1.1rem; color: #ffd200; margin-bottom: 14px; }
-
     .modal-media {
       width: 100%; max-width: 420px; aspect-ratio: 1/1;
       margin: 0 auto 14px; border-radius: 16px; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,.05);
     }
     .modal-media img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-    /* 純文字時的大字顯示 */
     .text-card {
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      font-size: clamp(2rem, 10vw, 4.5rem);
-      font-weight: 900; letter-spacing: 2px;
-      padding: 20px; word-break: break-all;
+      font-size: clamp(2rem, 10vw, 4.5rem); font-weight: 900;
+      letter-spacing: 2px; padding: 20px; word-break: break-all;
       border-radius: 16px; line-height: 1.2;
     }
-
-    .modal-name { font-size: 0.98rem; color: rgba(255,255,255,0.78); margin-bottom: 14px; font-weight: 700; }
+    .modal-name { font-size: .98rem; color: rgba(255,255,255,.78); margin-bottom: 14px; font-weight: 700; }
     .modal-ok {
       padding: 9px 32px;
       background: linear-gradient(135deg, #667eea, #764ba2);
       border: none; border-radius: 22px;
-      font-size: 0.95rem; color: #fff;
-      cursor: pointer; font-family: inherit; transition: transform 0.2s;
+      font-size: .95rem; color: #fff; cursor: pointer; font-family: inherit; transition: transform .2s;
     }
     .modal-ok:hover { transform: translateY(-2px); }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(30,30,60,.95); border: 1px solid rgba(247,151,30,.5);
+      border-radius: 30px; padding: 12px 28px;
+      font-size: .95rem; color: #fff; white-space: nowrap;
+      opacity: 0; transition: opacity .3s, transform .3s;
+      z-index: 2000; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== 靜音按鈕 ===== */
+    .mute-btn {
+      position: fixed; bottom: 20px; right: 20px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.25);
+      font-size: 1.3rem; cursor: pointer; z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .mute-btn:hover { background: rgba(255,255,255,.22); }
 
     /* ===== 彩帶 ===== */
     @keyframes confettiFall {
       0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(105vh) rotate(600deg); opacity: 0; }
     }
-    .confetti-piece {
-      position: fixed; top: 0; pointer-events: none;
-      z-index: 999; animation: confettiFall linear forwards;
-    }
+    .confetti-piece { position: fixed; top: 0; pointer-events: none; z-index: 999; animation: confettiFall linear forwards; }
   </style>
 </head>
 <body>
 
-<!-- ===== 編輯頁 ===== -->
+<!-- 編輯頁 -->
 <div id="editPage" class="page active">
   <div class="edit-wrap">
     <h1 class="edit-title">🎨 自訂開箱轉盤</h1>
     <p class="edit-sub">上傳照片 或 只輸入文字，幾個項目都可以！</p>
-
     <div class="items-list" id="itemsList"></div>
-
     <div class="edit-actions">
       <button class="btn-ghost" onclick="addItem()">＋ 新增項目</button>
-      <button class="btn-gold" id="startBtn" onclick="startGame()">▶ 開始遊戲</button>
+      <button class="btn-gold"  id="startBtn" onclick="startGame()">▶ 開始遊戲</button>
     </div>
     <p class="count-hint" id="countHint"></p>
+
+    <div class="share-hint" id="shareHint" style="display:none">
+      <strong>🔗 產生分享連結</strong><br>
+      設定完成後，按下按鈕產生專屬網址。把網址傳給朋友，對方打開就能直接玩！
+      <br><br>
+      <button class="btn-share" id="shareBtn" onclick="generateShareLink()">🔗 產生並複製連結</button>
+      <div class="share-url" id="shareUrlBox"></div>
+    </div>
   </div>
 </div>
 
-<!-- ===== 遊戲頁 ===== -->
+<!-- 遊戲頁 -->
 <div id="gamePage" class="page">
   <div class="game-header">
-    <button class="btn-ghost" onclick="goEdit()">✏️ 編輯</button>
+    <div class="header-left">
+      <button class="btn-ghost" onclick="goEdit()">✏️ 編輯</button>
+      <button class="btn-share" onclick="generateShareLink()">🔗 分享</button>
+    </div>
     <div class="game-title">🎁 開箱轉盤</div>
   </div>
-
   <div class="mode-toggle">
-    <button class="mode-btn active" id="btnBox" onclick="switchMode('box')">🎁 開箱遊戲</button>
+    <button class="mode-btn active" id="btnBox"  onclick="switchMode('box')">🎁 開箱遊戲</button>
     <button class="mode-btn"        id="btnSpin" onclick="switchMode('spin')">🎡 轉盤遊戲</button>
   </div>
 
@@ -334,38 +325,102 @@
   </div>
 </div>
 
-<!-- ===== 彈窗 ===== -->
+<!-- 彈窗 -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-title" id="modalTitle">🎉 恭喜！</div>
-    <div class="modal-media" id="modalMedia"></div>
-    <div class="modal-name"  id="modalName"></div>
-    <button class="modal-ok" onclick="closeModal()">✨ 太棒了！</button>
+    <div class="modal-media"  id="modalMedia"></div>
+    <div class="modal-name"   id="modalName"></div>
+    <button class="modal-ok"  onclick="closeModal()">✨ 太棒了！</button>
   </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 靜音按鈕 -->
+<button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="靜音切換">🔊</button>
+
 <script>
 // =============================================
-//  色盤（自動循環，支援任意數量）
+//  色盤
 // =============================================
 const PALETTE = [
-  { bg: '#FF6B6B', text: '#6B0000' },
-  { bg: '#4ECDC4', text: '#004040' },
-  { bg: '#FFE66D', text: '#5a4400' },
-  { bg: '#FF9AA2', text: '#6B0010' },
-  { bg: '#B5EAD7', text: '#004422' },
-  { bg: '#C7CEEA', text: '#1a1a5e' },
-  { bg: '#FFDAC1', text: '#5a2800' },
-  { bg: '#E2F0CB', text: '#2a4400' },
-  { bg: '#FFB7B2', text: '#5a1500' },
-  { bg: '#B5D5FF', text: '#002266' },
+  { bg:'#FF6B6B', text:'#6B0000' }, { bg:'#4ECDC4', text:'#004040' },
+  { bg:'#FFE66D', text:'#5a4400' }, { bg:'#FF9AA2', text:'#6B0010' },
+  { bg:'#B5EAD7', text:'#004422' }, { bg:'#C7CEEA', text:'#1a1a5e' },
+  { bg:'#FFDAC1', text:'#5a2800' }, { bg:'#E2F0CB', text:'#2a4400' },
+  { bg:'#FFB7B2', text:'#5a1500' }, { bg:'#B5D5FF', text:'#002266' },
 ];
 const col = i => PALETTE[i % PALETTE.length];
 
 // =============================================
+//  音效（Web Audio API）
+// =============================================
+let _ac = null;
+let muted = false;
+
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+
+function playTick() {
+  if (muted) return;
+  try {
+    const ac = getAC(), now = ac.currentTime;
+    const osc = ac.createOscillator(), g = ac.createGain();
+    osc.connect(g); g.connect(ac.destination);
+    osc.type = 'square';
+    osc.frequency.value = 500 + Math.random() * 300;
+    g.gain.setValueAtTime(.12, now);
+    g.gain.exponentialRampToValueAtTime(.001, now + .045);
+    osc.start(now); osc.stop(now + .045);
+  } catch(e) {}
+}
+
+function playPop() {
+  if (muted) return;
+  try {
+    const ac = getAC(), now = ac.currentTime;
+    const osc = ac.createOscillator(), g = ac.createGain();
+    osc.connect(g); g.connect(ac.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(900, now + .18);
+    g.gain.setValueAtTime(.5, now);
+    g.gain.exponentialRampToValueAtTime(.001, now + .28);
+    osc.start(now); osc.stop(now + .28);
+  } catch(e) {}
+}
+
+function playFanfare() {
+  if (muted) return;
+  try {
+    const ac = getAC();
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ac.createOscillator(), g = ac.createGain();
+      osc.connect(g); g.connect(ac.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      const t = ac.currentTime + i * .11;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.28, t + .02);
+      g.gain.exponentialRampToValueAtTime(.001, t + .38);
+      osc.start(t); osc.stop(t + .38);
+    });
+  } catch(e) {}
+}
+
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('muteBtn').textContent = muted ? '🔇' : '🔊';
+}
+
+// =============================================
 //  資料
 // =============================================
-let items = []; // { name: string, img: string|null }
+let items = [];
 
 // =============================================
 //  編輯頁
@@ -373,7 +428,6 @@ let items = []; // { name: string, img: string|null }
 function renderEditList() {
   const list = document.getElementById('itemsList');
   list.innerHTML = '';
-
   items.forEach((item, i) => {
     const row = document.createElement('div');
     row.className = 'item-row';
@@ -384,44 +438,39 @@ function renderEditList() {
       </label>
       <input class="name-input" type="text" placeholder="輸入名稱（必填）"
         value="${esc(item.name)}" oninput="updateName(${i},this.value)">
-      <button class="del-btn" onclick="deleteItem(${i})" title="刪除">✕</button>
-    `;
+      <button class="del-btn" onclick="deleteItem(${i})" title="刪除">✕</button>`;
     list.appendChild(row);
   });
+  refreshHints();
+}
 
+function refreshHints() {
   const allNamed = items.every(it => it.name.trim());
+  const ok = items.length >= 2 && allNamed;
   const startBtn = document.getElementById('startBtn');
   const hint     = document.getElementById('countHint');
-  startBtn.disabled = items.length < 2 || !allNamed;
-
-  if (items.length < 2)    hint.textContent = '至少需要 2 個項目才能開始';
-  else if (!allNamed)      hint.textContent = '請為每個項目填上名稱';
-  else                     hint.textContent = `共 ${items.length} 個項目，可以開始了！`;
+  const shareHint = document.getElementById('shareHint');
+  startBtn.disabled = !ok;
+  if (items.length < 2)  hint.textContent = '至少需要 2 個項目才能開始';
+  else if (!allNamed)    hint.textContent = '請為每個項目填上名稱';
+  else                   hint.textContent = `共 ${items.length} 個項目，可以開始了！`;
+  shareHint.style.display = ok ? 'block' : 'none';
 }
 
 function addItem() {
   items.push({ name: '', img: null });
-  renderEditList();
-  save();
+  renderEditList(); save();
 }
 
 function deleteItem(i) {
   if (items.length <= 1) return;
   items.splice(i, 1);
-  renderEditList();
-  save();
+  renderEditList(); save();
 }
 
 function updateName(i, val) {
   items[i].name = val;
-  // 只更新提示，不重繪整個列表（避免游標跳位）
-  const allNamed = items.every(it => it.name.trim());
-  const startBtn = document.getElementById('startBtn');
-  const hint     = document.getElementById('countHint');
-  startBtn.disabled = items.length < 2 || !allNamed;
-  if (!allNamed) hint.textContent = '請為每個項目填上名稱';
-  else           hint.textContent = `共 ${items.length} 個項目，可以開始了！`;
-  save();
+  refreshHints(); save();
 }
 
 function uploadImg(e, i) {
@@ -429,8 +478,7 @@ function uploadImg(e, i) {
   if (!file) return;
   resizeImage(file, 420, dataUrl => {
     items[i].img = dataUrl;
-    renderEditList();
-    save();
+    renderEditList(); save();
   });
 }
 
@@ -447,7 +495,7 @@ function resizeImage(file, maxPx, cb) {
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      cb(c.toDataURL('image/jpeg', 0.82));
+      cb(c.toDataURL('image/jpeg', .82));
     };
     img.src = ev.target.result;
   };
@@ -472,15 +520,52 @@ function load() {
 }
 
 // =============================================
+//  分享連結（URL Hash）
+// =============================================
+function generateShareLink() {
+  try {
+    const json    = JSON.stringify(items);
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    const url     = location.origin + location.pathname + '#data=' + encoded;
+
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('🔗 連結已複製到剪貼簿！');
+    }).catch(() => {
+      // clipboard 失敗時直接顯示網址
+    });
+
+    const box = document.getElementById('shareUrlBox');
+    if (box) {
+      box.style.display = 'block';
+      box.textContent = url;
+    }
+    showToast('🔗 連結已複製！可以傳給朋友了');
+  } catch(e) {
+    showToast('❌ 產生連結失敗，請再試一次');
+  }
+}
+
+function loadFromHash() {
+  const match = location.hash.match(/[#&]data=([^&]*)/);
+  if (!match) return false;
+  try {
+    const json = decodeURIComponent(escape(atob(match[1])));
+    const data = JSON.parse(json);
+    if (Array.isArray(data) && data.length >= 2) {
+      items = data; return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// =============================================
 //  頁面切換
 // =============================================
 function startGame() {
   if (document.getElementById('startBtn').disabled) return;
   document.getElementById('editPage').classList.remove('active');
   document.getElementById('gamePage').classList.add('active');
-  switchMode('box');
-  initBoxes();
-  drawWheel(wheelAngle);
+  switchMode('box'); initBoxes(); drawWheel(wheelAngle);
 }
 
 function goEdit() {
@@ -518,19 +603,17 @@ function initBoxes() {
 
 function openBox(boxEl) {
   if (boxEl.classList.contains('opened') || boxEl.classList.contains('popping')) return;
+  playPop();
   const idx  = Math.floor(Math.random() * items.length);
   const item = items[idx];
   boxEl.classList.add('popping');
   boxEl.addEventListener('animationend', () => {
     boxEl.classList.remove('popping');
     boxEl.classList.add('opened');
-    boxEl.innerHTML = `
-      <div class="box-icon">${item.img ? '🖼️' : '✨'}</div>
-      <div class="box-label">${esc(item.name)}</div>`;
+    boxEl.innerHTML = `<div class="box-icon">${item.img ? '🖼️' : '✨'}</div><div class="box-label">${esc(item.name)}</div>`;
     openedCount++;
     document.getElementById('openedNum').textContent = openedCount;
-    showModal(item, '🎉 恭喜獲得！');
-    launchConfetti();
+    setTimeout(() => { showModal(item, '🎉 恭喜獲得！'); playFanfare(); launchConfetti(); }, 100);
   }, { once: true });
 }
 
@@ -542,52 +625,42 @@ function resetBoxes() { initBoxes(); }
 const canvas = document.getElementById('wheelCanvas');
 const ctx    = canvas.getContext('2d');
 const CX = 200, CY = 200, R = 188;
-let wheelAngle = 0;
-let isSpinning = false;
+let wheelAngle = 0, isSpinning = false;
+let lastTickAngle = 0;
 
 function drawWheel(angle) {
-  const N   = items.length;
-  const SEC = (2 * Math.PI) / N;
+  const N = items.length, SEC = (2 * Math.PI) / N;
   ctx.clearRect(0, 0, 400, 400);
 
   // 光暈
   ctx.beginPath();
   ctx.arc(CX, CY, R + 10, 0, 2 * Math.PI);
   const glow = ctx.createRadialGradient(CX, CY, R - 5, CX, CY, R + 10);
-  glow.addColorStop(0, 'rgba(247,151,30,0.35)');
+  glow.addColorStop(0, 'rgba(247,151,30,.35)');
   glow.addColorStop(1, 'rgba(247,151,30,0)');
-  ctx.fillStyle = glow;
-  ctx.fill();
+  ctx.fillStyle = glow; ctx.fill();
 
   for (let i = 0; i < N; i++) {
     const startA = angle + i * SEC - Math.PI / 2;
     const midA   = startA + SEC / 2;
     const c      = col(i);
 
-    // 扇形
     ctx.beginPath();
     ctx.moveTo(CX, CY);
     ctx.arc(CX, CY, R, startA, startA + SEC);
     ctx.closePath();
-    ctx.fillStyle = c.bg;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.fillStyle = c.bg; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; ctx.stroke();
 
-    // 文字（項目多時自動縮小）
     const fs    = Math.max(9, Math.min(15, Math.floor(56 / N + 5)));
     const label = items[i].name.length > 6 ? items[i].name.slice(0, 5) + '…' : items[i].name;
     ctx.save();
-    ctx.translate(CX, CY);
-    ctx.rotate(midA);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.translate(CX, CY); ctx.rotate(midA);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = c.text;
     ctx.font = `bold ${fs}px "Microsoft JhengHei","PingFang TC",sans-serif`;
-    ctx.shadowColor = 'rgba(255,255,255,0.45)';
-    ctx.shadowBlur = 2;
-    ctx.fillText(label, R * 0.55, 0);
+    ctx.shadowColor = 'rgba(255,255,255,.4)'; ctx.shadowBlur = 2;
+    ctx.fillText(label, R * .55, 0);
     ctx.restore();
   }
 
@@ -595,54 +668,55 @@ function drawWheel(angle) {
   ctx.beginPath();
   ctx.arc(CX, CY, 22, 0, 2 * Math.PI);
   const cg = ctx.createRadialGradient(CX - 3, CY - 3, 1, CX, CY, 22);
-  cg.addColorStop(0, '#fffB');
-  cg.addColorStop(0.4, '#ffd200');
-  cg.addColorStop(1, '#f7971e');
-  ctx.fillStyle = cg;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
+  cg.addColorStop(0, '#fffB'); cg.addColorStop(.4, '#ffd200'); cg.addColorStop(1, '#f7971e');
+  ctx.fillStyle = cg; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 3; ctx.stroke();
 }
 
 function startSpin() {
   if (isSpinning) return;
   isSpinning = true;
   const btn = document.getElementById('spinBtn');
-  btn.disabled = true;
-  btn.textContent = '🌀 旋轉中…';
+  btn.disabled = true; btn.textContent = '🌀 旋轉中…';
 
   const N      = items.length;
   const SEC    = (2 * Math.PI) / N;
   const winner = Math.floor(Math.random() * N);
-
-  // 計算讓 winner 對準頂部指針的目標角度
-  const rawTarget = -(winner + 0.5) * SEC;
-  let tgt    = ((rawTarget % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const raw    = -(winner + .5) * SEC;
+  let tgt      = ((raw % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
   const curMod = ((wheelAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
   let delta    = tgt - curMod;
-  if (delta <= 0.01) delta += 2 * Math.PI;
+  if (delta <= .01) delta += 2 * Math.PI;
 
   const startA = wheelAngle;
   const endA   = wheelAngle + delta + (5 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
   const dur    = 4500 + Math.random() * 1500;
+  lastTickAngle = wheelAngle;
+  const tickArc = SEC / 2;
   let t0 = null;
 
   (function animate(ts) {
     if (!t0) t0 = ts;
     const t     = Math.min((ts - t0) / dur, 1);
     const eased = 1 - Math.pow(1 - t, 4);
+    const prev  = wheelAngle;
     wheelAngle  = startA + (endA - startA) * eased;
+
+    // 播放滴答聲：每越過半個扇形響一聲
+    const ticksDue = Math.floor((wheelAngle - lastTickAngle) / tickArc);
+    if (ticksDue > 0) {
+      for (let k = 0; k < Math.min(ticksDue, 3); k++) playTick();
+      lastTickAngle += ticksDue * tickArc;
+    }
+
     drawWheel(wheelAngle);
+
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
-      wheelAngle = endA;
-      isSpinning = false;
-      btn.disabled = false;
-      btn.textContent = '🎰 轉動！';
-      showModal(items[winner], '🎡 轉盤結果！');
-      launchConfetti();
+      wheelAngle = endA; isSpinning = false;
+      btn.disabled = false; btn.textContent = '🎰 轉動！';
+      setTimeout(() => { showModal(items[winner], '🎡 轉盤結果！'); playFanfare(); launchConfetti(); }, 200);
     }
   })(performance.now());
 }
@@ -653,44 +727,41 @@ function startSpin() {
 function showModal(item, title) {
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalName').textContent  = '🎊 ' + item.name + ' 🎊';
-
   const media = document.getElementById('modalMedia');
   if (item.img) {
     media.innerHTML = `<img src="${item.img}" alt="${esc(item.name)}">`;
   } else {
-    const idx = items.indexOf(item);
-    const c   = col(idx >= 0 ? idx : 0);
-    media.innerHTML = `
-      <div class="text-card" style="background:${c.bg}; color:${c.text};">
-        ${esc(item.name)}
-      </div>`;
+    const c = col(items.indexOf(item));
+    media.innerHTML = `<div class="text-card" style="background:${c.bg};color:${c.text};">${esc(item.name)}</div>`;
   }
   document.getElementById('modal').classList.add('show');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('show');
-}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
 document.getElementById('modal').addEventListener('click', e => {
   if (e.target === document.getElementById('modal')) closeModal();
 });
 
 // =============================================
+//  Toast
+// =============================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// =============================================
 //  彩帶
 // =============================================
-const CONF_COLORS = ['#f7971e','#ffd200','#FF6B6B','#4ECDC4','#B5EAD7','#667eea','#FF9AA2','#fff'];
+const CC = ['#f7971e','#ffd200','#FF6B6B','#4ECDC4','#B5EAD7','#667eea','#FF9AA2','#fff'];
 function launchConfetti() {
   for (let i = 0; i < 40; i++) {
     setTimeout(() => {
-      const el   = document.createElement('div');
-      const size = 7 + Math.random() * 9;
+      const el = document.createElement('div');
+      const sz = 7 + Math.random() * 9;
       el.className = 'confetti-piece';
-      el.style.cssText = `
-        left:${Math.random()*100}vw; width:${size}px; height:${size}px;
-        background:${CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)]};
-        border-radius:${Math.random()>.5?'50%':'2px'};
-        animation-duration:${1.6+Math.random()*2}s;
-      `;
+      el.style.cssText = `left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${CC[Math.floor(Math.random()*CC.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.6+Math.random()*2}s;`;
       document.body.appendChild(el);
       el.addEventListener('animationend', () => el.remove());
     }, i * 40);
@@ -700,16 +771,26 @@ function launchConfetti() {
 // =============================================
 //  初始化
 // =============================================
-load();
-if (items.length === 0) {
-  items = [
-    { name: '項目一', img: null },
-    { name: '項目二', img: null },
-    { name: '項目三', img: null },
-  ];
+const fromHash = loadFromHash();
+if (!fromHash) {
+  load();
+  if (items.length === 0) {
+    items = [
+      { name: '項目一', img: null },
+      { name: '項目二', img: null },
+      { name: '項目三', img: null },
+    ];
+  }
 }
+
 renderEditList();
 drawWheel(0);
+
+// 從分享連結進來 → 直接進遊戲
+if (fromHash) {
+  startGame();
+  showToast('✅ 已載入分享版本，直接開始玩！');
+}
 </script>
 </body>
 </html>
