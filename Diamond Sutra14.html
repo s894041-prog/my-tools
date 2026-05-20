@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金剛經 第十四品 離相寂滅分</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Serif TC', serif;
+    background: #f5f0e8;
+    min-height: 100vh;
+    color: #2c1a0e;
+  }
+  .header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    border-bottom: 2px solid rgba(140,100,50,0.3);
+    background: rgba(255,250,240,0.9);
+  }
+  .header h1 { font-size: 1.5em; color: #6b3d1e; letter-spacing: 0.3em; margin-bottom: 6px; }
+  .header p { font-size: 0.8em; color: #9a7a5a; letter-spacing: 0.15em; }
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+    margin: 0 auto;
+    min-height: calc(100vh - 120px);
+  }
+  .left-panel { padding: 30px 25px; border-right: 1px solid rgba(140,100,50,0.25); }
+  .right-panel { padding: 30px 25px; background: rgba(255,252,245,0.5); }
+  .panel-title {
+    font-size: 0.75em; letter-spacing: 0.3em; color: #9a7a5a;
+    margin-bottom: 20px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(140,100,50,0.2);
+  }
+  .sentence {
+    display: inline; cursor: pointer; line-height: 2.4;
+    font-size: 1em; letter-spacing: 0.05em;
+    transition: background 0.2s; border-radius: 3px; padding: 1px 2px;
+  }
+  .sentence:hover { background: rgba(180,140,60,0.15); }
+  .sentence.active { background: rgba(180,140,60,0.28); color: #6b3d1e; font-weight: 700; }
+  .translation-box { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .original-ref {
+    font-size: 0.75em; color: #9a7a5a; margin-bottom: 12px;
+    letter-spacing: 0.08em; padding: 6px 10px;
+    background: rgba(180,140,60,0.1);
+    border-left: 3px solid #c8a050; border-radius: 0 4px 4px 0;
+  }
+  .translation-text { font-size: 0.95em; line-height: 2.2; color: #3d2410; letter-spacing: 0.05em; }
+  .hint { color: #b8956a; font-size: 0.85em; line-height: 2.2; letter-spacing: 0.08em; font-style: italic; }
+  .divider { text-align: center; color: rgba(140,100,50,0.4); margin: 12px 0; letter-spacing: 0.5em; }
+  @media (max-width: 600px) {
+    .main { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 1px solid rgba(140,100,50,0.25); }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>金剛般若波羅蜜經</h1>
+  <p>第十四品　離相寂滅分　｜　點擊原文句子，右側顯示白話翻譯</p>
+</div>
+<div class="main">
+  <div class="left-panel">
+    <div class="panel-title">原　文（鳩摩羅什譯）</div>
+    <div id="originalText"></div>
+  </div>
+  <div class="right-panel">
+    <div class="panel-title">白話翻譯</div>
+    <div id="translationArea">
+      <p class="hint">請點擊左側原文中的任何一句，此處即顯示對應的白話解釋。</p>
+    </div>
+  </div>
+</div>
+<script>
+const verses = [
+  { original: "爾時，須菩提聞說是經，深解義趣，涕淚悲泣，而白佛言：", translation: "這時候，須菩提聽佛說完這部經，深深領悟了其中的義理和旨趣，感動得流下眼淚，向佛說道：" },
+  { original: "「希有，世尊！佛說如是甚深經典，我從昔來所得慧眼，未曾得聞如是之經。", translation: "「太稀有了，世尊！佛所說的這部如此甚深的經典，我從過去修行以來所得到的智慧眼，從未聽聞過這樣的經。" },
+  { original: "世尊！若復有人得聞是經，信心清淨，則生實相，當知是人，成就第一希有功德。", translation: "世尊！若有人能聽到這部經，信心清淨無染，就能生起對真實之相的領悟，應當知道這樣的人，成就了最殊勝希有的功德。" },
+  { original: "世尊！是實相者，即是非相，是故如來說名實相。", translation: "世尊！所謂實相，其實並非固定的形相，所以如來才稱它為實相。" },
+  { original: "世尊！我今得聞如是經典，信解受持不足為難，若當來世，後五百歲，其有眾生，得聞是經，信解受持，是人則為第一希有。", translation: "世尊！我現在能聽聞這部經典，相信理解並受持修行，這並不困難。但若到了未來末世，後五百年，若有眾生能聽聞這部經，並且信解受持，此人才是真正最希有的人。" },
+  { original: "何以故？此人無我相、人相、眾生相、壽者相。", translation: "為什麼呢？因為這樣的人沒有我相、人相、眾生相、壽者相這四種執著。" },
+  { original: "所以者何？我相即是非相，人相、眾生相、壽者相即是非相。", translation: "原因是什麼呢？所謂我相，其實並非真實的相；人相、眾生相、壽者相也同樣並非真實的相。" },
+  { original: "何以故？離一切諸相，則名諸佛。」", translation: "為什麼呢？因為能夠遠離一切諸相，就可以稱為佛了。」" },
+  { original: "佛告須菩提：「如是！如是！", translation: "佛對須菩提說：「正是！正是！" },
+  { original: "若復有人得聞是經，不驚、不怖、不畏，當知是人甚為希有。", translation: "若有人聽到這部經，不驚嚇、不恐怖、不畏懼，應當知道這樣的人是非常難得的。" },
+  { original: "何以故？須菩提！如來說第一波羅蜜，非第一波羅蜜，是名第一波羅蜜。", translation: "為什麼呢？須菩提！如來說的第一波羅蜜（最高的到彼岸之法），其實並非固定的第一波羅蜜，只是名為第一波羅蜜。" },
+  { original: "須菩提！忍辱波羅蜜，如來說非忍辱波羅蜜，是名忍辱波羅蜜。", translation: "須菩提！忍辱波羅蜜，如來說它並非固定的忍辱波羅蜜，只是名為忍辱波羅蜜。" },
+  { original: "何以故？須菩提！如我昔為歌利王割截身體，我於爾時，無我相、無人相、無眾生相、無壽者相。", translation: "為什麼呢？須菩提！就像我過去被歌利王一節一節地割截身體，我在那時，沒有我相、沒有人相、沒有眾生相、沒有壽者相。" },
+  { original: "何以故？我於往昔節節支解時，若有我相、人相、眾生相、壽者相，應生瞋恨。", translation: "為什麼呢？我在過去被一節一節割截的時候，如果有我相、人相、眾生相、壽者相，就應該生起瞋恨之心了。" },
+  { original: "須菩提！又念過去於五百世作忍辱仙人，於爾所世，無我相、無人相、無眾生相、無壽者相。", translation: "須菩提！我又想到過去五百世做忍辱仙人的時候，在那許多世中，都沒有我相、人相、眾生相、壽者相。" },
+  { original: "是故須菩提！菩薩應離一切相，發阿耨多羅三藐三菩提心，", translation: "所以，須菩提！菩薩應當遠離一切相，發起無上正等正覺之心，" },
+  { original: "不應住色生心，不應住聲香味觸法生心，應生無所住心。", translation: "不應執著於色（形相）而生心，不應執著於聲、香、味、觸、法而生心，應當生起無所執著的心。" },
+  { original: "若心有住，則為非住。", translation: "若心有所執著停留，那就不是真正的安住。" },
+  { original: "是故佛說菩薩心不應住色布施。", translation: "所以佛說，菩薩布施時心不應執著於色相。" },
+  { original: "須菩提！菩薩為利益一切眾生，應如是布施。", translation: "須菩提！菩薩為了利益一切眾生，應當這樣地布施。" },
+  { original: "如來說一切諸相，即是非相；又說一切眾生，即非眾生。", translation: "如來說一切諸相，其實都不是真實固定的相；又說一切眾生，其實也並非真正固定的眾生。" },
+  { original: "須菩提！如來是真語者、實語者、如語者、不誑語者、不異語者。", translation: "須菩提！如來是說真實話的人、說誠實話的人、說符合實際話的人、不說誑語的人、說話前後一致的人。" },
+  { original: "須菩提！如來所得法，此法無實無虛。", translation: "須菩提！如來所證得的法，這個法既不是真實固定的，也不是虛假空洞的。" },
+  { original: "須菩提！若菩薩心住於法而行布施，如人入暗，則無所見；", translation: "須菩提！若菩薩的心執著於法相而行布施，就好像人進入黑暗之中，什麼也看不見；" },
+  { original: "若菩薩心不住法而行布施，如人有目，日光明照，見種種色。", translation: "若菩薩的心不執著於法相而行布施，就好像人有眼睛，在明亮的日光照耀下，能看見各種形色。" },
+  { original: "須菩提！當來之世，若有善男子、善女人，能於此經受持讀誦，則為如來以佛智慧，悉知是人，悉見是人，皆得成就無量無邊功德。」", translation: "須菩提！在未來的世代，若有善男子、善女人，能夠受持讀誦這部經，如來以佛的智慧，完全了知這樣的人，完全看見這樣的人，這些人都能成就無量無邊的功德。」" }
+];
+
+function renderOriginal() {
+  const container = document.getElementById('originalText');
+  verses.forEach((v, i) => {
+    const span = document.createElement('span');
+    span.className = 'sentence';
+    span.textContent = v.original;
+    span.addEventListener('click', () => selectVerse(i));
+    container.appendChild(span);
+  });
+}
+
+function selectVerse(index) {
+  document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sentence')[index].classList.add('active');
+  const area = document.getElementById('translationArea');
+  area.innerHTML = `
+    <div class="translation-box">
+      <div class="original-ref">原文：${verses[index].original}</div>
+      <div class="divider">✦</div>
+      <div class="translation-text">${verses[index].translation}</div>
+    </div>
+  `;
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('sentence') && !e.target.closest('#translationArea')) {
+    document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active'));
+    document.getElementById('translationArea').innerHTML =
+      '<p class="hint">請點擊左側原文中的任何一句，此處即顯示對應的白話解釋。</p>';
+  }
+});
+
+renderOriginal();
+</script>
+</body>
+</html>
