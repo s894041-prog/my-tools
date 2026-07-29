@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>特選北海道五日｜地理路線圖</title>
+<meta name="description" content="特選北海道五日地理路線圖">
+</head>
+<body>
+<style>
+  :root{
+    --sea:#bfd7e0;
+    --sea-line:#9cc0cd;
+    --land:#e3e2c8;
+    --land-line:#c3c2a0;
+    --accent:#8a6fae;
+    --accent-ink:#5b4a78;
+    --ink:#2c2a26;
+    --ink-soft:#6b6558;
+    --card:#fffdf6;
+    --card-border:#e3ded0;
+    --grid:#9fb0b8;
+    --shadow: 0 1px 2px rgba(44,42,38,.06), 0 6px 22px rgba(44,42,38,.07);
+  }
+  :root[data-theme="dark"]{
+    --sea:#1f3441; --sea-line:#2c4b5c; --land:#33362a; --land-line:#484c3a;
+    --accent:#b79bd6; --accent-ink:#e4d9f2; --ink:#ece7dc; --ink-soft:#a39d8d;
+    --card:#242220; --card-border:#3a362f; --grid:#4a6472;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --sea:#1f3441; --sea-line:#2c4b5c; --land:#33362a; --land-line:#484c3a;
+      --accent:#b79bd6; --accent-ink:#e4d9f2; --ink:#ece7dc; --ink-soft:#a39d8d;
+      --card:#242220; --card-border:#3a362f; --grid:#4a6472;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--sea); color:var(--ink);
+    font-family: ui-serif, Georgia, "Noto Serif TC", "Times New Roman", serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:980px; margin:0 auto; padding:36px 20px 60px; }
+  .sans{ font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif; }
+
+  header{ text-align:center; margin-bottom:26px; }
+  .eyebrow{
+    font-size:11.5px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--accent-ink); font-weight:700; margin:0 0 8px;
+  }
+  h1{ font-size:clamp(24px,3.6vw,32px); margin:0 0 8px; text-wrap:balance; font-weight:600; }
+  .sub{ font-size:13.5px; color:var(--ink-soft); margin:0 0 4px; }
+  .sub b{ color:var(--ink); font-weight:700; }
+
+  .map-shell{
+    position:relative; background:var(--card); border:1px solid var(--card-border);
+    border-radius:18px; box-shadow:var(--shadow); padding:14px; overflow:hidden;
+  }
+  .map-frame{ position:relative; border-radius:10px; overflow:hidden; background:var(--sea); }
+  svg{ display:block; width:100%; height:auto; }
+
+  .pin-label{
+    font-size:14.5px; font-weight:700; fill:var(--ink);
+    paint-order:stroke; stroke:var(--card); stroke-width:4px; stroke-linejoin:round;
+  }
+  .pin-sub{
+    font-size:10px; font-weight:600; letter-spacing:.03em; fill:var(--ink-soft);
+    paint-order:stroke; stroke:var(--card); stroke-width:3.5px; stroke-linejoin:round;
+  }
+  .ref-label{
+    font-size:11.5px; fill:var(--ink-soft); opacity:.75;
+    paint-order:stroke; stroke:var(--sea); stroke-width:3px;
+  }
+  .sea-label{ font-size:13px; font-weight:600; letter-spacing:.12em; fill:var(--sea-line); opacity:.9; }
+  .grid-label{ font-size:9px; fill:var(--ink-soft); opacity:.55; }
+  .route-path{
+    fill:none; stroke:var(--accent); stroke-width:3.2;
+    stroke-dasharray:1 9; stroke-linecap:round;
+  }
+  .pin-circle{ fill:var(--card); stroke:var(--accent); stroke-width:2.5; }
+  .pin-num{
+    font-size:13px; font-weight:700; fill:var(--accent-ink);
+    text-anchor:middle; dominant-baseline:central;
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+  }
+  .ref-dot{ fill:var(--ink-soft); opacity:.55; }
+  .graticule{ stroke:var(--grid); stroke-width:.6; stroke-dasharray:2 4; opacity:.6; }
+  .plane{ fill:var(--accent-ink); }
+  .seg-pill{ fill:var(--accent); opacity:.92; }
+  .seg-time{
+    font-size:10px; font-weight:700; fill:#fff;
+    text-anchor:middle; dominant-baseline:central;
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    letter-spacing:.02em;
+  }
+
+  .legend{
+    margin-top:22px; display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px;
+  }
+  .leg-item{
+    display:flex; align-items:flex-start; gap:10px;
+    background:var(--card); border:1px solid var(--card-border);
+    border-radius:12px; padding:11px 13px; box-shadow:var(--shadow);
+  }
+  .leg-num{
+    flex:none; width:26px; height:26px; border-radius:50%;
+    background:var(--card); border:2px solid var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--accent-ink);
+  }
+  .leg-body b{ display:block; font-size:14px; font-weight:700; margin-bottom:1px; }
+  .leg-body span{ font-size:11.5px; color:var(--ink-soft); }
+
+  footer{
+    text-align:center; margin-top:30px; font-size:11.5px;
+    color:var(--ink-soft); letter-spacing:.02em; line-height:1.7;
+  }
+
+  @media (max-width:560px){ .pin-label{ font-size:12.5px; } }
+</style>
+
+<div class="wrap sans"><p style="text-align:center;margin:0 0 18px;font-family:-apple-system,'Noto Sans TC',Arial,sans-serif;font-size:13px"><a href="./" style="color:#8a6fae;text-decoration:none">← 回總覽</a></p>
+  <header>
+    <p class="eyebrow">道央・道北　實際地理位置示意</p>
+    <h1 style="font-family:ui-serif, Georgia, 'Noto Serif TC', serif;">特選北海道五日・地理路線圖</h1>
+    <p class="sub">26JH802BRE-T　｜　2026/8/2（日）→ 8/6（四）　｜　領隊 <b>洪文良</b></p>
+    <p class="sub">集合 <b>07:40</b>　桃園機場第二航廈・長榮航空 20 號櫃台前方</p>
+  </header>
+
+  <div class="map-shell">
+    <div class="map-frame">
+      <svg viewBox="0 0 460 430" xmlns="http://www.w3.org/2000/svg">
+
+        <rect x="0" y="0" width="460" height="430" fill="var(--sea)"/>
+
+        <path fill="var(--land)" stroke="var(--land-line)" stroke-width="1.5" fill-rule="evenodd" d="
+          M 15,15 L 460,15 L 460,430 L 15,430 Z
+          M 15,15 L 180,60 L 186,165 L 210,217 L 247,207 L 270,240
+          L 288,285 L 297,322 L 270,363 L 225,387 L 172,390
+          L 132,381 L 90,345 L 15,285 Z
+        "/>
+
+        <line class="graticule" x1="0" y1="255" x2="460" y2="255"/>
+        <text class="grid-label" x="452" y="251" text-anchor="end">43°N</text>
+        <line class="graticule" x1="0" y1="338" x2="460" y2="338"/>
+        <text class="grid-label" x="452" y="334" text-anchor="end">42.5°N</text>
+        <line class="graticule" x1="218" y1="0" x2="218" y2="430"/>
+        <text class="grid-label" x="221" y="12">141°E</text>
+        <line class="graticule" x1="341" y1="0" x2="341" y2="430"/>
+        <text class="grid-label" x="344" y="12">142°E</text>
+
+        <text class="sea-label" x="55" y="95" transform="rotate(-70 55 95)">日本海</text>
+        <text class="sea-label" x="330" y="300">太平洋</text>
+        <text class="ref-label" x="190" y="345" text-anchor="middle" font-style="italic">內浦灣（噴火灣）</text>
+
+        <circle class="ref-dot" cx="210" cy="217.5" r="2.6"/>
+        <text class="ref-label" x="215" y="215">小樽</text>
+        <circle class="ref-dot" cx="297" cy="322.5" r="2.6"/>
+        <text class="ref-label" x="288" y="315" text-anchor="end">苫小牧</text>
+        <circle class="ref-dot" cx="255" cy="352" r="2.6"/>
+        <text class="ref-label" x="260" y="358">室蘭</text>
+
+        <path class="route-path" d="
+          M 302.9,292.6
+          Q 270,325 231.4,351.4
+          Q 210,338 199.0,324.4
+          Q 225,270 261.7,244.7
+          Q 330,220 387.3,198.0
+          Q 393,178 395.3,156.3
+          Q 391,140 385.1,126.3
+          Q 350,200 302.9,292.6
+        "/>
+
+        <g transform="translate(273,326)"><rect class="seg-pill" x="-22" y="-9" width="44" height="18" rx="9"/><text class="seg-time" x="0" y="0">約1h10m</text></g>
+        <g transform="translate(206,349)"><rect class="seg-pill" x="-19" y="-9" width="38" height="18" rx="9"/><text class="seg-time" x="0" y="0">約50m</text></g>
+        <g transform="translate(214,282)"><rect class="seg-pill" x="-16" y="-9" width="32" height="18" rx="9"/><text class="seg-time" x="0" y="0">約2h</text></g>
+        <g transform="translate(322,214)"><rect class="seg-pill" x="-22" y="-9" width="44" height="18" rx="9"/><text class="seg-time" x="0" y="0">約2h40m</text></g>
+        <g transform="translate(408,178)"><rect class="seg-pill" x="-19" y="-9" width="38" height="18" rx="9"/><text class="seg-time" x="0" y="0">約40m</text></g>
+        <g transform="translate(407,141)"><rect class="seg-pill" x="-19" y="-9" width="38" height="18" rx="9"/><text class="seg-time" x="0" y="0">約40m</text></g>
+        <g transform="translate(352,205)"><rect class="seg-pill" x="-22" y="-9" width="44" height="18" rx="9"/><text class="seg-time" x="0" y="0">約2h30m</text></g>
+
+        <text class="plane" x="302.9" y="268.6" font-size="15" text-anchor="middle" dominant-baseline="central">✈</text>
+
+        <circle class="pin-circle" cx="302.9" cy="292.6" r="10"/>
+        <text class="pin-num" x="302.9" y="293.5">✈</text>
+        <text class="pin-label" x="316" y="288">新千歲機場</text>
+        <text class="pin-sub" x="316" y="301">起訖點</text>
+
+        <circle class="pin-circle" cx="231.4" cy="351.4" r="11"/>
+        <text class="pin-num" x="231.4" y="352">1</text>
+        <text class="pin-label" x="205" y="376" text-anchor="middle">登別溫泉</text>
+        <text class="pin-sub" x="205" y="388" text-anchor="middle">Day1 住・雅亭</text>
+
+        <circle class="pin-circle" cx="199.0" cy="324.4" r="11"/>
+        <text class="pin-num" x="199.0" y="325">2</text>
+        <text class="pin-label" x="150" y="322" text-anchor="end">洞爺湖</text>
+        <text class="pin-sub" x="150" y="334" text-anchor="end">Day2 住・花火</text>
+
+        <circle class="pin-circle" cx="261.7" cy="244.7" r="11"/>
+        <text class="pin-num" x="261.7" y="245.5">3</text>
+        <text class="pin-label" x="276" y="234">札幌</text>
+        <text class="pin-sub" x="276" y="247">Day3 住・狸小路購物</text>
+
+        <circle class="pin-circle" cx="387.3" cy="198.0" r="11"/>
+        <text class="pin-num" x="387.3" y="199">4</text>
+        <text class="pin-label" x="401" y="193">富良野</text>
+        <text class="pin-sub" x="401" y="206">富田農場花海</text>
+
+        <circle class="pin-circle" cx="395.3" cy="156.3" r="10"/>
+        <text class="pin-num" x="395.3" y="157" font-size="11">4-5</text>
+        <text class="pin-label" x="409" y="150">美瑛</text>
+        <text class="pin-sub" x="409" y="163">Day4 住・青池</text>
+
+        <circle class="pin-circle" cx="385.1" cy="126.3" r="11"/>
+        <text class="pin-num" x="385.1" y="127">5</text>
+        <text class="pin-label" x="399" y="120">旭川</text>
+        <text class="pin-sub" x="399" y="133">拉麵村</text>
+
+        <g transform="translate(46,50)">
+          <circle r="16" fill="var(--card)" stroke="var(--card-border)" stroke-width="1"/>
+          <path d="M 0,-12 L 4,0 L 0,12 L -4,0 Z" fill="var(--accent)"/>
+          <text x="0" y="-19" text-anchor="middle" font-size="10" fill="var(--ink-soft)" font-weight="700">N</text>
+        </g>
+
+        <g transform="translate(30,405)">
+          <line x1="0" y1="0" x2="30" y2="0" stroke="var(--ink-soft)" stroke-width="2"/>
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <line x1="30" y1="-3" x2="30" y2="3" stroke="var(--ink-soft)" stroke-width="1.5"/>
+          <text x="15" y="14" text-anchor="middle" font-size="9.5" fill="var(--ink-soft)">約 20 公里</text>
+        </g>
+
+        <g transform="translate(388,30)">
+          <rect x="-2" y="-2" width="64" height="64" rx="8" fill="var(--card)" stroke="var(--card-border)"/>
+          <path d="
+            M 30,4 C 45,4 56,14 54,26 C 58,32 52,40 44,40
+            C 42,48 34,52 28,48 C 20,56 10,52 12,44
+            C 4,40 4,30 10,24 C 6,16 14,6 24,8 C 26,4 28,4 30,4 Z
+            M 22,48 L 16,58 L 24,52 Z
+          " fill="var(--land)" stroke="var(--land-line)" stroke-width="1"/>
+          <rect x="14" y="20" width="18" height="16" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="31" y="-6" text-anchor="middle" font-size="8.5" fill="var(--ink-soft)">北海道全境</text>
+        </g>
+
+      </svg>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="leg-item">
+      <div class="leg-num">✈</div>
+      <div class="leg-body"><b>新千歲機場</b><span>去 BR116 15:00 抵達／回 BR115 16:15 起飛</span></div>
+    </div>
+    <div class="leg-item">
+      <div class="leg-num">1</div>
+      <div class="leg-body"><b>登別溫泉</b><span>8/2 住・名湯之宿 PARK 雅亭</span></div>
+    </div>
+    <div class="leg-item">
+      <div class="leg-num">2</div>
+      <div class="leg-body"><b>洞爺湖</b><span>8/3 住・TOYA SUN PALACE・夜賞花火</span></div>
+    </div>
+    <div class="leg-item">
+      <div class="leg-num">3</div>
+      <div class="leg-body"><b>札幌</b><span>8/4 住・MYSTAYS PREMIER・購物主場</span></div>
+    </div>
+    <div class="leg-item">
+      <div class="leg-num">4</div>
+      <div class="leg-body"><b>富良野・美瑛</b><span>8/5 住・緩慢瑞萃十勝岳・富田農場</span></div>
+    </div>
+    <div class="leg-item">
+      <div class="leg-num">5</div>
+      <div class="leg-body"><b>旭川 → 機場</b><span>8/6 青池後北上旭川，再南下返機場</span></div>
+    </div>
+  </div>
+
+  <footer>
+    紫色標籤為各段預估搭車時間（含停靠概估，實際依路況／領隊安排）・地圖為示意比例<br>
+    領隊 洪文良（聯絡電話請見團體簡訊／個人筆記）
+  </footer>
+</div>
+</body>
+</html>

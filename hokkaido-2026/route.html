@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>特選北海道五日路線圖｜8/2 長榮團</title>
+<meta name="description" content="特選北海道五日每日行程">
+</head>
+<body>
+<style>
+  :root{
+    --paper:#f6f3ec;
+    --ink:#2c2a26;
+    --ink-soft:#6b6558;
+    --accent:#8a6fae;
+    --accent-soft:#c9b8dd;
+    --card:#ffffff;
+    --card-border:#e5ded0;
+    --shadow: 0 1px 2px rgba(44,42,38,.06), 0 6px 20px rgba(44,42,38,.06);
+  }
+  :root[data-theme="dark"]{
+    --paper:#1b1a17;
+    --ink:#ece7dc;
+    --ink-soft:#a39d8d;
+    --accent:#b79bd6;
+    --accent-soft:#5d4f74;
+    --card:#242220;
+    --card-border:#3a362f;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1b1a17;
+      --ink:#ece7dc;
+      --ink-soft:#a39d8d;
+      --accent:#b79bd6;
+      --accent-soft:#5d4f74;
+      --card:#242220;
+      --card-border:#3a362f;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family: ui-serif, Georgia, "Noto Serif TC", "Times New Roman", serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:920px; margin:0 auto; padding:48px 24px 80px; }
+
+  header{ text-align:center; margin-bottom:52px; }
+  .eyebrow{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--accent); font-weight:600; margin:0 0 10px;
+  }
+  h1{
+    font-size:clamp(28px,4vw,40px); margin:0 0 12px;
+    text-wrap:balance; font-weight:600; letter-spacing:.01em;
+  }
+  .sub{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    color:var(--ink-soft); font-size:14.5px; margin:0 0 6px;
+  }
+  .sub b{ color:var(--ink); font-weight:600; }
+  .stamp{
+    display:inline-block; margin-top:10px;
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:11.5px; color:var(--accent);
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background:color-mix(in srgb, var(--accent) 10%, transparent);
+    padding:4px 11px; border-radius:999px;
+  }
+
+  .route{ position:relative; display:flex; flex-direction:column; }
+  .path-svg{ position:absolute; left:31px; top:14px; bottom:14px; width:2px; }
+  .path-svg .line{
+    stroke:var(--accent-soft); stroke-width:2;
+    stroke-dasharray:6 7; fill:none;
+  }
+
+  .stop{
+    position:relative; display:grid;
+    grid-template-columns:64px 1fr; gap:0 22px; padding-bottom:40px;
+  }
+  .stop:last-child{ padding-bottom:0; }
+
+  .marker{
+    position:relative; z-index:1; width:64px; height:64px; border-radius:50%;
+    background:var(--card); border:2px solid var(--accent);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    box-shadow:var(--shadow);
+  }
+  .marker .day{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:9.5px; letter-spacing:.08em; color:var(--ink-soft); text-transform:uppercase;
+  }
+  .marker .num{
+    font-size:22px; font-weight:700; color:var(--accent);
+    line-height:1; font-variant-numeric: tabular-nums;
+  }
+
+  .card{
+    background:var(--card); border:1px solid var(--card-border);
+    border-radius:14px; padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .card-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; margin-bottom:4px;
+  }
+  .route-name{ font-size:18px; font-weight:600; margin:0; text-wrap:balance; }
+  .date-tag{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:12px; color:var(--ink-soft); margin:0 0 12px;
+  }
+  .badge{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:11px; font-weight:600; letter-spacing:.03em;
+    color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    padding:3px 9px; border-radius:999px; white-space:nowrap;
+  }
+
+  .meta{
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:13.5px; line-height:1.75; color:var(--ink);
+  }
+  .meta .row{ display:flex; gap:8px; margin-bottom:5px; }
+  .meta .row:last-child{ margin-bottom:0; }
+  .meta .label{
+    flex:none; width:44px; color:var(--ink-soft); font-size:12px; padding-top:1px;
+  }
+  .meta .val{ flex:1; }
+  .meta .val b{ color:var(--accent); font-weight:700; }
+  .hotel-jp{ color:var(--ink-soft); font-size:12px; }
+
+  .note{
+    margin-top:12px; padding-top:12px; border-top:1px dashed var(--card-border);
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:12.5px; color:var(--ink-soft); line-height:1.6;
+  }
+
+  footer{
+    text-align:center; margin-top:52px;
+    font-family: -apple-system, "Helvetica Neue", "Noto Sans TC", Arial, sans-serif;
+    font-size:12px; color:var(--ink-soft); letter-spacing:.02em; line-height:1.7;
+  }
+
+  @media (max-width:520px){
+    .stop{ grid-template-columns:48px 1fr; gap:0 14px; }
+    .marker{ width:48px; height:48px; }
+    .marker .num{ font-size:17px; }
+    .marker .day{ font-size:8px; }
+    .path-svg{ left:23px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference){
+    .stop{ opacity:0; transform:translateY(10px); animation: rise .5s ease forwards; }
+    .stop:nth-child(1){ animation-delay:.02s; }
+    .stop:nth-child(2){ animation-delay:.10s; }
+    .stop:nth-child(3){ animation-delay:.18s; }
+    .stop:nth-child(4){ animation-delay:.26s; }
+    .stop:nth-child(5){ animation-delay:.34s; }
+  }
+  @keyframes rise{ to{ opacity:1; transform:none; } }
+</style>
+
+<div class="wrap"><p style="text-align:center;margin:0 0 18px;font-family:-apple-system,'Noto Sans TC',Arial,sans-serif;font-size:13px"><a href="./" style="color:#8a6fae;text-decoration:none">← 回總覽</a></p>
+  <header>
+    <p class="eyebrow">26JH802BRE-T ・ 長榮航空 ・ 新千歲進出</p>
+    <h1>特選北海道五日路線圖</h1>
+    <p class="sub">2026/08/02（日）→ 08/06（四）　｜　領隊 <b>洪文良</b>　｜　集合 <b>07:40</b></p>
+    <p class="sub">桃園機場第二航廈・長榮航空 20 號櫃台前方</p>
+    <span class="stamp">依旅行社最終版說明會資料</span>
+  </header>
+
+  <div class="route">
+    <svg class="path-svg" preserveAspectRatio="none" viewBox="0 0 2 100">
+      <line class="line" x1="1" y1="0" x2="1" y2="100" vector-effect="non-scaling-stroke"/>
+    </svg>
+
+    <div class="stop">
+      <div class="marker"><span class="day">DAY</span><span class="num">1</span></div>
+      <div class="card">
+        <div class="card-head">
+          <p class="route-name">台北 → 新千歲 → 登別溫泉</p>
+          <span class="badge">BR116　10:10 起飛</span>
+        </div>
+        <p class="date-tag">8/2（日）・新千歲 → 登別 73km</p>
+        <div class="meta">
+          <div class="row"><span class="label">景點</span><span class="val">登別溫泉街、極樂通<b>閻魔堂「閻羅王變臉秀」</b></span></div>
+          <div class="row"><span class="label">餐食</span><span class="val">早／溫暖的家　午／機上精緻簡餐　晚／飯店內總匯自助餐</span></div>
+          <div class="row"><span class="label">住宿</span><span class="val">名湯之宿 PARK HOTEL 雅亭<br><span class="hotel-jp">登別市登別温泉町100　TEL 81-143-84-2335</span></span></div>
+        </div>
+        <div class="note">登別出泉量日本前三名。下飛機約 1 小時多到飯店，晚上可自由逛溫泉街、泡湯。</div>
+      </div>
+    </div>
+
+    <div class="stop">
+      <div class="marker"><span class="day">DAY</span><span class="num">2</span></div>
+      <div class="card">
+        <div class="card-head">
+          <p class="route-name">登別 → 洞爺湖</p>
+          <span class="badge">企鵝遊行 ・ 花火</span>
+        </div>
+        <p class="date-tag">8/3（一）・地獄谷 7.8km → 海洋公園 46.5km → 熊牧場 5km → 洞爺湖</p>
+        <div class="meta">
+          <div class="row"><span class="label">景點</span><span class="val">登別地獄谷、尼克斯海洋公園（<b>國王企鵝大遊行</b>）、昭和新山、熊牧場（★贈熊食蘋果或餅乾）、洞爺湖畔<b>浪漫花火</b></span></div>
+          <div class="row"><span class="label">餐食</span><span class="val">早／飯店　午／日式壽喜燒（2500円）　晚／飯店內總匯自助餐</span></div>
+          <div class="row"><span class="label">住宿</span><span class="val">TOYA SUN PALACE RESORT &amp; SPA<br><span class="hotel-jp">有珠郡壮瞥町洞爺湖温泉7-1　TEL 81-142-75-1111</span></span></div>
+        </div>
+        <div class="note">花火就在住宿的洞爺湖畔，看完直接回房間。施放期間 4/28–10/31。</div>
+      </div>
+    </div>
+
+    <div class="stop">
+      <div class="marker"><span class="day">DAY</span><span class="num">3</span></div>
+      <div class="card">
+        <div class="card-head">
+          <p class="route-name">洞爺湖 → 札幌</p>
+          <span class="badge">⭐ 購物主場</span>
+        </div>
+        <p class="date-tag">8/4（二）・展望台 → 147km → Outlet → 29.7km → 免稅店 → 大通公園 → 狸小路</p>
+        <div class="meta">
+          <div class="row"><span class="label">景點</span><span class="val">洞爺湖展望台、<b>北廣島三井 Outlet</b>（近130品牌）、免稅店（停約1小時）、大通公園、<b>狸小路商店街</b>（200間以上店家）</span></div>
+          <div class="row"><span class="label">餐食</span><span class="val">早／飯店　午／自理（逛街）　晚／<b>三大螃蟹吃到飽＋酒水暢飲</b>（7500円・70分）</span></div>
+          <div class="row"><span class="label">住宿</span><span class="val">HOTEL MYSTAYS PREMIER 札幌公園<br><span class="hotel-jp">札幌市中央区南9条西2丁目2-10　TEL 81-11-5123456</span></span></div>
+        </div>
+        <div class="note">今天是購物主場——Outlet＋免稅店＋狸小路都在同一天，要買的、要托運的一次買齊。</div>
+      </div>
+    </div>
+
+    <div class="stop">
+      <div class="marker"><span class="day">DAY</span><span class="num">4</span></div>
+      <div class="card">
+        <div class="card-head">
+          <p class="route-name">札幌 → 富良野 → 美瑛</p>
+          <span class="badge">富田農場 ・ 四季彩之丘</span>
+        </div>
+        <p class="date-tag">8/5（三）・富田農場 → 20km → 拓真館 → 4.8km → 四季彩之丘</p>
+        <div class="meta">
+          <div class="row"><span class="label">景點</span><span class="val"><b>富田農場</b>（溫室薰衣草・花人之舍・★贈冰淇淋每人一支）、拓真館、<b>四季彩之丘</b></span></div>
+          <div class="row"><span class="label">餐食</span><span class="val">早／飯店　午／富良野田園風味餐（2000円）　晚／<b>飯店內富良野和牛鍋物套餐</b></span></div>
+          <div class="row"><span class="label">住宿</span><span class="val">★保證入住 ADAGIO RETREAT TOKACHIDAKE<br><span class="hotel-jp">緩慢 瑞萃 十勝岳｜Villas &amp; Hotel（含芬蘭浴）　TEL 81-166-76-9202</span></span></div>
+        </div>
+        <div class="note">拉車約 2h40m 到富良野，看完花海住一晚不用拉回。拓真館每週三定休，如遇休館改去後藤純男美術館。</div>
+      </div>
+    </div>
+
+    <div class="stop">
+      <div class="marker"><span class="day">DAY</span><span class="num">5</span></div>
+      <div class="card">
+        <div class="card-head">
+          <p class="route-name">美瑛 → 旭川 → 新千歲 → 台北</p>
+          <span class="badge">BR115　16:15 起飛</span>
+        </div>
+        <p class="date-tag">8/6（四）・青池 → 42.6km → 拉麵村 → 154km → 新千歲機場</p>
+        <div class="meta">
+          <div class="row"><span class="label">景點</span><span class="val"><b>美瑛青池</b>（透明度9公尺・寶石天藍色）、<b>旭川拉麵村</b>（8家名店）</span></div>
+          <div class="row"><span class="label">餐食</span><span class="val">早／飯店　午／自理（逛街）　晚／機上精緻餐食</span></div>
+        </div>
+        <div class="note">回程約有 1.5 小時在新千歲機場購物。19:15 抵達桃園。</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    特選北海道旅遊｜富良野花田．四季彩之丘．洞爺湖花火．海洋公園．美瑛青池．企鵝遊行．溫泉螃蟹五日<br>
+    領隊 洪文良（聯絡電話請見團體簡訊／個人筆記）
+  </footer>
+</div>
+</body>
+</html>
