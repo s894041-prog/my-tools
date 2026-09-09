@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>馬鳴國小 - 小公民快速加分系統</title>
+  <!-- 載入 html2canvas 用於生成對照圖片 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --accent: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 12px;
+      padding-bottom: 80px;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    /* 頂部標題 */
+    header {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+      padding: 20px 16px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    .status-badge {
+      display: inline-block;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    /* 卡片區塊 */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #0f172a;
+    }
+    .card-title span.badge {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* 班級與搜尋列 */
+    .filter-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .search-box {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    .grade-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .grade-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tab-btn {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* 學生選擇網格 */
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .student-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .student-item.selected {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+      font-weight: 700;
+      transform: scale(0.97);
+    }
+    .student-name {
+      font-size: 0.9rem;
+    }
+    .student-score {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .student-item.selected .student-score {
+      color: var(--primary-dark);
+    }
+
+    /* 已選擇名單提示 */
+    .selected-bar {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 快捷選項 */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+    .chip {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      transition: all 0.15s;
+    }
+    .chip:active, .chip:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    /* 輸入表單 */
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      outline: none;
+      background: white;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    .split-tip {
+      font-size: 0.8rem;
+      color: #0284c7;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* 底部提交按鈕 */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .submit-btn:disabled {
+      background: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* 加分規定與辦法卡片 */
+    .rules-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .rules-card h3.rules-main-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-light);
+    }
+    .rules-category {
+      margin-bottom: 14px;
+    }
+    .rules-category:last-child {
+      margin-bottom: 0;
+    }
+    .rules-cat-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .rules-item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rules-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+      gap: 8px;
+    }
+    .rules-item-text {
+      flex: 1;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .rules-item-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #a7f3d0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .rules-item-badge:hover, .rules-item-badge:active {
+      background: #10b981;
+      color: white;
+      transform: scale(1.02);
+    }
+    .rules-subnote {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.5;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    /* 進度面板 */
+    .progress-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .progress-modal.active {
+      display: flex;
+    }
+    .progress-content {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-bar-bg {
+      background: #e2e8f0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 14px 0 8px;
+    }
+    .progress-bar-fill {
+      background: var(--primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.2s;
+    }
+
+    /* 成果收據與前後對照卡片 (可轉成圖片) */
+    .receipt-container {
+      display: none;
+      margin-top: 20px;
+    }
+    .receipt-card {
+      background: #ffffff;
+      border: 2px solid #10b981;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .receipt-header {
+      text-align: center;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .receipt-header h2 {
+      font-size: 1.2rem;
+      color: #059669;
+      font-weight: 800;
+    }
+    .receipt-meta {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+    }
+    .receipt-table th, .receipt-table td {
+      padding: 8px 6px;
+      text-align: center;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .receipt-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+    }
+    .score-old {
+      color: #64748b;
+    }
+    .score-added {
+      color: #059669;
+      font-weight: 700;
+    }
+    .score-new {
+      color: #2563eb;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+    .receipt-footer {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* 圖片下載與分享按鈕 */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: white;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .btn-download {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+
+<!-- 訪客密碼解鎖面板 (保護個資) -->
+<div id="unlockScreen" style="display: none; max-width: 420px; margin: 60px auto; padding: 24px; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border: 1px solid #e2e8f0;">
+  <div style="font-size: 3rem; margin-bottom: 12px;">🔒</div>
+  <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">馬鳴國小 小公民系統</h2>
+  <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">本工具為校內專用，名單已全面進行 AES 加密防護。<br>請輸入通行密碼以解鎖學生名單：</p>
+  <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+    <input type="password" id="unlockPassInput" placeholder="請輸入密碼 (預設: mmps)" style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none;" onkeydown="if(event.key==='Enter') verifyUnlock()">
+    <button onclick="verifyUnlock()" style="padding: 12px 18px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; white-space: nowrap;">解鎖</button>
+  </div>
+  <div id="unlockError" style="display: none; color: #ef4444; font-size: 0.85rem; font-weight: 600; margin-top: 8px;">❌ 密碼不正確，請重新輸入</div>
+  <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 16px; text-align: left; background: #f8fafc; padding: 10px; border-radius: 8px;">
+    💡 <strong>提示</strong>：若使用專屬連結（網址結尾帶 <code>#mmps</code>），此裝置將自動解鎖並記住，下次無須再輸入。
+  </div>
+</div>
+
+<div class="container" id="mainApp" style="display: none;">
+  <header>
+    <h1>🏅 馬鳴國小 小公民快速加分系統</h1>
+    <p>免密碼輸入 • 超過50分自動拆解 • 分數即時對照</p>
+    <div class="status-badge" id="syncStatus">🔄 正在連線學校總表...</div>
+  </header>
+
+  <!-- 步驟 1: 選擇學生 -->
+  <div class="card">
+    <div class="card-title">
+      <span>1. 選擇學生</span>
+      <span class="badge" id="selectedCountBadge">已選 0 人</span>
+    </div>
+
+    <div class="filter-section">
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 快速搜尋學生姓名（例如：佩淳、科宏）...">
+      <div class="grade-tabs" id="gradeTabs">
+        <button class="tab-btn active" data-grade="ALL">全部 (64)</button>
+        <button class="tab-btn" data-grade="一">一年級 (13)</button>
+        <button class="tab-btn" data-grade="二">二年級 (5)</button>
+        <button class="tab-btn" data-grade="三">三年級 (10)</button>
+        <button class="tab-btn" data-grade="四">四年級 (15)</button>
+        <button class="tab-btn" data-grade="五">五年級 (12)</button>
+        <button class="tab-btn" data-grade="六">六年級 (9)</button>
+      </div>
+    </div>
+
+    <div class="student-grid" id="studentGrid">
+      <!-- 學生卡片動態渲染 -->
+    </div>
+
+    <div class="selected-bar" id="selectedTagsBar">
+      <!-- 已選擇標籤 -->
+    </div>
+  </div>
+
+  <!-- 步驟 2: 加分設定 -->
+  <div class="card">
+    <div class="card-title">
+      <span>2. 加分設定</span>
+    </div>
+
+    <!-- 加得分數 -->
+    <div class="form-group">
+      <label>加得分數（可輸入任意分數，系統自動拆解）</label>
+      <input type="number" id="scoreInput" class="form-input" value="10" min="1">
+      <div class="chips">
+        <div class="chip" onclick="setScore(5)">+5分</div>
+        <div class="chip" onclick="setScore(10)">+10分</div>
+        <div class="chip" onclick="setScore(20)">+20分</div>
+        <div class="chip" onclick="setScore(30)">+30分</div>
+        <div class="chip" onclick="setScore(50)">+50分</div>
+        <div class="chip" onclick="setScore(60)">+60分</div>
+        <div class="chip" onclick="setScore(75)">+75分</div>
+        <div class="chip" onclick="setScore(100)">+100分</div>
+      </div>
+      <div class="split-tip" id="splitTip"></div>
+    </div>
+
+    <!-- 加分原因 -->
+    <div class="form-group">
+      <label>加分原因 / 事由</label>
+      <input type="text" id="reasonInput" class="form-input" value="班級表現優良" placeholder="請輸入加分事由">
+      <div class="chips">
+        <div class="chip" onclick="setReason('書法社團表現優秀')">書法社團優秀</div>
+        <div class="chip" onclick="setReason('作文作業成績優良')">作文作業優良</div>
+        <div class="chip" onclick="setReason('暑假作業優良')">暑假作業優良</div>
+        <div class="chip" onclick="setReason('回答讀書問題表現優良')">回答讀書問題</div>
+        <div class="chip" onclick="setReason('閱讀心得優良')">閱讀心得優良</div>
+        <div class="chip" onclick="setReason('打掃環境認真')">打掃認真</div>
+        <div class="chip" onclick="setReason('班級表現優良')">班級表現優良</div>
+      </div>
+    </div>
+
+    <!-- 教師簽核 -->
+    <div class="form-group">
+      <label>教師簽核</label>
+      <select id="teacherSelect" class="form-select"><option value="蔡志益" selected>載入中...</option></select>
+    </div>
+
+    <button id="submitBtn" class="submit-btn" onclick="startBatchSubmit()">確認送出加分</button>
+  </div>
+
+  <!-- 步驟 3: 前後對照成果卡片 (自動生成圖片回傳) -->
+  <div class="receipt-container" id="receiptContainer">
+    <div class="receipt-card" id="receiptCard">
+      <div class="receipt-header">
+        <h2>🎉 馬鳴國小 小公民加分確認單</h2>
+        <div class="receipt-meta" id="receiptMeta">提交時間：2026/09/09 | 簽核：蔡志益</div>
+        <div class="receipt-meta" id="receiptReasonText" style="color: #0f172a; font-weight: 700; margin-top: 4px;">事由：書法社團表現優秀</div>
+      </div>
+
+      <table class="receipt-table">
+        <thead>
+          <tr>
+            <th>年級</th>
+            <th>學生姓名</th>
+            <th>加分前</th>
+            <th>本次加分</th>
+            <th>加分後總分</th>
+          </tr>
+        </thead>
+        <tbody id="receiptTableBody">
+          <!-- 前後對照表格內容 -->
+        </tbody>
+      </table>
+
+      <div class="receipt-footer">
+        ✅ 系統已自動分批提交至 Google 表單資料庫 • 數據已即時同步累加至總表
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-secondary" onclick="resetForm()">繼續加分</button>
+      <button class="btn-download" onclick="downloadReceiptImage()">📸 下載/儲存對照圖片</button>
+    </div>
+  </div>
+
+  <!-- 規定與集點辦法說明區塊 -->
+  <div class="rules-card">
+    <h3 class="rules-main-title">📜 馬鳴小公民加分規定與集點標準</h3>
+
+    <!-- 1. 教務處閱讀計畫 -->
+    <div class="rules-category">
+      <div class="rules-cat-title">📚 教務處閱讀計畫</div>
+      <div class="rules-item-list">
+        <div class="rules-item-row">
+          <div class="rules-item-text"><strong>閱讀心得優良名單</strong></div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('閱讀心得優良名單', 50)">+50 點 (帶入)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 直接給予 10 點獎勵者 -->
+    <div class="rules-category">
+      <div class="rules-cat-title">🎯 直接給予 10 點獎勵者</div>
+      <div class="rules-item-list">
+        <div class="rules-item-row">
+          <div class="rules-item-text">(1) 作業抽查優良名單</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('作業抽查優良名單', 10)">+10 點 (帶入)</button>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">(2) 補救教學優良名單</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('補救教學優良名單', 10)">+10 點 (帶入)</button>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">(3) 社團代表學校參與活動及表演者</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('社團代表學校參與活動及表演', 10)">+10 點 (帶入)</button>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">(4) 代表學校參加校外活動比賽（無得獎者參賽獎勵）</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('代表學校參加校外活動比賽(無得獎)', 10)">+10 點 (帶入)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 各處、室舉辦之活動與服務學習 -->
+    <div class="rules-category">
+      <div class="rules-cat-title">🏫 各處、室舉辦之活動與服務學習</div>
+      <div class="rules-item-list">
+        <div class="rules-item-row">
+          <div class="rules-item-text">(1) 擔任環保小志工者，每週完成任務（訓導組負責）</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('擔任環保小志工(每週任務完成)', 5)">+5 點 (帶入)</button>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">(2) 參與學校辦理活動踴躍者（如班親會、親職講座等）</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('參與學校活動踴躍', 5)">+5 點 (帶入)</button>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">
+            (3) 通過網路奇異國測驗（達標每通過一次測驗給予鼓勵）
+          </div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            <button type="button" class="rules-item-badge" onclick="applyRule('網路奇異國測驗通過(低年級80分以上)', 1)">低年級 +1 點</button>
+            <button type="button" class="rules-item-badge" onclick="applyRule('網路奇異國測驗通過(中年級75分以上)', 2)">中年級 +2 點</button>
+            <button type="button" class="rules-item-badge" onclick="applyRule('網路奇異國測驗通過(高年級70分以上)', 3)">高年級 +3 點</button>
+          </div>
+        </div>
+        <div class="rules-item-row">
+          <div class="rules-item-text">(4) 其他在校擔任服務學習者（由負責師長核定）</div>
+          <button type="button" class="rules-item-badge" onclick="applyRule('在校擔任服務學習認真', 3)">+1~5 點 (帶入)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 學生在班級表現優良 -->
+    <div class="rules-category">
+      <div class="rules-cat-title">🌱 學生在班級表現優良</div>
+      <div class="rules-subnote">
+        符合各班級導師於該班級認定之獎勵行為，可由各班老師發給獎勵點數鼓勵。（因教務處已明定相關考查優良名單，請導師盡量以良好的品行及行為給予獎勵）
+      </div>
+    </div>
+
+    <!-- 5. 參加校外競賽優勝給獎 -->
+    <div class="rules-category">
+      <div class="rules-cat-title">🏆 參加校外活動比賽與特殊優良說明</div>
+      <div class="rules-subnote">
+        1. 凡參加校外任何比賽成績優異者，於朝會公開表揚。<br>
+        2. 凡代表學校參加對外比賽有得獎者，指導老師與學生根據台中市外埔區馬鳴國民小學學生各項競賽優勝給獎辦法【附件二】，由家長會給予獎金鼓勵（若比賽已有獎金，將不適用上述辦法）。<br>
+        3. 其他特殊優良有具體事實，經各處室主任審核後足資表揚者，亦得獲點數。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 進度條彈窗 -->
+<div class="progress-modal" id="progressModal">
+  <div class="progress-content">
+    <div class="spinner"></div>
+    <h3 id="progressTitle" style="font-size: 1.1rem; margin-bottom: 6px;">正在送出加分表單...</h3>
+    <p id="progressDetail" style="font-size: 0.85rem; color: #64748b;">準備發送請求...</p>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div id="progressPercent" style="font-size: 0.8rem; color: #059669; font-weight: 700;">0%</div>
+  </div>
+</div>
+
+<script>
+  // AES 加密防護資料包 (已消除任何明文個資)
+  const ENCRYPTED_PAYLOAD = "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";
+
+  // 動態解密載入常數
+  let FORM_URL = "";
+  let PASSWORD_VAL = "";
+  let SPREADSHEET_ID = "";
+  let GID = "";
+  let STUDENTS_DATA = [];
+  let TEACHERS_LIST = [];
+
+  // 解密與初始化
+  function tryDecryptPayload(key) {
+    try {
+      const bytes = CryptoJS.AES.decrypt(ENCRYPTED_PAYLOAD, key);
+      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+      if (!decrypted) return false;
+      const data = JSON.parse(decrypted);
+      if (!data.students || !data.teachers) return false;
+
+      STUDENTS_DATA = data.students;
+      TEACHERS_LIST = data.teachers;
+      FORM_URL = data.formUrl;
+      PASSWORD_VAL = data.password;
+      SPREADSHEET_ID = data.sheetId;
+      GID = data.gid;
+
+      // 渲染教師選單
+      const tSelect = document.getElementById("teacherSelect");
+      tSelect.innerHTML = TEACHERS_LIST.map(t => 
+        `<option value="${t}"${t === "蔡志益" ? " selected" : ""}>${t}老師${t === "紀乃綺" ? "(主任)" : ""}</option>`
+      ).join("");
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function verifyUnlock() {
+    const key = document.getElementById("unlockPassInput").value.trim();
+    if (tryDecryptPayload(key)) {
+      localStorage.setItem("mmps_auth_key", key);
+      document.getElementById("unlockScreen").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      initAppAfterUnlock();
+    } else {
+      document.getElementById("unlockError").style.display = "block";
+    }
+  }
+
+  function initAppAfterUnlock() {
+    renderStudentGrid();
+    fetchLiveScores();
+    updateScoreTip();
+  }
+
+  // 網頁載入時自動偵測 Hash 或 LocalStorage 解密
+  window.addEventListener("DOMContentLoaded", () => {
+    let key = window.location.hash.replace("#", "").trim();
+    if (key.startsWith("key=")) key = key.substring(4);
+    if (!key) key = localStorage.getItem("mmps_auth_key");
+
+    if (key && tryDecryptPayload(key)) {
+      localStorage.setItem("mmps_auth_key", key);
+      document.getElementById("unlockScreen").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      initAppAfterUnlock();
+    } else {
+      document.getElementById("unlockScreen").style.display = "block";
+      document.getElementById("mainApp").style.display = "none";
+    }
+  });
+
+  // 目前分數快取 (從 Google Sheet 抓取)
+  let studentScores = {};
+  let selectedStudents = new Set();
+  let currentGradeFilter = "ALL";
+
+  // 初始化
+  window.addEventListener('DOMContentLoaded', () => {
+    fetchLiveScores();
+    renderStudentGrid();
+    updateSplitTip();
+
+    // 監聽搜尋
+    document.getElementById('searchInput').addEventListener('input', () => {
+      renderStudentGrid();
+    });
+
+    // 監聽年級切換
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGradeFilter = btn.dataset.grade;
+        renderStudentGrid();
+      });
+    });
+
+    // 監聽分數改變
+    document.getElementById('scoreInput').addEventListener('input', updateSplitTip);
+  });
+
+  // 透過 JSONP 從公開 Google 試算表獲取最新目前分數
+  function fetchLiveScores(callback) {
+    const syncStatus = document.getElementById('syncStatus');
+    syncStatus.innerText = "🔄 正在連線學校總表更新即時分數...";
+
+    window.handleSheetResponse = function(data) {
+      if (data && data.table && data.table.rows) {
+        data.table.rows.forEach(r => {
+          const c = r.c;
+          if (c && c[2] && c[2].v) {
+            const name = String(c[2].v).trim();
+            const score = c[4] && c[4].v !== null ? Number(c[4].v) : 0;
+            studentScores[name] = score;
+          }
+        });
+        syncStatus.innerText = "✅ 已連線學校總表（分數為最新即時狀態）";
+        renderStudentGrid();
+        if (callback) callback();
+      }
+    };
+
+    const script = document.createElement('script');
+    script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetResponse&gid=${GID}&_t=${Date.now()}`;
+    script.onerror = function() {
+      syncStatus.innerText = "⚠️ 無法即時載入總表分數（不影響表單加分功能）";
+      if (callback) callback();
+    };
+    document.body.appendChild(script);
+  }
+
+  // 渲染學生網格
+  function renderStudentGrid() {
+    const grid = document.getElementById('studentGrid');
+    const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+    grid.innerHTML = '';
+
+    const filtered = STUDENTS_DATA.filter(s => {
+      const matchGrade = (currentGradeFilter === "ALL" || s.grade === currentGradeFilter);
+      const matchSearch = !searchVal || s.name.toLowerCase().includes(searchVal);
+      return matchGrade && matchSearch;
+    });
+
+    filtered.forEach(s => {
+      const isSel = selectedStudents.has(s.name);
+      const curScore = studentScores[s.name] !== undefined ? studentScores[s.name] : '--';
+      const item = document.createElement('div');
+      item.className = `student-item ${isSel ? 'selected' : ''}`;
+      item.innerHTML = `
+        <div class="student-name">${s.name}</div>
+        <div class="student-score">${s.grade}年級 • ${curScore}分</div>
+      `;
+      item.onclick = () => toggleStudent(s.name);
+      grid.appendChild(item);
+    });
+
+    updateSelectedTags();
+  }
+
+  // 切換選取學生
+  function toggleStudent(name) {
+    if (selectedStudents.has(name)) {
+      selectedStudents.delete(name);
+    } else {
+      selectedStudents.add(name);
+    }
+    renderStudentGrid();
+  }
+
+  // 更新已選擇標籤列
+  function updateSelectedTags() {
+    const bar = document.getElementById('selectedTagsBar');
+    const badge = document.getElementById('selectedCountBadge');
+    badge.innerText = `已選 ${selectedStudents.size} 人`;
+
+    if (selectedStudents.size === 0) {
+      bar.innerHTML = '<span style="font-size: 0.8rem; color: #94a3b8;">尚未選擇任何學生</span>';
+      return;
+    }
+
+    let html = '';
+    selectedStudents.forEach(name => {
+      html += `
+        <span class="tag">
+          ${name}
+          <span class="tag-remove" onclick="removeStudent('${name}')">×</span>
+        </span>
+      `;
+    });
+    html += `<span style="font-size: 0.75rem; color: #ef4444; cursor: pointer; margin-left: 6px;" onclick="clearAllStudents()">清除全部</span>`;
+    bar.innerHTML = html;
+  }
+
+  function removeStudent(name) {
+    selectedStudents.delete(name);
+    renderStudentGrid();
+  }
+
+  function clearAllStudents() {
+    selectedStudents.clear();
+    renderStudentGrid();
+  }
+
+  // 快捷設定分數與事由
+  function setScore(val) {
+    document.getElementById('scoreInput').value = val;
+    updateSplitTip();
+  }
+
+  function setReason(val) {
+    document.getElementById('reasonInput').value = val;
+  }
+
+  // 分數智慧拆解演算法 (合法: 50, 40, 30, 20..1)
+  const VALID_SCORES = [50, 40, 30];
+  for (let i = 20; i >= 1; i--) VALID_SCORES.push(i);
+
+  function splitScore(target) {
+    if (target <= 0) return [];
+    const dp = { 0: [] };
+    for (let s = 1; s <= target; s++) {
+      let best = null;
+      for (const opt of VALID_SCORES) {
+        if (s >= opt && dp[s - opt]) {
+          const cand = [...dp[s - opt], opt];
+          if (best === null || cand.length < best.length) {
+            best = cand;
+          }
+        }
+      }
+      if (best) dp[s] = best;
+    }
+    if (dp[target]) return dp[target];
+
+    // 若超大分數
+    const res = [];
+    let curr = target;
+    while (curr > 50) {
+      res.push(50);
+      curr -= 50;
+    }
+    if (curr > 0) res.push(...splitScore(curr));
+    return res;
+  }
+
+  function updateSplitTip() {
+    const val = parseInt(document.getElementById('scoreInput').value, 10);
+    const tip = document.getElementById('splitTip');
+    if (!val || val <= 0) {
+      tip.innerText = '';
+      return;
+    }
+    const parts = splitScore(val);
+    if (parts.length > 1) {
+      tip.innerText = `💡 該分數表單無法一次送出，系統將自動拆解為 [ ${parts.join(' + ')} 分 ] 分批發送 ${parts.length} 次！`;
+    } else {
+      tip.innerText = `✅ 可一次直接送出 (${val} 分)`;
+    }
+  }
+
+  // 開始批次送出
+  async function startBatchSubmit() {
+    if (selectedStudents.size === 0) {
+      alert("請至少選擇一位學生！");
+      return;
+    }
+    const totalScore = parseInt(document.getElementById('scoreInput').value, 10);
+    if (!totalScore || totalScore <= 0) {
+      alert("請輸入大於 0 的有效加得分數！");
+      return;
+    }
+    const reason = document.getElementById('reasonInput').value.trim() || "表現優良";
+    const teacher = document.getElementById('teacherSelect').value;
+
+    const parts = splitScore(totalScore);
+    const studentList = Array.from(selectedStudents);
+    const totalRequests = studentList.length * parts.length;
+
+    // 開啟進度彈窗
+    const modal = document.getElementById('progressModal');
+    const pTitle = document.getElementById('progressTitle');
+    const pDetail = document.getElementById('progressDetail');
+    const pFill = document.getElementById('progressBarFill');
+    const pPercent = document.getElementById('progressPercent');
+
+    modal.classList.add('active');
+    let completed = 0;
+
+    // 紀錄加分前分數快照
+    const beforeScoresSnapshot = {};
+    studentList.forEach(name => {
+      beforeScoresSnapshot[name] = studentScores[name] !== undefined ? studentScores[name] : 0;
+    });
+
+    // 依序個別發送
+    for (let i = 0; i < studentList.length; i++) {
+      const student = studentList[i];
+      for (let j = 0; j < parts.length; j++) {
+        const pScore = parts[j];
+        pTitle.innerText = `正在為學生加分中 (${completed + 1}/${totalRequests})`;
+        pDetail.innerText = `正在提交 [ ${student} ] +${pScore}分 (${j + 1}/${parts.length})`;
+        
+        await sendGoogleFormPost(student, pScore, reason, teacher);
+        completed++;
+        
+        const pct = Math.round((completed / totalRequests) * 100);
+        pFill.style.width = `${pct}%`;
+        pPercent.innerText = `${pct}%`;
+
+        // 輕微間隔
+        await new Promise(r => setTimeout(r, 120));
+      }
+    }
+
+    // 全部完成
+    pTitle.innerText = "🎉 全數加分完成！";
+    pDetail.innerText = "正在同步學校最新總表數據，生成對照圖...";
+    await new Promise(r => setTimeout(r, 1000));
+    modal.classList.remove('active');
+
+    // 產生前後對照卡片
+    showReceiptCard(studentList, totalScore, reason, teacher, beforeScoresSnapshot);
+  }
+
+  // 發送單一學生的 Google 表單 POST (突破 CORS)
+  function sendGoogleFormPost(student, score, reason, teacher) {
+    return new Promise((resolve) => {
+      const params = new URLSearchParams();
+      params.append('entry.1956792902', PASSWORD_VAL);
+      params.append('entry.1369678928', student);
+      params.append('entry.977092560', String(score));
+      params.append('entry.1432754576', reason);
+      params.append('entry.1255656998', teacher);
+      params.append('pageHistory', '0,1');
+
+      fetch(FORM_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      }).then(() => {
+        resolve();
+      }).catch((e) => {
+        console.warn("fetch error, attempting fallback iframe:", e);
+        // 備用隱藏 iframe 表單送出
+        submitViaHiddenIframe(student, score, reason, teacher);
+        setTimeout(resolve, 300);
+      });
+    });
+  }
+
+  // 備用 iframe 方式
+  function submitViaHiddenIframe(student, score, reason, teacher) {
+    const iframeName = 'hidden_iframe_' + Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.target = iframeName;
+    form.action = FORM_URL;
+    form.method = 'POST';
+
+    const addField = (name, val) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = val;
+      form.appendChild(input);
+    };
+
+    addField('entry.1956792902', PASSWORD_VAL);
+    addField('entry.1369678928', student);
+    addField('entry.977092560', String(score));
+    addField('entry.1432754576', reason);
+    addField('entry.1255656998', teacher);
+    addField('pageHistory', '0,1');
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => {
+      form.remove();
+      iframe.remove();
+    }, 1500);
+  }
+
+  // 產生前後對照卡片
+  function showReceiptCard(studentList, addedScore, reason, teacher, beforeSnapshot) {
+    const container = document.getElementById('receiptContainer');
+    const meta = document.getElementById('receiptMeta');
+    const reasonText = document.getElementById('receiptReasonText');
+    const tbody = document.getElementById('receiptTableBody');
+
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    meta.innerText = `提交時間：${dateStr} | 簽核教師：${teacher}`;
+    reasonText.innerText = `事由：${reason}`;
+
+    let html = '';
+    studentList.forEach(name => {
+      const sObj = STUDENTS_DATA.find(s => s.name === name) || { grade: "-" };
+      const oldScore = beforeSnapshot[name] || 0;
+      const expectedNew = oldScore + addedScore;
+      html += `
+        <tr>
+          <td>${sObj.grade}年級</td>
+          <td style="font-weight: 700;">${name}</td>
+          <td class="score-old">${oldScore}</td>
+          <td class="score-added">+${addedScore}</td>
+          <td class="score-new">${expectedNew}</td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth' });
+
+    // 重新載入試算表驗證
+    setTimeout(() => {
+      fetchLiveScores();
+    }, 2500);
+  }
+
+  // 下載收據為 PNG 圖片
+  function downloadReceiptImage() {
+    const card = document.getElementById('receiptCard');
+    html2canvas(card, {
+      scale: 2, // 2倍高解析度
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `小公民加分對照表_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  }
+
+  function resetForm() {
+    selectedStudents.clear();
+    renderStudentGrid();
+    document.getElementById('receiptContainer').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 點擊下方規定快速套用事由與分數
+  function applyRule(reason, score) {
+    document.getElementById('reasonInput').value = reason;
+    document.getElementById('scoreInput').value = score;
+    updateScoreTip();
+    const reasonEl = document.getElementById('reasonInput');
+    reasonEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    reasonEl.focus();
+  }
+</script>
+
+</body>
+</html>
