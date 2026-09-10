@@ -1064,8 +1064,14 @@
         pFill.style.width = `${pct}%`;
         pPercent.innerText = `${pct}%`;
 
-        // 輕微間隔
-        await new Promise(r => setTimeout(r, 120));
+        // 請求間隔（Rate Limiting）：每次提交強制暫停 2.2～2.8 秒模擬真人，避免觸發 Google 風控封鎖
+        if (completed < totalRequests) {
+          const delayMs = Math.floor(2200 + Math.random() * 600); // 2.2 ~ 2.8 秒
+          const delaySec = (delayMs / 1000).toFixed(1);
+          pTitle.innerText = `🛡️ 安全保護中 (${completed}/${totalRequests})`;
+          pDetail.innerText = `已送出 [ ${student} ]。模擬真人速度暫停 ${delaySec} 秒，避免觸發 Google 帳號風控...`;
+          await new Promise(r => setTimeout(r, delayMs));
+        }
       }
     }
 
