@@ -163,6 +163,16 @@
   }
   .coast{fill:var(--map-water);}
   .grid-line{stroke:var(--line);stroke-width:1;}
+  .zone{stroke:var(--line-strong);stroke-width:1.4;stroke-linejoin:round;}
+  .zone:nth-child(9n+1){fill:color-mix(in srgb, var(--accent) 8%, var(--map-land));}
+  .zone:nth-child(9n+2){fill:color-mix(in srgb, var(--accent-2) 8%, var(--map-land));}
+  .zone:nth-child(9n+3){fill:color-mix(in srgb, #E8A23F 10%, var(--map-land));}
+  .zone:nth-child(9n+4){fill:color-mix(in srgb, #6FA86B 9%, var(--map-land));}
+  .zone:nth-child(9n+5){fill:color-mix(in srgb, var(--accent) 5%, var(--map-land));}
+  .zone:nth-child(9n+6){fill:color-mix(in srgb, #7B8FD4 8%, var(--map-land));}
+  .zone:nth-child(9n+7){fill:color-mix(in srgb, var(--accent-2) 5%, var(--map-land));}
+  .zone:nth-child(9n+8){fill:color-mix(in srgb, #B784C4 8%, var(--map-land));}
+  .zone:nth-child(9n+9){fill:color-mix(in srgb, #E8A23F 5%, var(--map-land));}
 
   .pin{cursor:pointer;}
   .pin circle.halo{fill:var(--accent);opacity:0;transition:opacity .15s ease;}
@@ -174,9 +184,9 @@
     filter:drop-shadow(0 1px 1.5px var(--pin-shadow));
     transition:r .12s ease;
   }
-  .pin:hover circle.dot, .pin.active circle.dot{r:7.5;}
+  .pin:hover circle.dot, .pin.active circle.dot{r:12;}
   .pin text.num{
-    font-size:8px;
+    font-size:10.5px;
     font-weight:700;
     fill:var(--accent-ink);
     text-anchor:middle;
@@ -354,6 +364,7 @@
             <line x1="380" y1="0" x2="380" y2="860"></line>
             <line x1="570" y1="0" x2="570" y2="860"></line>
           </g>
+          <g id="zones"></g>
           <g id="districtLabels"></g>
           <g id="pins"></g>
           <g transform="translate(694,40)">
@@ -437,10 +448,33 @@ function project(lat, lon){
   const y = padT + (latMax-lat)/(latMax-latMin) * mapH;
   return [x,y];
 }
+// districtPolys 座標是 0-1 的相對分數（依各行政區代表點算出的 Voronoi 分界，經裁切至地圖範圍）
+function projectFrac(fx, fy){
+  return [padL + fx*mapW, padT + fy*mapH];
+}
+
+const districtPolys = {"桃園區": [[0.585, 0.384], [0.53, 0.44725], [0.53, 0.749444], [0.708026, 1.0], [1.0, 1.0], [1.0, 0.55], [0.585, 0.384]], "龜山區": [[0.510968, 0.11], [0.585, 0.245], [1.0, 0.245], [1.0, 0.11], [0.510968, 0.11]], "中壢區": [[0.25, 0.625], [0.53, 0.749444], [0.53, 0.44725], [0.25, 0.40525], [0.25, 0.625]], "龍潭區": [[0.53, 0.749444], [0.25, 0.625], [0.0, 0.791667], [0.0, 1.0], [0.708026, 1.0], [0.53, 0.749444]], "大溪區": [[0.585, 0.245], [0.510968, 0.11], [0.507183, 0.105655], [0.19855, 0.320357], [0.25, 0.40525], [0.53, 0.44725], [0.585, 0.384], [0.585, 0.245]], "復興區": [[0.585, 0.245], [0.585, 0.384], [1.0, 0.55], [1.0, 0.245], [0.585, 0.245]], "蘆竹區": [[0.507183, 0.105655], [0.510968, 0.11], [1.0, 0.11], [1.0, 0.0], [0.498191, 0.0], [0.507183, 0.105655]], "大園區": [[0.19855, 0.320357], [0.507183, 0.105655], [0.498191, 0.0], [0.0, 0.0], [0.0, 0.24186], [0.19855, 0.320357]], "觀音區": [[0.25, 0.625], [0.25, 0.40525], [0.19855, 0.320357], [0.0, 0.24186], [0.0, 0.791667], [0.25, 0.625]]};
+const districtSite = {
+  "桃園區":[0.66,0.53], "龜山區":[0.74,0.155], "中壢區":[0.38,0.53],
+  "龍潭區":[0.28,0.80], "大溪區":[0.43,0.30], "復興區":[0.77,0.34],
+  "蘆竹區":[0.76,0.05], "大園區":[0.24,0.09], "觀音區":[0.09,0.53]
+};
+const districtOrderForZones = ["桃園區","龜山區","中壢區","龍潭區","大溪區","復興區","蘆竹區","大園區","觀音區"];
+
+const svgNS = "http://www.w3.org/2000/svg";
+const zonesG = document.getElementById("zones");
+districtOrderForZones.forEach(name=>{
+  const coords = districtPolys[name];
+  if(!coords) return;
+  const pts = coords.map(([fx,fy])=>projectFrac(fx,fy).join(",")).join(" ");
+  const poly = document.createElementNS(svgNS,"polygon");
+  poly.setAttribute("class","zone");
+  poly.setAttribute("points", pts);
+  zonesG.appendChild(poly);
+});
 
 const pinsG = document.getElementById("pins");
 const tooltip = document.getElementById("tooltip");
-const svgNS = "http://www.w3.org/2000/svg";
 
 venues.forEach(v=>{
   const [x,y] = project(v.lat, v.lon);
@@ -448,9 +482,9 @@ venues.forEach(v=>{
   g.setAttribute("class","pin");
   g.setAttribute("data-id", v.id);
   g.innerHTML = `
-    <circle class="halo" cx="${x}" cy="${y}" r="16"></circle>
-    <circle class="dot" cx="${x}" cy="${y}" r="6.2"></circle>
-    <text class="num" x="${x}" y="${y+2.6}">${v.id}</text>
+    <circle class="halo" cx="${x}" cy="${y}" r="20"></circle>
+    <circle class="dot" cx="${x}" cy="${y}" r="9.5"></circle>
+    <text class="num" x="${x}" y="${y+3.4}">${v.id}</text>
   `;
   g.addEventListener("mouseenter", ()=>showTip(v,x,y));
   g.addEventListener("mouseleave", hideTip);
@@ -458,16 +492,13 @@ venues.forEach(v=>{
   pinsG.appendChild(g);
 });
 
-const districtLabelPos = {
-  "桃園區":[520,470], "龜山區":[560,150], "中壢區":[300,470],
-  "龍潭區":[220,700], "大溪區":[330,300], "復興區":[560,300],
-  "蘆竹區":[560,90], "大園區":[210,110], "觀音區":[80,470]
-};
 const dG = document.getElementById("districtLabels");
-Object.entries(districtLabelPos).forEach(([name,pos])=>{
+Object.entries(districtSite).forEach(([name,[fx,fy]])=>{
+  const [x,y] = projectFrac(fx,fy);
   const t = document.createElementNS(svgNS,"text");
   t.setAttribute("class","district-label");
-  t.setAttribute("x", pos[0]); t.setAttribute("y", pos[1]);
+  t.setAttribute("x", x); t.setAttribute("y", y);
+  t.setAttribute("text-anchor","middle");
   t.textContent = name;
   dG.appendChild(t);
 });
