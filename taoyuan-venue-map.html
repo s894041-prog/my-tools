@@ -1,0 +1,535 @@
+<meta charset="UTF-8">
+<title>115全民運桃園場館圖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF6F0;
+    --surface:#FFFFFF;
+    --surface-2:#F4ECE2;
+    --ink:#26191E;
+    --ink-muted:#7A6A65;
+    --accent:#DE3F56;
+    --accent-ink:#FFFFFF;
+    --accent-2:#1C6F82;
+    --line:#E6D9CB;
+    --line-strong:#D2BFA9;
+    --pin-shadow:rgba(38,25,30,.28);
+    --map-water:#DCEAEC;
+    --map-land:#F4ECE1;
+    --chip-bg:#F4ECE2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1B1417;
+      --surface:#251C20;
+      --surface-2:#2E2226;
+      --ink:#F2E8E4;
+      --ink-muted:#B7A39C;
+      --accent:#FF6B7E;
+      --accent-ink:#221217;
+      --accent-2:#5FC3DA;
+      --line:#3B2C30;
+      --line-strong:#4E3B40;
+      --pin-shadow:rgba(0,0,0,.55);
+      --map-water:#1E2B30;
+      --map-land:#2B2124;
+      --chip-bg:#2E2226;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B1417;
+    --surface:#251C20;
+    --surface-2:#2E2226;
+    --ink:#F2E8E4;
+    --ink-muted:#B7A39C;
+    --accent:#FF6B7E;
+    --accent-ink:#221217;
+    --accent-2:#5FC3DA;
+    --line:#3B2C30;
+    --line-strong:#4E3B40;
+    --pin-shadow:rgba(0,0,0,.55);
+    --map-water:#1E2B30;
+    --map-land:#2B2124;
+    --chip-bg:#2E2226;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+    font-variant-numeric:tabular-nums;
+  }
+  .page{max-width:1280px;margin:0 auto;padding:28px 20px 60px;}
+
+  header.top{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:20px;
+    margin-bottom:24px;
+    border-bottom:2px solid var(--line-strong);
+  }
+  .title-block .eyebrow{
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.14em;
+    color:var(--accent);
+    text-transform:uppercase;
+  }
+  .title-block h1{
+    font-family:"Noto Serif TC",serif;
+    font-weight:900;
+    font-size:clamp(26px,4vw,38px);
+    margin:.15em 0 .1em;
+    text-wrap:balance;
+    letter-spacing:.01em;
+  }
+  .title-block p{
+    margin:0;
+    color:var(--ink-muted);
+    font-size:14.5px;
+    max-width:56ch;
+  }
+  .meta-stats{
+    display:flex;
+    gap:22px;
+  }
+  .meta-stats div{text-align:right;}
+  .meta-stats .num{
+    font-family:"Noto Serif TC",serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--accent-2);
+    display:block;
+    line-height:1;
+  }
+  .meta-stats .lbl{
+    font-size:12px;
+    color:var(--ink-muted);
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width:880px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .map-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px 18px 14px;
+    box-shadow:0 1px 2px rgba(38,25,30,.05);
+  }
+  .map-card h2{
+    font-family:"Noto Serif TC",serif;
+    font-size:16px;
+    margin:0 0 10px;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .map-card h2 small{
+    font-family:"Noto Sans TC",sans-serif;
+    font-weight:400;
+    color:var(--ink-muted);
+    font-size:12px;
+  }
+  .map-wrap{
+    position:relative;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  svg.mapsvg{display:block;width:100%;height:auto;background:var(--map-land);}
+  .compass{font-size:11px;fill:var(--ink-muted);font-family:"Noto Sans TC",sans-serif;}
+  .district-label{
+    font-family:"Noto Serif TC",serif;
+    font-size:15px;
+    fill:var(--ink-muted);
+    opacity:.55;
+    letter-spacing:.06em;
+  }
+  .coast{fill:var(--map-water);}
+  .grid-line{stroke:var(--line);stroke-width:1;}
+
+  .pin{cursor:pointer;}
+  .pin circle.halo{fill:var(--accent);opacity:0;transition:opacity .15s ease;}
+  .pin:hover circle.halo, .pin.active circle.halo{opacity:.16;}
+  .pin circle.dot{
+    fill:var(--accent);
+    stroke:var(--surface);
+    stroke-width:1.6;
+    filter:drop-shadow(0 1px 1.5px var(--pin-shadow));
+    transition:r .12s ease;
+  }
+  .pin:hover circle.dot, .pin.active circle.dot{r:7.5;}
+  .pin text.num{
+    font-size:8px;
+    font-weight:700;
+    fill:var(--accent-ink);
+    text-anchor:middle;
+    pointer-events:none;
+    font-family:"Noto Sans TC",sans-serif;
+  }
+
+  .tooltip{
+    position:absolute;
+    pointer-events:none;
+    background:var(--ink);
+    color:var(--bg);
+    padding:8px 11px;
+    border-radius:9px;
+    font-size:12.5px;
+    line-height:1.5;
+    max-width:230px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+    opacity:0;
+    transform:translate(-50%,-100%);
+    transition:opacity .1s ease;
+    z-index:20;
+  }
+  .tooltip.show{opacity:1;}
+  .tooltip b{display:block;font-size:13px;margin-bottom:2px;}
+  .tooltip span.addr{opacity:.75;}
+
+  .legend-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--ink-muted);
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .legend-row .swatch{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--accent);
+    display:inline-block;
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .side{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    padding-right:4px;
+  }
+  .district-group{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .district-group .dg-head{
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:"Noto Serif TC",serif;
+    font-weight:700;
+    font-size:14.5px;
+    background:var(--surface-2);
+  }
+  .district-group .dg-head .cnt{
+    font-family:"Noto Sans TC",sans-serif;
+    font-weight:600;
+    font-size:11.5px;
+    color:var(--accent-2);
+    background:var(--chip-bg);
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .venue-item{
+    padding:10px 14px;
+    border-top:1px solid var(--line);
+    font-size:13px;
+    cursor:pointer;
+    transition:background .12s ease;
+  }
+  .venue-item:hover, .venue-item.active{background:var(--surface-2);}
+  .venue-item .vname{font-weight:600;}
+  .venue-item .vsports{
+    color:var(--accent);
+    font-size:12px;
+    margin-top:2px;
+  }
+  .venue-item .vaddr{
+    color:var(--ink-muted);
+    font-size:11.5px;
+    margin-top:2px;
+  }
+  .venue-item .vnum{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--accent);
+    color:var(--accent-ink);
+    font-size:9.5px;
+    font-weight:700;
+    margin-right:6px;
+  }
+  .venue-item .vrow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .navlink{
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+    font-size:11px;
+    font-weight:600;
+    color:var(--accent-2);
+    text-decoration:none;
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    padding:3px 9px;
+    white-space:nowrap;
+    transition:background .12s ease, color .12s ease;
+  }
+  .navlink:hover{background:var(--accent-2);color:var(--surface);border-color:var(--accent-2);}
+  .tooltip .navlink{
+    margin-top:6px;
+    pointer-events:auto;
+    border-color:rgba(255,255,255,.35);
+    color:var(--bg);
+  }
+  .tooltip .navlink:hover{background:var(--bg);color:var(--ink);}
+
+  footer.note{
+    margin-top:22px;
+    font-size:11.5px;
+    color:var(--ink-muted);
+    border-top:1px solid var(--line);
+    padding-top:12px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+
+<div class="page">
+  <header class="top">
+    <div class="title-block">
+      <div class="eyebrow">115 全民運動會 · 場館分布</div>
+      <h1>桃園場館地圖</h1>
+      <p>依大會官網「場館資訊」逐項核實的競賽地點座標，按行政區彙整。點地圖圓點或清單的「🧭 導航」，直接開啟 Google 地圖導航前往。</p>
+    </div>
+    <div class="meta-stats">
+      <div><span class="num">32</span><span class="lbl">競賽種類</span></div>
+      <div><span class="num">34</span><span class="lbl">場館地點</span></div>
+      <div><span class="num">8</span><span class="lbl">行政區</span></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="map-card">
+      <h2>桃園市域示意圖 <small>依經緯度等比例投影，非精確地籍圖</small></h2>
+      <div class="map-wrap">
+        <svg class="mapsvg" viewBox="0 0 760 860" id="mapsvg">
+          <rect x="0" y="0" width="760" height="860" fill="var(--map-land)"></rect>
+          <path class="coast" d="M0,0 L120,0 C95,90 70,160 78,250 C86,340 40,420 55,520 C68,610 30,700 48,790 C55,815 40,840 0,860 Z"></path>
+          <g class="grid-line" opacity="0.5">
+            <line x1="0" y1="215" x2="760" y2="215"></line>
+            <line x1="0" y1="430" x2="760" y2="430"></line>
+            <line x1="0" y1="645" x2="760" y2="645"></line>
+            <line x1="190" y1="0" x2="190" y2="860"></line>
+            <line x1="380" y1="0" x2="380" y2="860"></line>
+            <line x1="570" y1="0" x2="570" y2="860"></line>
+          </g>
+          <g id="districtLabels"></g>
+          <g id="pins"></g>
+          <g transform="translate(694,40)">
+            <text class="compass" x="0" y="0" text-anchor="middle">N</text>
+            <line x1="0" y1="6" x2="0" y2="22" stroke="var(--ink-muted)" stroke-width="1.2"></line>
+            <polygon points="0,4 -3,10 3,10" fill="var(--ink-muted)"></polygon>
+          </g>
+        </svg>
+        <div class="tooltip" id="tooltip"></div>
+      </div>
+      <div class="legend-row">
+        <span class="swatch"></span> 競賽場館（編號對應右側清單）
+        <span style="margin-left:auto;color:var(--ink-muted)">西臨臺灣海峽 · 東接復興山區</span>
+      </div>
+    </div>
+
+    <div class="side" id="sideList"></div>
+  </div>
+
+  <footer class="note">
+    <span>資料來源：115全民運動會官網「場館資訊」各競賽種類頁面，2026-09-10 逐項查核座標</span>
+    <span>製表：臺中市代表隊工作小組</span>
+  </footer>
+</div>
+
+<script>
+const venues = [
+  {id:1, district:"桃園區", name:"桃園市立體育館", addr:"桃園區三民路一段1號", lat:24.9943083, lon:121.323401, sports:["五人制足球","龍獅運動"]},
+  {id:2, district:"桃園區", name:"桃園市立田徑場", addr:"桃園區三民路一段1號", lat:24.9934617, lon:121.3238273, sports:["木球"]},
+  {id:3, district:"桃園區", name:"建國國民中學活動中心", addr:"桃園區介新街20號", lat:24.9788939, lon:121.3062558, sports:["健力"]},
+  {id:4, district:"桃園區", name:"桃園農工樂群館", addr:"桃園區成功路二段144號", lat:24.9952277, lon:121.3206408, sports:["柔術","摔角"]},
+  {id:5, district:"桃園區", name:"虎頭山創新園區", addr:"桃園區成功路三段1號", lat:24.9981476, lon:121.3241926, sports:["沙灘角力"]},
+  {id:6, district:"桃園區", name:"青溪國民中學活動中心", addr:"桃園區中山東路124號", lat:24.9970003, lon:121.3198299, sports:["劍道"]},
+  {id:7, district:"桃園區", name:"桃園高級中等學校體育館", addr:"桃園區成功路三段38號", lat:24.9993045, lon:121.3260039, sports:["躲避球"]},
+  {id:8, district:"桃園區", name:"中興國民中學活動中心", addr:"桃園區文中路122號", lat:24.9961728, lon:121.290878, sports:["民俗體育"]},
+
+  {id:9, district:"龜山區", name:"國立體育大學", addr:"龜山區文化一路250號", lat:25.0313864, lon:121.3877619, sports:["水上救生","原野射箭","拔河(室內/室外)","飛盤(爭奪賽)"]},
+  {id:10, district:"龜山區", name:"大崗國民中學", addr:"龜山區文化二路168號", lat:25.0516466, lon:121.3708779, sports:["獨輪車"]},
+
+  {id:11, district:"中壢區", name:"中壢公九公園溜冰場", addr:"中壢區新明路320號", lat:24.9619964, lon:121.2158821, sports:["滑輪溜冰(競速)"]},
+  {id:12, district:"中壢區", name:"中原大學體育館", addr:"中壢區中北路200號", lat:24.9599774, lon:121.2423957, sports:["運動舞蹈","舞蹈運動"]},
+  {id:13, district:"中壢區", name:"陸軍專科學校游泳池", addr:"中壢區龍東路750號", lat:24.9429296, lon:121.2625551, sports:["水中運動"]},
+  {id:14, district:"中壢區", name:"青埔足球場", addr:"中壢區青商路398號", lat:25.0108042, lon:121.2223458, sports:["槌球"]},
+  {id:15, district:"中壢區", name:"中央大學附屬中壢高中", addr:"中壢區三光路115號", lat:24.9621253, lon:121.2110943, sports:["太極拳"]},
+  {id:16, district:"中壢區", name:"中央大學依仁堂", addr:"中壢區中大路300號", lat:24.9682669, lon:121.1908966, sports:["巧固球"]},
+  {id:17, district:"中壢區", name:"中壢國民運動中心", addr:"中壢區光明里三光路350號", lat:24.9642409, lon:121.2155697, sports:["合球"]},
+  {id:18, district:"中壢區", name:"中壢商業高中游藝館", addr:"中壢區中央西路二段141巷100號", lat:24.9620061, lon:121.2145456, sports:["國術"]},
+  {id:19, district:"中壢區", name:"青埔運動公園棒球場", addr:"中壢區文康二路89號", lat:25.000428, lon:121.198898, sports:["慢速壘球(男B)"]},
+  {id:20, district:"中壢區", name:"青埔慢速壘球場", addr:"中壢區致善路二段", lat:25.0127876, lon:121.2096949, sports:["慢速壘球(女)"]},
+
+  {id:21, district:"龍潭區", name:"國道三號橋下溜冰場", addr:"龍潭區中正路", lat:24.860591, lon:121.2178559, sports:["滑輪溜冰(曲棍球/花式)"]},
+  {id:22, district:"龍潭區", name:"龍潭大池", addr:"龍潭區上林段115巷11號", lat:24.862645, lon:121.2084989, sports:["龍舟"]},
+  {id:23, district:"龍潭區", name:"龍潭國民中學活動中心", addr:"龍潭區龍華路460號", lat:24.8564716, lon:121.2175229, sports:["有氧體操"]},
+
+  {id:24, district:"大溪區", name:"大溪河濱公園", addr:"大溪區大鶯路60巷89弄75號", lat:24.8932601, lon:121.283638, sports:["輕艇水球"]},
+  {id:25, district:"大溪區", name:"石門水庫榕園", addr:"大溪區（定向越野場域）", lat:24.81295, lon:121.24388, sports:["定向越野(短距離模擬賽)"]},
+  {id:26, district:"大溪區", name:"南苑生態園區及溪州公園", addr:"大溪區（定向越野場域）", lat:24.81557, lon:121.24872, sports:["定向越野(短距離混合接力)"]},
+
+  {id:27, district:"龜山區", name:"虎頭山園區", addr:"龜山區（定向越野場域）", lat:25.01079, lon:121.33320, sports:["定向越野(中距離模擬賽)"]},
+  {id:28, district:"龜山區", name:"龜山區中坑場域", addr:"龜山區（定向越野場域）", lat:25.03321, lon:121.34814, sports:["定向越野(中距離個人賽/接力賽)"]},
+
+  {id:29, district:"復興區", name:"角板山公園園區", addr:"復興區（定向越野場域）", lat:24.81402, lon:121.35067, sports:["定向越野(短距離個人賽)"]},
+
+  {id:30, district:"蘆竹區", name:"山腳國民中學沙灘手球場", addr:"蘆竹區海山路319號", lat:25.088127, lon:121.278728, sports:["沙灘手球(會內賽)"]},
+  {id:31, district:"蘆竹區", name:"機捷A10法式滾球場", addr:"蘆竹區山鼻路", lat:25.0818513, lon:121.2838571, sports:["滾球"]},
+
+  {id:32, district:"大園區", name:"大園國際高中體育館", addr:"大園區大成路二段8號", lat:25.0211, lon:121.2210422, sports:["健美"]},
+
+  {id:33, district:"觀音區", name:"崙坪文化地景園區", addr:"觀音區學府路350巷120號", lat:24.9992282, lon:121.1658982, sports:["飛盤(高爾夫)"]},
+  {id:34, district:"觀音區", name:"草漯棒壘球場", addr:"觀音區福興街188號", lat:25.0448546, lon:121.1381432, sports:["慢速壘球(男A)"]}
+];
+
+const lats = venues.map(v=>v.lat), lons = venues.map(v=>v.lon);
+const latMin = Math.min(...lats)-0.015, latMax = Math.max(...lats)+0.015;
+const lonMin = Math.min(...lons)-0.02, lonMax = Math.max(...lons)+0.02;
+const W = 760, H = 860, padL = 40, padT = 30, padR = 40, padB = 30;
+const mapW = W-padL-padR, mapH = H-padT-padB;
+
+function project(lat, lon){
+  const x = padL + (lon-lonMin)/(lonMax-lonMin) * mapW;
+  const y = padT + (latMax-lat)/(latMax-latMin) * mapH;
+  return [x,y];
+}
+
+const pinsG = document.getElementById("pins");
+const tooltip = document.getElementById("tooltip");
+const svgNS = "http://www.w3.org/2000/svg";
+
+venues.forEach(v=>{
+  const [x,y] = project(v.lat, v.lon);
+  const g = document.createElementNS(svgNS,"g");
+  g.setAttribute("class","pin");
+  g.setAttribute("data-id", v.id);
+  g.innerHTML = `
+    <circle class="halo" cx="${x}" cy="${y}" r="16"></circle>
+    <circle class="dot" cx="${x}" cy="${y}" r="6.2"></circle>
+    <text class="num" x="${x}" y="${y+2.6}">${v.id}</text>
+  `;
+  g.addEventListener("mouseenter", ()=>showTip(v,x,y));
+  g.addEventListener("mouseleave", hideTip);
+  g.addEventListener("click", ()=>{ window.open(navUrl(v), "_blank", "noopener"); });
+  pinsG.appendChild(g);
+});
+
+const districtLabelPos = {
+  "桃園區":[520,470], "龜山區":[560,150], "中壢區":[300,470],
+  "龍潭區":[220,700], "大溪區":[330,300], "復興區":[560,300],
+  "蘆竹區":[560,90], "大園區":[210,110], "觀音區":[80,470]
+};
+const dG = document.getElementById("districtLabels");
+Object.entries(districtLabelPos).forEach(([name,pos])=>{
+  const t = document.createElementNS(svgNS,"text");
+  t.setAttribute("class","district-label");
+  t.setAttribute("x", pos[0]); t.setAttribute("y", pos[1]);
+  t.textContent = name;
+  dG.appendChild(t);
+});
+
+function navUrl(v){
+  return "https://www.google.com/maps/search/?api=1&query=" + v.lat + "," + v.lon;
+}
+
+function showTip(v,x,y){
+  const wrap = document.querySelector(".map-wrap").getBoundingClientRect();
+  const svgEl = document.getElementById("mapsvg").getBoundingClientRect();
+  const scale = svgEl.width / W;
+  tooltip.innerHTML = `<b>${v.id}. ${v.name}</b><span class="addr">${v.sports.join("、")}</span><br><span class="addr">${v.addr}</span><br><span class="addr" style="opacity:.6">點一下場館可開啟導航 →</span>`;
+  tooltip.style.left = (x*scale) + "px";
+  tooltip.style.top = (y*scale - 10) + "px";
+  tooltip.classList.add("show");
+  document.querySelectorAll(".pin").forEach(p=>p.classList.toggle("active", p.dataset.id==v.id));
+  document.querySelectorAll(".venue-item").forEach(el=>el.classList.toggle("active", el.dataset.id==v.id));
+}
+function hideTip(){
+  tooltip.classList.remove("show");
+  document.querySelectorAll(".pin").forEach(p=>p.classList.remove("active"));
+}
+function focusVenue(id){
+  const el = document.querySelector(`.venue-item[data-id="${id}"]`);
+  if(el){
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    el.classList.add("active");
+    setTimeout(()=>el.classList.remove("active"), 1600);
+  }
+}
+
+const byDistrict = {};
+venues.forEach(v=>{ (byDistrict[v.district] ||= []).push(v); });
+const districtOrder = ["桃園區","龜山區","中壢區","龍潭區","大溪區","復興區","蘆竹區","大園區","觀音區"];
+const side = document.getElementById("sideList");
+districtOrder.forEach(dist=>{
+  const list = byDistrict[dist];
+  if(!list) return;
+  const det = document.createElement("div");
+  det.className = "district-group";
+  const sportCount = list.reduce((a,v)=>a+v.sports.length,0);
+  det.innerHTML = `<div class="dg-head">${dist} <span class="cnt">${sportCount} 項 · ${list.length} 館</span></div>`;
+  list.forEach(v=>{
+    const item = document.createElement("div");
+    item.className = "venue-item";
+    item.dataset.id = v.id;
+    item.innerHTML = `
+      <div class="vrow">
+        <div class="vname"><span class="vnum">${v.id}</span>${v.name}</div>
+        <a class="navlink" href="${navUrl(v)}" target="_blank" rel="noopener">🧭 導航</a>
+      </div>
+      <div class="vsports">${v.sports.join("、")}</div>
+      <div class="vaddr">${v.addr}</div>
+    `;
+    item.addEventListener("mouseenter", ()=>{
+      const [x,y] = project(v.lat, v.lon);
+      showTip(v,x,y);
+    });
+    item.addEventListener("mouseleave", hideTip);
+    det.appendChild(item);
+  });
+  side.appendChild(det);
+});
+</script>
