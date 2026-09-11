@@ -100,7 +100,7 @@
 
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+    grid-template-columns: minmax(0, 1.65fr) minmax(340px, 1fr);
     gap: 22px;
     align-items: start;
   }
@@ -222,11 +222,16 @@
     stroke-linejoin: round;
     fill: #FFF9FB;
     transition: fill .15s;
+    cursor: pointer;
+  }
+  .dist-poly:hover {
+    fill: #FFE5F0;
   }
   .dist-poly.inactive {
     stroke: #F4B0D0;
     stroke-width: 1.2;
     fill: #FAFAFA;
+    cursor: default;
   }
   .dist-label {
     font-size: 11px;
@@ -283,39 +288,98 @@
   .tooltip b { display: block; font-size: 14px; margin-bottom: 2px; color: #38C2FA; }
   .tooltip .addr { font-size: 12px; color: #D6CCC7; }
 
-  /* 右側清單 */
+  /* 右側清單 (可摺疊手風琴 Accordion) */
+  .side-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .side-header .side-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .btn-toggle-all {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-2);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-toggle-all:hover {
+    background: var(--surface-2);
+    border-color: var(--accent-2);
+  }
+
   .side {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    max-height: 900px;
-    overflow-y: auto;
-    padding-right: 6px;
+    gap: 10px;
+    padding-right: 4px;
   }
-  .district-group {
+  details.district-group {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
+    transition: box-shadow .15s ease, border-color .15s ease;
   }
-  .dg-head {
+  details.district-group[open] {
+    border-color: #74D2F7;
+    box-shadow: 0 3px 10px rgba(0,171,235,.10);
+  }
+  summary.dg-head {
     background: #00ABEB;
     color: #FFFFFF;
-    padding: 9px 14px;
+    padding: 10px 14px;
     font-weight: 700;
     font-size: 14.5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    transition: background .15s ease;
+  }
+  summary.dg-head::-webkit-details-marker {
+    display: none;
+  }
+  summary.dg-head:hover {
+    background: #0098D3;
+  }
+  .dg-head-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .arrow-icon {
+    display: inline-block;
+    font-size: 11px;
+    transition: transform .2s ease;
+  }
+  details.district-group[open] .arrow-icon {
+    transform: rotate(90deg);
   }
   .dg-head .cnt {
     font-size: 12px;
-    background: rgba(255,255,255,.22);
-    padding: 2px 8px;
+    background: rgba(255,255,255,.24);
+    padding: 2px 9px;
     border-radius: 999px;
+    font-weight: 600;
+  }
+  
+  .dg-body {
+    background: var(--surface);
   }
   .venue-item {
-    padding: 10px 14px;
+    padding: 11px 14px;
     border-bottom: 1px solid var(--line);
     transition: background .12s ease;
   }
@@ -369,6 +433,9 @@
     padding: 3px 10px;
     white-space: nowrap;
     transition: all .12s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
   }
   .navlink:hover {
     background: #00ABEB;
@@ -436,8 +503,14 @@
       </div>
     </div>
 
-    <!-- 右側依行政區彙整清單 -->
-    <div class="side" id="sideList"></div>
+    <!-- 右側依行政區彙整清單 (可摺疊/展開) -->
+    <div>
+      <div class="side-header">
+        <div class="side-title">📍 各行政區場館列表</div>
+        <button class="btn-toggle-all" id="btnToggleAll" onclick="toggleAllDistricts()">展開全部</button>
+      </div>
+      <div class="side" id="sideList"></div>
+    </div>
   </div>
 
   <footer class="note">
@@ -481,6 +554,9 @@ svgDistricts.forEach(d => {
   const p = document.createElementNS(svgNS, "path");
   p.setAttribute("class", "dist-poly" + (d.active ? "" : " inactive"));
   p.setAttribute("d", d.d);
+  if (d.active) {
+    p.addEventListener("click", () => openDistrict(d.name));
+  }
   distG.appendChild(p);
 
   const t = document.createElementNS(svgNS, "text");
@@ -502,7 +578,15 @@ venues.forEach(v => {
   `;
   g.addEventListener("mouseenter", (e) => showTip(v, v.svg_x, v.svg_y));
   g.addEventListener("mouseleave", hideTip);
-  g.addEventListener("click", () => { window.open(navUrl(v), "_blank"); });
+  g.addEventListener("click", () => {
+    openDistrict(v.district);
+    const item = document.querySelector(`.venue-item[data-id="${v.id}"]`);
+    if (item) {
+      item.scrollIntoView({ behavior: "smooth", block: "center" });
+      item.classList.add("active");
+      setTimeout(() => item.classList.remove("active"), 1600);
+    }
+  });
   pinsG.appendChild(g);
 });
 
@@ -525,18 +609,34 @@ function hideTip() {
   document.querySelectorAll(".venue-item").forEach(el => el.classList.remove("active"));
 }
 
-// 建立右側行政區清單
+// 建立右側行政區摺疊清單
 const byDistrict = {};
 venues.forEach(v => { (byDistrict[v.district] ||= []).push(v); });
 const districtOrder = ["桃園區", "龜山區", "中壢區", "蘆竹區", "大園區", "觀音區", "大溪區", "龍潭區", "復興區"];
 const side = document.getElementById("sideList");
 
-districtOrder.forEach(dist => {
+districtOrder.forEach((dist, idx) => {
   const list = byDistrict[dist];
   if (!list) return;
-  const det = document.createElement("div");
+  const det = document.createElement("details");
   det.className = "district-group";
-  det.innerHTML = `<div class="dg-head">${dist} <span class="cnt">${list.length} 場館</span></div>`;
+  det.id = "group-" + dist;
+  // 預設展開第 1 個行政區 (桃園區)，其他預設收起
+  if (idx === 0) det.open = true;
+  
+  const summary = document.createElement("summary");
+  summary.className = "dg-head";
+  summary.innerHTML = `
+    <div class="dg-head-left">
+      <span class="arrow-icon">▶</span>
+      <span>${dist}</span>
+    </div>
+    <span class="cnt">${list.length} 場館</span>
+  `;
+  det.appendChild(summary);
+
+  const body = document.createElement("div");
+  body.className = "dg-body";
   
   list.forEach(v => {
     const item = document.createElement("div");
@@ -551,18 +651,42 @@ districtOrder.forEach(dist => {
       <div class="vdates">${v.dates}</div>
     `;
     item.addEventListener("mouseenter", () => {
-      switchView('interactive');
-      showTip(v, v.svg_x, v.svg_y);
-      document.querySelectorAll(".pin").forEach(p => p.classList.toggle("active", p.dataset.id == v.id));
+      if (document.getElementById("interactiveView").style.display === "block") {
+        showTip(v, v.svg_x, v.svg_y);
+        document.querySelectorAll(".pin").forEach(p => p.classList.toggle("active", p.dataset.id == v.id));
+      }
     });
     item.addEventListener("mouseleave", () => {
-      hideTip();
-      document.querySelectorAll(".pin").forEach(p => p.classList.remove("active"));
+      if (document.getElementById("interactiveView").style.display === "block") {
+        hideTip();
+        document.querySelectorAll(".pin").forEach(p => p.classList.remove("active"));
+      }
     });
-    det.appendChild(item);
+    body.appendChild(item);
   });
+  
+  det.appendChild(body);
   side.appendChild(det);
 });
+
+// 開啟指定行政區
+function openDistrict(dname) {
+  const group = document.getElementById("group-" + dname);
+  if (group) {
+    group.open = true;
+    group.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+// 一鍵展開/收合全部
+let allExpanded = false;
+function toggleAllDistricts() {
+  const detailsList = document.querySelectorAll("details.district-group");
+  const btn = document.getElementById("btnToggleAll");
+  allExpanded = !allExpanded;
+  detailsList.forEach(d => d.open = allExpanded);
+  btn.textContent = allExpanded ? "收起全部" : "展開全部";
+}
 </script>
 </body>
 </html>
