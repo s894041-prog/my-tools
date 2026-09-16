@@ -68,7 +68,7 @@
   .target-F { background: rgba(247,151,30,0.25); border: 1px solid #f7971e; }
   .target-C { background: rgba(78,205,196,0.2); border: 1px solid #4ecdc4; }
   /* ===== 遊戲畫布 ===== */
-  #game { border-radius: 14px; border: 2px solid rgba(255,255,255,0.25); background: #101820; touch-action: none; }
+  #game { border-radius: 14px; border: 2px solid rgba(255,255,255,0.25); background: #101820; touch-action: none; max-width: 100%; height: auto; }
   #hud { display: flex; justify-content: space-between; width: 100%; max-width: 460px; margin: 6px 0; font-size: 0.95rem; }
   .hint { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 460px; }
   #fingeringImg { max-width: 100%; border-radius: 10px; margin-top: 8px; }
@@ -324,7 +324,7 @@ document.getElementById('playC').addEventListener('click', () => playRef(TARGETS
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
-let player, floors, cameraY, scrollSpeed, score, hp, invincible, gameLoopId;
+let player = null, floors = [], cameraY = 0, scrollSpeed = 28, score = 0, hp = 3, invincible = 0, gameLoopId = 0;
 let best = parseInt(localStorage.getItem('recorderBest') || '0', 10);
 document.getElementById('best').textContent = best;
 
@@ -336,6 +336,13 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'c' || e.key === 'C') simFreq = TARGETS[1].freq;
 });
 window.addEventListener('keyup', () => { simFreq = 0; });
+// 鍵盤測試模式：免麥克風也能試玩遊戲邏輯（方便上課前先測）
+document.getElementById('keyTest').addEventListener('change', (e) => {
+  if (e.target.checked && !analyser) {
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('practiceBtn').disabled = false;
+  }
+});
 
 function resetGame() {
   player = { x: W / 2, y: 60, vx: 120, vy: 0, r: 12, standing: false };
@@ -496,22 +503,46 @@ function draw() {
     ctx.textAlign = 'center';
     ctx.fillText(f.target.label, f.holeX + f.holeW / 2, sy - 6);
   }
-  // 玩家（閃爍 = 剛扣血無敵中）
-  const py = player.y - cameraY;
-  if (!(invincible > 0 && Math.floor(invincible * 10) % 2 === 0)) {
-    ctx.font = '24px serif';
+  // 玩家（閃爍 = 剛扣血無敵中；待機時不畫，只顯示提示文字）
+  if (player) {
+    const py = player.y - cameraY;
+    if (!(invincible > 0 && Math.floor(invincible * 10) % 2 === 0)) {
+      ctx.font = '24px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
+    }
+    // 下鑽特效線
+    if (pitchLocked) {
+      ctx.strokeStyle = 'rgba(125,255,170,0.7)';
+      ctx.beginPath(); ctx.moveTo(player.x, py - 30); ctx.lineTo(player.x, py - 8); ctx.stroke();
+    }
+  } else {
+    // 待機提示文字
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(40, H / 2 - 52, W - 80, 96);
+    ctx.fillStyle = '#ffd200';
+    ctx.font = 'bold 17px "Microsoft JhengHei", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
-  }
-  // 下鑽特效線
-  if (pitchLocked) {
-    ctx.strokeStyle = 'rgba(125,255,170,0.7)';
-    ctx.beginPath(); ctx.moveTo(player.x, py - 30); ctx.lineTo(player.x, py - 8); ctx.stroke();
+    ctx.fillText('🎤 先按「啟用麥克風」', W / 2, H / 2 - 18);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('再按「開始遊戲」', W / 2, H / 2 + 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.font = '13px "Microsoft JhengHei", sans-serif';
+    ctx.fillText('只想試玩法可勾鍵盤測試模式', W / 2, H / 2 + 32);
   }
 }
 
-// 初次繪製空白畫面
-draw();
+// 待機預覽樓層（還沒開始遊戲先讓畫面有東西）
+// 初次繪製待機畫面
+(function initIdle() {
+  floors = [
+    { y: 150, holeX: 60, holeW: 90, target: TARGETS[0], passed: false },
+    { y: 300, holeX: 220, holeW: 90, target: TARGETS[1], passed: false },
+    { y: 450, holeX: 130, holeW: 90, target: TARGETS[0], passed: false },
+  ];
+  cameraY = 0;
+  draw();
+})();
 </script>
 </body>
 </html>
