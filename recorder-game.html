@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直笛小遊戲：升F升C下樓梯</title>
+<style>
+  /* ===== 版面樣式 ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    min-height: 100vh; color: #fff;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+  }
+  h1 { font-size: 1.6rem; margin: 8px 0 2px; letter-spacing: 1px; }
+  .sub { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-bottom: 12px; }
+  .panel {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 14px; padding: 14px 16px;
+    width: 100%; max-width: 460px; margin-bottom: 12px;
+  }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+  label { font-size: 0.9rem; }
+  select, input[type=range] { font-family: inherit; }
+  select {
+    background: rgba(255,255,255,0.12); color: #fff;
+    border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 6px 10px;
+  }
+  select option { color: #000; }
+  button {
+    font-family: inherit; cursor: pointer;
+    padding: 10px 22px; border: none; border-radius: 26px;
+    font-size: 1rem; font-weight: 700;
+    background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a2e;
+    transition: transform 0.2s;
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button.ghost {
+    background: rgba(255,255,255,0.1); color: #fff;
+    border: 2px solid rgba(255,255,255,0.25); font-weight: 400; font-size: 0.9rem;
+    padding: 7px 16px;
+  }
+  /* ===== 調音器顯示 ===== */
+  #tuner { text-align: center; }
+  #detected { font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
+  #centsBarWrap {
+    height: 14px; background: rgba(255,255,255,0.12);
+    border-radius: 7px; margin: 8px 0; position: relative; overflow: hidden;
+  }
+  #centsBar {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    background: #ff6b6b; border-radius: 7px; width: 4px;
+  }
+  #centsText { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+  #micLevelWrap {
+    height: 10px; background: rgba(255,255,255,0.12);
+    border-radius: 5px; overflow: hidden; margin-top: 8px;
+  }
+  #micLevel { height: 100%; width: 0%; background: #4ecdc4; }
+  .target-tag {
+    display: inline-block; padding: 4px 14px; border-radius: 16px;
+    font-weight: 700; margin: 2px 4px;
+  }
+  .target-F { background: rgba(247,151,30,0.25); border: 1px solid #f7971e; }
+  .target-C { background: rgba(78,205,196,0.2); border: 1px solid #4ecdc4; }
+  /* ===== 遊戲畫布 ===== */
+  #game { border-radius: 14px; border: 2px solid rgba(255,255,255,0.25); background: #101820; touch-action: none; }
+  #hud { display: flex; justify-content: space-between; width: 100%; max-width: 460px; margin: 6px 0; font-size: 0.95rem; }
+  .hint { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 460px; }
+  #fingeringImg { max-width: 100%; border-radius: 10px; margin-top: 8px; }
+  kbd { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 6px; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<h1>🎶 直笛小遊戲：升F升C下樓梯</h1>
+<p class="sub">免費・免登入・單一檔案・麥克風吹直笛控制</p>
+
+<!-- ===== 設定面板 ===== -->
+<div class="panel">
+  <div class="row">
+    <button id="micBtn">🎤 啟用麥克風</button>
+    <button id="startBtn" class="ghost" disabled>▶ 開始遊戲</button>
+    <button id="practiceBtn" class="ghost" disabled>🎵 練習模式</button>
+  </div>
+  <div class="row">
+    <label>容許誤差：
+      <select id="tolerance">
+        <option value="50">寬鬆 ±50音分</option>
+        <option value="35" selected>標準 ±35音分</option>
+        <option value="20">嚴格 ±20音分</option>
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>麥克風音量門檻：<input type="range" id="gate" min="1" max="10" value="2"></label>
+  </div>
+  <div class="row">
+    <label><input type="checkbox" id="octaveOk" checked> 允許差八度也算過（指法對就好）</label>
+  </div>
+  <div class="row">
+    <label><input type="checkbox" id="keyTest"> 鍵盤測試模式（按 <kbd>F</kbd>=升F <kbd>C</kbd>=升C，不用吹）</label>
+  </div>
+  <div class="row">
+    <button class="ghost" id="playF">🔊 聽升F</button>
+    <button class="ghost" id="playC">🔊 聽升C</button>
+  </div>
+</div>
+
+<!-- ===== 調音器面板 ===== -->
+<div class="panel" id="tuner">
+  <div>
+    <span class="target-tag target-F">目標① 升F (F#5) 740Hz</span>
+    <span class="target-tag target-C">目標② 升C (C#5) 554Hz</span>
+  </div>
+  <div id="detected">-- Hz</div>
+  <div id="centsBarWrap"><div id="centsBar"></div></div>
+  <div id="centsText">尚未啟用麥克風</div>
+  <div id="micLevelWrap"><div id="micLevel"></div></div>
+</div>
+
+<div id="hud">
+  <span>❤️ <span id="hp">3</span></span>
+  <span>🧱 <span id="score">0</span> 層</span>
+  <span>🏆 最佳 <span id="best">0</span></span>
+</div>
+<canvas id="game" width="400" height="560"></canvas>
+
+<p class="hint">
+  玩法：角色會自動左右走、慢慢往下飄。<br>
+  每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），角色就會快速往下鑽過洞。<br>
+  沒吹或吹錯就飄著下不去，捲軸追上來會扣血（3滴血）。<br>
+  升C指法圖（資料夾內附圖）：<br>
+  <img id="fingeringImg" src="升C.jpg" alt="升C指法圖" onerror="this.style.display='none'">
+</p>
+
+<script>
+// ============================================================
+//  目標音定義（Target notes）
+//  升F = F#5 = 739.99Hz，升C = C#5 = 554.37Hz（低八度，初學者適用）
+// ============================================================
+const TARGETS = [
+  { key: 'F', label: '升F', note: 'F#5', freq: 739.99 },
+  { key: 'C', label: '升C', note: 'C#5', freq: 554.37 },
+];
+const SUSTAIN_TIME = 0.3; // 持續吹穩幾秒才算過關
+
+// ============================================================
+//  音高偵測（Pitch detection，自相關演算法）
+// ============================================================
+let audioCtx = null, analyser = null, micStream = null;
+let pitchBuffer = null;
+let detectedFreq = 0;      // 目前偵測到的頻率
+let micRMS = 0;            // 目前音量
+let matchTime = 0;         // 持續吹準的時間
+let pitchLocked = false;   // 是否已鎖定（可觸發下鑽）
+let currentTarget = TARGETS[0];
+let lastFrameTime = 0;
+
+// 自相關演算法：從時域波形找基頻（直笛音域夠用）
+function autoCorrelate(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  micRMS = rms;
+  const gate = document.getElementById('gate').value / 1000; // 門檻可調
+  if (rms < gate) return -1; // 太小聲：視為沒吹
+
+  let r1 = 0, r2 = SIZE - 1;
+  const th = 0.2;
+  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < th) { r1 = i; break; } }
+  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < th) { r2 = SIZE - i; break; } }
+  const cut = buf.slice(r1, r2);
+  const N = cut.length;
+  if (N < 64) return -1;
+
+  // 計算各延遲的相關係數
+  const corrs = new Array(N).fill(0);
+  for (let lag = 0; lag < N; lag++) {
+    let sum = 0;
+    for (let i = 0; i < N - lag; i++) sum += cut[i] * cut[i + lag];
+    corrs[lag] = sum / N;
+  }
+  // 找第一個波谷之後的波峰
+  let d = 0;
+  while (d < N - 1 && corrs[d] > corrs[d + 1]) d++;
+  let maxVal = -1, maxPos = -1;
+  for (let i = d; i < N; i++) {
+    if (corrs[i] > maxVal) { maxVal = corrs[i]; maxPos = i; }
+  }
+  if (maxPos <= 0) return -1;
+  // 拋物線內插提高精度
+  let x1 = corrs[maxPos - 1] || 0, x2 = corrs[maxPos], x3 = corrs[maxPos + 1] || 0;
+  const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
+  let shift = 0;
+  if (a !== 0) shift = -b / (2 * a);
+  return sampleRate / (maxPos + shift);
+}
+
+// 計算與目標音的音分誤差（含八度寬容選項）
+function centsOff(freq, targetFreq) {
+  const allowOctave = document.getElementById('octaveOk').checked;
+  if (!allowOctave) return 1200 * Math.log2(freq / targetFreq);
+  // 把頻率折到與目標同八度再比（差八度也算對）
+  let f = freq;
+  while (f < targetFreq / Math.SQRT2) f *= 2;
+  while (f > targetFreq * Math.SQRT2) f /= 2;
+  return 1200 * Math.log2(f / targetFreq);
+}
+
+// 每幀更新音高
+function updatePitch(now) {
+  const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+  lastFrameTime = now;
+  if (analyser && pitchBuffer) {
+    analyser.getFloatTimeDomainData(pitchBuffer);
+    detectedFreq = autoCorrelate(pitchBuffer, audioCtx.sampleRate);
+  }
+  // 鍵盤測試模式：用按鍵模擬吹對
+  if (document.getElementById('keyTest').checked && simFreq > 0) {
+    detectedFreq = simFreq;
+    micRMS = 0.05;
+  }
+  updateTunerUI();
+  // 判定是否持續吹準
+  const tol = parseFloat(document.getElementById('tolerance').value);
+  if (detectedFreq > 0) {
+    const off = centsOff(detectedFreq, currentTarget.freq);
+    if (Math.abs(off) <= tol) {
+      matchTime += dt;
+      if (matchTime >= SUSTAIN_TIME) pitchLocked = true;
+    } else {
+      matchTime = 0; pitchLocked = false;
+    }
+  } else {
+    matchTime = 0; pitchLocked = false;
+  }
+  return dt;
+}
+
+// 調音器畫面更新
+function updateTunerUI() {
+  const det = document.getElementById('detected');
+  const bar = document.getElementById('centsBar');
+  const txt = document.getElementById('centsText');
+  document.getElementById('micLevel').style.width = Math.min(micRMS * 1500, 100) + '%';
+  if (detectedFreq <= 0) {
+    det.textContent = '-- Hz';
+    det.style.color = '#fff';
+    bar.style.left = '50%'; bar.style.width = '4px'; bar.style.background = '#888';
+    txt.textContent = '沒收到聲音（檢查麥克風＋音量門檻）・目前目標：' + currentTarget.label;
+    return;
+  }
+  const off = centsOff(detectedFreq, currentTarget.freq);
+  const tol = parseFloat(document.getElementById('tolerance').value);
+  det.textContent = detectedFreq.toFixed(1) + ' Hz';
+  const ok = Math.abs(off) <= tol;
+  det.style.color = ok ? '#7dffaa' : (off < 0 ? '#ff9a9a' : '#ffd200');
+  // 中央為準，左右偏移顯示
+  const px = Math.max(-1, Math.min(1, off / 100)) * 45;
+  bar.style.left = (50 + Math.min(px, 0)) + '%';
+  bar.style.width = Math.max(Math.abs(px), 4) + 'px';
+  bar.style.background = ok ? '#7dffaa' : '#ff6b6b';
+  txt.textContent = '目標 ' + currentTarget.label + '（' + currentTarget.freq.toFixed(0) +
+    'Hz） 誤差 ' + (off >= 0 ? '+' : '') + off.toFixed(0) + '音分' +
+    (pitchLocked ? ' ✅ 鎖定！' : '');
+}
+
+// ============================================================
+//  麥克風啟用
+// ============================================================
+document.getElementById('micBtn').addEventListener('click', async () => {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    pitchBuffer = new Float32Array(analyser.fftSize);
+    src.connect(analyser);
+    document.getElementById('micBtn').disabled = true;
+    document.getElementById('micBtn').textContent = '✅ 麥克風已啟用';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('practiceBtn').disabled = false;
+    requestAnimationFrame(tunerLoop);
+  } catch (e) {
+    alert('無法啟用麥克風：' + e.message + '\n（注意：麥克風需要 HTTPS 或 localhost，GitHub Pages 沒問題，本機 file:// 可能被擋）');
+  }
+});
+
+// 練習模式也跑調音器（不開始遊戲）
+let inGame = false, practiceMode = false;
+function tunerLoop(now) {
+  if (!lastFrameTime) lastFrameTime = now;
+  updatePitch(now);
+  if (!inGame) requestAnimationFrame(tunerLoop);
+}
+
+// 參考音播放（免費離線：Web Audio 合成）
+function playRef(freq) {
+  try {
+    const AC = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const osc = AC.createOscillator(), g = AC.createGain();
+    osc.connect(g); g.connect(AC.destination);
+    osc.type = 'sine'; osc.frequency.value = freq;
+    const t = AC.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.4, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+    osc.start(t); osc.stop(t + 1.2);
+  } catch (e) { alert('請先啟用麥克風（會順便建立音訊環境）'); }
+}
+document.getElementById('playF').addEventListener('click', () => playRef(TARGETS[0].freq));
+document.getElementById('playC').addEventListener('click', () => playRef(TARGETS[1].freq));
+
+// ============================================================
+//  遊戲本體（下樓梯玩法，操作 = 嘴＋指法）
+// ============================================================
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+let player, floors, cameraY, scrollSpeed, score, hp, invincible, gameLoopId;
+let best = parseInt(localStorage.getItem('recorderBest') || '0', 10);
+document.getElementById('best').textContent = best;
+
+// 鍵盤測試用模擬頻率
+let simFreq = 0;
+window.addEventListener('keydown', (e) => {
+  if (!document.getElementById('keyTest').checked) return;
+  if (e.key === 'f' || e.key === 'F') simFreq = TARGETS[0].freq;
+  if (e.key === 'c' || e.key === 'C') simFreq = TARGETS[1].freq;
+});
+window.addEventListener('keyup', () => { simFreq = 0; });
+
+function resetGame() {
+  player = { x: W / 2, y: 60, vx: 120, vy: 0, r: 12, standing: false };
+  floors = [];
+  cameraY = 0;
+  scrollSpeed = 28; // 每秒往下捲幾個 px（會慢慢加速）
+  score = 0; hp = 3; invincible = 0;
+  let y = 140;
+  for (let i = 0; i < 8; i++) { floors.push(makeFloor(y)); y += 130; }
+  document.getElementById('score').textContent = '0';
+  document.getElementById('hp').textContent = '3';
+}
+
+// 產生一層樓：整排平台＋一個洞，洞口標目標音
+function makeFloor(y) {
+  const holeW = 90;
+  const holeX = 30 + Math.random() * (W - 60 - holeW);
+  const target = TARGETS[Math.floor(Math.random() * TARGETS.length)];
+  return { y, holeX, holeW, target, passed: false };
+}
+
+function startGame(practice) {
+  practiceMode = practice;
+  resetGame();
+  inGame = true;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('practiceBtn').disabled = true;
+  lastFrameTime = performance.now();
+  gameLoopId = requestAnimationFrame(gameLoop);
+  if (practice) alert('練習模式：不會扣血、不捲軸，熟悉指法用。按「開始遊戲」才正式挑戰。');
+}
+document.getElementById('startBtn').addEventListener('click', () => startGame(false));
+document.getElementById('practiceBtn').addEventListener('click', () => startGame(true));
+
+function gameLoop(now) {
+  const dt = updatePitch(now);
+  if (!inGame) return;
+
+  // 找出離玩家最近的下一層樓，當作目前目標音
+  let next = null;
+  for (const f of floors) {
+    if (f.y + 10 > player.y && (!next || f.y < next.y)) next = f;
+  }
+  if (next) currentTarget = next.target;
+
+  // 捲軸（練習模式不捲）
+  if (!practiceMode) {
+    cameraY += scrollSpeed * dt;
+    scrollSpeed += dt * 1.2;
+  }
+
+  // 玩家自動左右走
+  player.x += player.vx * dt;
+  if (player.x < player.r) { player.x = player.r; player.vx = Math.abs(player.vx); }
+  if (player.x > W - player.r) { player.x = W - player.r; player.vx = -Math.abs(player.vx); }
+
+  // 重力：平常慢速飄浮，吹準鎖定才快速下鑽
+  const diving = pitchLocked;
+  player.vy += 1500 * dt;
+  const terminal = diving ? 520 : 130;
+  if (player.vy > terminal) player.vy = terminal;
+  if (diving) {
+    // 下鑽時稍微吸向洞口
+    if (next) {
+      const cx = next.holeX + next.holeW / 2;
+      player.x += Math.sign(cx - player.x) * 60 * dt;
+    }
+  }
+  player.y += player.vy * dt;
+  player.standing = false;
+
+  // 平台碰撞
+  for (const f of floors) {
+    const top = f.y;
+    const prevBottom = player.y - player.vy * dt + player.r;
+    const nowBottom = player.y + player.r;
+    if (prevBottom <= top && nowBottom >= top && player.vy >= 0) {
+      const inHole = player.x > f.holeX && player.x < f.holeX + f.holeW;
+      if (!inHole) {
+        player.y = top - player.r; player.vy = 0; player.standing = true;
+      } else if (!f.passed) {
+        f.passed = true; score++;
+        document.getElementById('score').textContent = score;
+        blip();
+      }
+    }
+  }
+
+  // 清掉上方樓層、下方補新樓
+  floors = floors.filter(f => f.y > cameraY - 60);
+  let maxY = 0;
+  for (const f of floors) maxY = Math.max(maxY, f.y);
+  while (maxY < cameraY + H + 100) { maxY += 130; floors.push(makeFloor(maxY)); }
+
+  // 扣血判定：被捲軸追上（頭頂超出畫面）
+  if (invincible > 0) invincible -= dt;
+  const screenY = player.y - cameraY;
+  if (!practiceMode && screenY < 14 && invincible <= 0) {
+    hp--; invincible = 1.2;
+    document.getElementById('hp').textContent = hp;
+    player.y = cameraY + H / 2; player.vy = 0; // 拉回中央
+    if (hp <= 0) return gameOver();
+  }
+  // 掉出底（理論上不會，保險）
+  if (screenY > H + 40) return gameOver();
+
+  draw();
+  gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+// 過關音效（免費：Web Audio 合成）
+function blip() {
+  try {
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.type = 'sine'; osc.frequency.value = 880;
+    g.gain.setValueAtTime(0.3, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    osc.start(t); osc.stop(t + 0.2);
+  } catch (e) {}
+}
+
+function gameOver() {
+  inGame = false;
+  cancelAnimationFrame(gameLoopId);
+  if (score > best) {
+    best = score;
+    localStorage.setItem('recorderBest', String(best));
+    document.getElementById('best').textContent = best;
+  }
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('practiceBtn').disabled = false;
+  alert('遊戲結束！過了 ' + score + ' 層，最佳 ' + best + ' 層。\n多練指法再挑戰一次吧！');
+  requestAnimationFrame(tunerLoop);
+}
+
+// 畫面繪製
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  // 背景格線
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  for (let y = 0; y < H; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  // 樓層
+  for (const f of floors) {
+    const sy = f.y - cameraY;
+    if (sy < -30 || sy > H + 30) continue;
+    ctx.fillStyle = f.passed ? 'rgba(125,255,170,0.35)' : 'rgba(247,151,30,0.55)';
+    ctx.fillRect(0, sy, f.holeX, 14);
+    ctx.fillRect(f.holeX + f.holeW, sy, W - f.holeX - f.holeW, 14);
+    // 洞口標籤
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(f.holeX, sy - 22, f.holeW, 22);
+    ctx.fillStyle = f.target.key === 'F' ? '#ffd200' : '#7dffaa';
+    ctx.font = 'bold 15px "Microsoft JhengHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(f.target.label, f.holeX + f.holeW / 2, sy - 6);
+  }
+  // 玩家（閃爍 = 剛扣血無敵中）
+  const py = player.y - cameraY;
+  if (!(invincible > 0 && Math.floor(invincible * 10) % 2 === 0)) {
+    ctx.font = '24px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
+  }
+  // 下鑽特效線
+  if (pitchLocked) {
+    ctx.strokeStyle = 'rgba(125,255,170,0.7)';
+    ctx.beginPath(); ctx.moveTo(player.x, py - 30); ctx.lineTo(player.x, py - 8); ctx.stroke();
+  }
+}
+
+// 初次繪製空白畫面
+draw();
+</script>
+</body>
+</html>
