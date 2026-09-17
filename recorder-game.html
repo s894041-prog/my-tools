@@ -85,7 +85,6 @@
   <div class="row">
     <button id="micBtn">🎤 啟用麥克風</button>
     <button id="startBtn" class="ghost" disabled>▶ 開始遊戲</button>
-    <button id="practiceBtn" class="ghost" disabled>🎵 練習模式</button>
   </div>
   <div class="row">
     <label>容許誤差：
@@ -124,16 +123,15 @@
 </div>
 
 <div id="hud">
-  <span>❤️ <span id="hp">3</span></span>
   <span>🧱 <span id="score">0</span> 層</span>
   <span>🏆 最佳 <span id="best">0</span></span>
 </div>
 <canvas id="game" width="400" height="560"></canvas>
 
 <p class="hint">
-  玩法：角色會自動左右走、慢慢往下飄。<br>
-  每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），角色就會快速往下鑽過洞。<br>
-  沒吹就飄著下不去，捲軸追上來會扣血（3滴血）。吹錯會顯示你吹了什麼音、再對照指法重吹。<br>
+  玩法：每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），角色才會往下鑽過洞。<br>
+  沒吹對就停在原地、不會往下，也不會扣血，慢慢對指法就好。<br>
+  吹錯會顯示你吹了什麼音、再對照指法重吹。<br>
   升C指法圖（資料夾內附圖）：<br>
   <img id="fingeringImg" src="升C.jpg" alt="升C指法圖" onerror="this.style.display='none'">
 </p>
@@ -313,7 +311,6 @@ document.getElementById('micBtn').addEventListener('click', async () => {
     document.getElementById('micBtn').disabled = true;
     document.getElementById('micBtn').textContent = '✅ 麥克風已啟用';
     document.getElementById('startBtn').disabled = false;
-    document.getElementById('practiceBtn').disabled = false;
     requestAnimationFrame(tunerLoop);
   } catch (e) {
     alert('無法啟用麥克風：' + e.message + '\n（注意：麥克風需要 HTTPS 或 localhost，GitHub Pages 沒問題，本機 file:// 可能被擋）');
@@ -321,7 +318,7 @@ document.getElementById('micBtn').addEventListener('click', async () => {
 });
 
 // 練習模式也跑調音器（不開始遊戲）
-let inGame = false, practiceMode = false;
+let inGame = false;
 function tunerLoop(now) {
   if (!lastFrameTime) lastFrameTime = now;
   updatePitch(now);
@@ -351,7 +348,7 @@ document.getElementById('playC').addEventListener('click', () => playRef(TARGETS
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
-let player = null, floors = [], cameraY = 0, scrollSpeed = 28, score = 0, hp = 3, invincible = 0, gameLoopId = 0;
+let player = null, floors = [], cameraY = 0, score = 0, hoverT = 0, targetIdx = 0, gameLoopId = 0;
 let best = parseInt(localStorage.getItem('recorderBest') || '0', 10);
 document.getElementById('best').textContent = best;
 
@@ -367,20 +364,18 @@ window.addEventListener('keyup', () => { simFreq = 0; });
 document.getElementById('keyTest').addEventListener('change', (e) => {
   if (e.target.checked && !analyser) {
     document.getElementById('startBtn').disabled = false;
-    document.getElementById('practiceBtn').disabled = false;
   }
 });
 
 function resetGame() {
-  player = { x: W / 2, y: 60, vx: 120, vy: 0, r: 12, standing: false };
   floors = [];
   cameraY = 0;
-  scrollSpeed = 28; // 每秒往下捲幾個 px（會慢慢加速）
-  score = 0; hp = 3; invincible = 0;
-  let y = 140;
+  score = 0; hoverT = 0; targetIdx = 0;
+  let y = 220;
   for (let i = 0; i < 8; i++) { floors.push(makeFloor(y)); y += 130; }
+  // 玩家停在第一層洞口上方：不吹對就不會自己往下掉
+  player = { x: floors[0].holeX + floors[0].holeW / 2, y: floors[0].y - 60, vy: 0, r: 12 };
   document.getElementById('score').textContent = '0';
-  document.getElementById('hp').textContent = '3';
 }
 
 // 產生一層樓：整排平台＋一個洞，洞口標目標音
@@ -391,97 +386,65 @@ function makeFloor(y) {
   return { y, holeX, holeW, target, passed: false };
 }
 
-function startGame(practice) {
-  practiceMode = practice;
+// 開始遊戲（隨時可按 = 重新開始；吹對才往下，沒有死亡）
+function startGame() {
   resetGame();
   inGame = true;
-  document.getElementById('startBtn').disabled = true;
-  document.getElementById('practiceBtn').disabled = true;
   lastFrameTime = performance.now();
+  cancelAnimationFrame(gameLoopId);
   gameLoopId = requestAnimationFrame(gameLoop);
-  if (practice) alert('練習模式：不會扣血、不捲軸，熟悉指法用。按「開始遊戲」才正式挑戰。');
 }
-document.getElementById('startBtn').addEventListener('click', () => startGame(false));
-document.getElementById('practiceBtn').addEventListener('click', () => startGame(true));
+document.getElementById('startBtn').addEventListener('click', startGame);
 
 function gameLoop(now) {
   const dt = updatePitch(now);
   if (!inGame) return;
+  hoverT += dt;
 
-  // 找出離玩家最近的下一層樓，當作目前目標音
-  let next = null;
-  for (const f of floors) {
-    if (f.y + 10 > player.y && (!next || f.y < next.y)) next = f;
-  }
-  if (next) currentTarget = next.target;
+  // 目前目標音 = 正在挑戰的這層洞口的音
+  const target = floors[targetIdx];
+  if (target) currentTarget = target.target;
+  const cx = target ? target.holeX + target.holeW / 2 : W / 2;
 
-  // 鏡頭：基礎捲動給壓力＋下墜時即時跟上（音樂老師回饋②：畫面跟不上）
-  // 玩家保持在畫面上方約 1/3 處，鏡頭只往下跟、不往上跑
-  if (!practiceMode) {
-    cameraY += scrollSpeed * dt;
-    scrollSpeed += dt * 1.2;
-    const want = player.y - H * 0.35;
-    if (want > cameraY) cameraY = want;
-  } else {
-    // 練習模式：平滑雙向跟隨
-    const want = player.y - H * 0.35;
-    cameraY += (want - cameraY) * Math.min(1, 5 * dt);
-  }
-
-  // 玩家自動左右走
-  player.x += player.vx * dt;
-  if (player.x < player.r) { player.x = player.r; player.vx = Math.abs(player.vx); }
-  if (player.x > W - player.r) { player.x = W - player.r; player.vx = -Math.abs(player.vx); }
-
-  // 重力：平常慢速飄浮，吹準鎖定才快速下鑽
-  const diving = pitchLocked;
-  player.vy += 1500 * dt;
-  const terminal = diving ? 520 : 130;
-  if (player.vy > terminal) player.vy = terminal;
-  if (diving) {
-    // 下鑽時稍微吸向洞口
-    if (next) {
-      const cx = next.holeX + next.holeW / 2;
-      player.x += Math.sign(cx - player.x) * 60 * dt;
-    }
-  }
-  player.y += player.vy * dt;
-  player.standing = false;
-
-  // 平台碰撞
-  for (const f of floors) {
-    const top = f.y;
-    const prevBottom = player.y - player.vy * dt + player.r;
-    const nowBottom = player.y + player.r;
-    if (prevBottom <= top && nowBottom >= top && player.vy >= 0) {
-      const inHole = player.x > f.holeX && player.x < f.holeX + f.holeW;
-      if (!inHole) {
-        player.y = top - player.r; player.vy = 0; player.standing = true;
-      } else if (!f.passed) {
-        f.passed = true; score++;
-        document.getElementById('score').textContent = score;
-        blip();
+  if (pitchLocked && target) {
+    // 吹對才往下：快速下鑽穿過洞口
+    player.vy += 2200 * dt;
+    if (player.vy > 560) player.vy = 560;
+    player.x += (cx - player.x) * Math.min(1, 8 * dt);
+    player.y += player.vy * dt;
+    // 整顆穿過樓層 → 過關
+    if (player.y - player.r > target.y + 14) {
+      target.passed = true;
+      score++;
+      document.getElementById('score').textContent = score;
+      if (score > best) {
+        best = score;
+        localStorage.setItem('recorderBest', String(best));
+        document.getElementById('best').textContent = best;
       }
+      blip();
+      targetIdx++;
+      player.vy = 0;
+      // 下方補新樓、上方清舊樓（索引跟著調整）
+      let maxY = 0;
+      for (const f of floors) maxY = Math.max(maxY, f.y);
+      floors.push(makeFloor(maxY + 130));
+      const cutY = cameraY - 200;
+      let removed = 0;
+      floors = floors.filter(f => { if (f.y < cutY) { removed++; return false; } return true; });
+      targetIdx -= removed;
     }
+  } else {
+    // 沒吹對：停在原地懸浮，只慢慢對準洞口（不往下、不扣血、不會一直跑）
+    player.vy = 0;
+    const hoverY = target ? target.y - 60 : player.y;
+    player.y += (hoverY - player.y) * Math.min(1, 4 * dt);
+    player.x += (cx - player.x) * Math.min(1, 2 * dt);
   }
 
-  // 清掉上方樓層、下方補新樓
-  floors = floors.filter(f => f.y > cameraY - 60);
-  let maxY = 0;
-  for (const f of floors) maxY = Math.max(maxY, f.y);
-  while (maxY < cameraY + H + 100) { maxY += 130; floors.push(makeFloor(maxY)); }
-
-  // 扣血判定：被捲軸追上（頭頂超出畫面）
-  if (invincible > 0) invincible -= dt;
-  const screenY = player.y - cameraY;
-  if (!practiceMode && screenY < 14 && invincible <= 0) {
-    hp--; invincible = 1.2;
-    document.getElementById('hp').textContent = hp;
-    player.y = cameraY + H / 2; player.vy = 0; // 拉回中央
-    if (hp <= 0) return gameOver();
-  }
-  // 掉出底（理論上不會，保險）
-  if (screenY > H + 40) return gameOver();
+  // 鏡頭平滑跟隨玩家（雙向，不會跟不上）
+  const want = player.y - H * 0.35;
+  cameraY += (want - cameraY) * Math.min(1, 5 * dt);
 
   draw();
   gameLoopId = requestAnimationFrame(gameLoop);
@@ -498,20 +461,6 @@ function blip() {
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
     osc.start(t); osc.stop(t + 0.2);
   } catch (e) {}
-}
-
-function gameOver() {
-  inGame = false;
-  cancelAnimationFrame(gameLoopId);
-  if (score > best) {
-    best = score;
-    localStorage.setItem('recorderBest', String(best));
-    document.getElementById('best').textContent = best;
-  }
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('practiceBtn').disabled = false;
-  alert('遊戲結束！過了 ' + score + ' 層，最佳 ' + best + ' 層。\n多練指法再挑戰一次吧！');
-  requestAnimationFrame(tunerLoop);
 }
 
 // 畫面繪製
@@ -537,14 +486,13 @@ function draw() {
     ctx.textAlign = 'center';
     ctx.fillText(f.target.label, f.holeX + f.holeW / 2, sy - 6);
   }
-  // 玩家（閃爍 = 剛扣血無敵中；待機時不畫，只顯示提示文字）
+  // 玩家（待機時不畫，只顯示提示文字；懸浮等待時加呼吸浮動）
   if (player) {
-    const py = player.y - cameraY;
-    if (!(invincible > 0 && Math.floor(invincible * 10) % 2 === 0)) {
-      ctx.font = '24px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
-    }
+    const bob = (!pitchLocked && inGame) ? Math.sin(hoverT * 3) * 4 : 0;
+    const py = player.y - cameraY + bob;
+    ctx.font = '24px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
     // 下鑽特效線
     if (pitchLocked) {
       ctx.strokeStyle = 'rgba(125,255,170,0.7)';
