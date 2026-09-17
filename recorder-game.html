@@ -133,7 +133,7 @@
 <p class="hint">
   玩法：角色會自動左右走、慢慢往下飄。<br>
   每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），角色就會快速往下鑽過洞。<br>
-  沒吹或吹錯就飄著下不去，捲軸追上來會扣血（3滴血）。<br>
+  沒吹就飄著下不去，捲軸追上來會扣血（3滴血）。吹錯會顯示你吹了什麼音、再對照指法重吹。<br>
   升C指法圖（資料夾內附圖）：<br>
   <img id="fingeringImg" src="升C.jpg" alt="升C指法圖" onerror="this.style.display='none'">
 </p>
@@ -147,7 +147,6 @@ const TARGETS = [
   { key: 'F', label: '升F', note: 'F#5', freq: 739.99 },
   { key: 'C', label: '升C', note: 'C#5', freq: 554.37 },
 ];
-const SUSTAIN_TIME = 0.3; // 持續吹穩幾秒才算過關
 
 // ============================================================
 //  音高偵測（Pitch detection，自相關演算法）
@@ -156,8 +155,8 @@ let audioCtx = null, analyser = null, micStream = null;
 let pitchBuffer = null;
 let detectedFreq = 0;      // 目前偵測到的頻率
 let micRMS = 0;            // 目前音量
-let matchTime = 0;         // 持續吹準的時間
 let pitchLocked = false;   // 是否已鎖定（可觸發下鑽）
+let lastWrongTone = 0;     // 上次吹錯提醒音時間（節流用）
 let currentTarget = TARGETS[0];
 let lastFrameTime = 0;
 
@@ -168,8 +167,7 @@ function autoCorrelate(buf, sampleRate) {
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
   micRMS = rms;
-  const gate = document.getElementById('gate').value / 1000; // 門檻可調
-  if (rms < gate) return -1; // 太小聲：視為沒吹
+  if (rms < gateVal()) return -1; // 太小聲：視為沒吹
 
   let r1 = 0, r2 = SIZE - 1;
   const th = 0.2;
@@ -227,20 +225,49 @@ function updatePitch(now) {
     micRMS = 0.05;
   }
   updateTunerUI();
-  // 判定是否持續吹準
+  // 判定：有吹對就好，不用持續時間（音樂老師回饋①）
+  // 吹錯則顯示小朋友實際吹了什麼音＋短音提醒（音樂老師回饋③）
   const tol = parseFloat(document.getElementById('tolerance').value);
   if (detectedFreq > 0) {
     const off = centsOff(detectedFreq, currentTarget.freq);
-    if (Math.abs(off) <= tol) {
-      matchTime += dt;
-      if (matchTime >= SUSTAIN_TIME) pitchLocked = true;
-    } else {
-      matchTime = 0; pitchLocked = false;
+    pitchLocked = Math.abs(off) <= tol;
+    if (!pitchLocked && micRMS > gateVal() * 2 && now - lastWrongTone > 1500) {
+      lastWrongTone = now;
+      errorBuzz();
     }
   } else {
-    matchTime = 0; pitchLocked = false;
+    pitchLocked = false;
   }
   return dt;
+}
+
+// 麥克風音量門檻（滑桿值）
+function gateVal() {
+  return document.getElementById('gate').value / 1000;
+}
+
+// 頻率轉最近的音名（十二平均律）：告訴小朋友他到底吹了什麼音
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const NOTE_ZH = { 'C': 'Do', 'C#': '升Do', 'D': 'Re', 'D#': '升Re', 'E': 'Mi', 'F': 'Fa', 'F#': '升Fa', 'G': 'Sol', 'G#': '升Sol', 'A': 'La', 'A#': '升La', 'B': 'Si' };
+function freqToNote(freq) {
+  const midi = Math.round(69 + 12 * Math.log2(freq / 440));
+  const name = NOTE_NAMES[((midi % 12) + 12) % 12];
+  const octave = Math.floor(midi / 12) - 1;
+  return (NOTE_ZH[name] || name) + '（' + name + octave + '）';
+}
+
+// 吹錯提醒音（免費：Web Audio 合成，短促低音）
+function errorBuzz() {
+  try {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.type = 'square'; osc.frequency.value = 160;
+    g.gain.setValueAtTime(0.12, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    osc.start(t); osc.stop(t + 0.18);
+  } catch (e) {}
 }
 
 // 調音器畫面更新
@@ -266,9 +293,9 @@ function updateTunerUI() {
   bar.style.left = (50 + Math.min(px, 0)) + '%';
   bar.style.width = Math.max(Math.abs(px), 4) + 'px';
   bar.style.background = ok ? '#7dffaa' : '#ff6b6b';
-  txt.textContent = '目標 ' + currentTarget.label + '（' + currentTarget.freq.toFixed(0) +
-    'Hz） 誤差 ' + (off >= 0 ? '+' : '') + off.toFixed(0) + '音分' +
-    (pitchLocked ? ' ✅ 鎖定！' : '');
+  txt.textContent = ok
+    ? '✅ 吹對了！往下鑽！（你吹：' + freqToNote(detectedFreq) + '）'
+    : '❌ 吹錯囉！你吹的是' + freqToNote(detectedFreq) + '，目標是' + currentTarget.label;
 }
 
 // ============================================================
@@ -388,10 +415,17 @@ function gameLoop(now) {
   }
   if (next) currentTarget = next.target;
 
-  // 捲軸（練習模式不捲）
+  // 鏡頭：基礎捲動給壓力＋下墜時即時跟上（音樂老師回饋②：畫面跟不上）
+  // 玩家保持在畫面上方約 1/3 處，鏡頭只往下跟、不往上跑
   if (!practiceMode) {
     cameraY += scrollSpeed * dt;
     scrollSpeed += dt * 1.2;
+    const want = player.y - H * 0.35;
+    if (want > cameraY) cameraY = want;
+  } else {
+    // 練習模式：平滑雙向跟隨
+    const want = player.y - H * 0.35;
+    cameraY += (want - cameraY) * Math.min(1, 5 * dt);
   }
 
   // 玩家自動左右走
