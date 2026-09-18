@@ -186,7 +186,7 @@
     <label><input type="checkbox" id="octaveOk" checked> 允許差八度也算過（指法對就好）</label>
   </div>
   <div class="row">
-    <label><input type="checkbox" id="keyTest"> 鍵盤測試模式（老師專用，需密碼；不列入成績）</label>
+    <label><input type="checkbox" id="keyTest"> 鍵盤測試模式（老師專用，需密碼）</label>
   </div>
   <div class="row">
     <button class="ghost" id="playF">🔊 聽升F</button>
@@ -522,7 +522,8 @@ const FLOOR_COLORS = ['#FF9EBB', '#FFB84D', '#FFD93D', '#6BCB77', '#4D96FF', '#B
 
 // 鍵盤測試用模擬頻率
 let simFreq = 0;
-let micUsedThisGame = false; // 本局是否有用麥克風吹過（上傳成績用來擋鍵盤洗分）
+let micUsedThisGame = false; // 本局是否有用麥克風吹過
+let keyUnlocked = false; // 是否用密碼解鎖過鍵盤（老師測試用，可上傳；同瀏覽器 session 有效）
 window.addEventListener('keydown', (e) => {
   if (!document.getElementById('keyTest').checked) return;
   if (e.key === 'f' || e.key === 'F') simFreq = TARGETS[0].freq;
@@ -539,7 +540,8 @@ document.getElementById('keyTest').addEventListener('change', (e) => {
     showToast('🔒 密碼不對！請用直笛吹麥克風練習');
     return;
   }
-  showToast('🔓 鍵盤測試已啟用（此模式成績不列入）');
+  showToast('🔓 鍵盤測試已啟用（老師測試分可上傳）');
+  keyUnlocked = true;
   if (!analyser) {
     document.getElementById('startBtn').disabled = false;
   }
@@ -765,7 +767,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   if (!(grade >= 1 && grade <= 6)) { showToast('🐣 請先選年級！'); return; }
   if (!nickname) { showToast('🐣 請填暱稱（不要寫真名喔）！'); return; }
   if (score <= 0) { showToast('🐣 先玩到至少 1 層再上傳吧！'); return; }
-  if (!micUsedThisGame) { showToast('🔒 鍵盤測試不列入成績，請用直笛吹麥克風再上傳！'); return; }
+  if (!micUsedThisGame && !keyUnlocked) { showToast('🔒 請用直笛吹麥克風後再上傳！（鍵盤測試需老師密碼解鎖）'); return; }
   try {
     const res = await fetch(API_BASE + '/api/practice', {
       method: 'POST',
