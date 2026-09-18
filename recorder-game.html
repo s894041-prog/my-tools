@@ -186,7 +186,7 @@
     <label><input type="checkbox" id="octaveOk" checked> 允許差八度也算過（指法對就好）</label>
   </div>
   <div class="row">
-    <label><input type="checkbox" id="keyTest"> 鍵盤測試模式（按 <kbd>F</kbd>=升F <kbd>C</kbd>=升C，不用吹）</label>
+    <label><input type="checkbox" id="keyTest"> 鍵盤測試模式（老師專用，需密碼；不列入成績）</label>
   </div>
   <div class="row">
     <button class="ghost" id="playF">🔊 聽升F</button>
@@ -223,9 +223,10 @@
   <div class="row">
     <label>學校：
       <select id="boardSchool">
+        <option value="all" selected>全部學校</option>
         <option value="鐵山國小">鐵山國小</option>
         <option value="安定國小">安定國小</option>
-        <option value="馬鳴國小" selected>馬鳴國小</option>
+        <option value="馬鳴國小">馬鳴國小</option>
       </select>
     </label>
     <label>年級：
@@ -378,6 +379,8 @@ function updatePitch(now) {
   if (analyser && pitchBuffer) {
     analyser.getFloatTimeDomainData(pitchBuffer);
     detectedFreq = autoCorrelate(pitchBuffer, audioCtx.sampleRate);
+    // 麥克風真的有收到聲音 → 本局算數，可上傳成績
+    if (detectedFreq > 0 && inGame) micUsedThisGame = true;
   }
   // 鍵盤測試模式：用按鍵模擬吹對
   if (document.getElementById('keyTest').checked && simFreq > 0) {
@@ -519,15 +522,25 @@ const FLOOR_COLORS = ['#FF9EBB', '#FFB84D', '#FFD93D', '#6BCB77', '#4D96FF', '#B
 
 // 鍵盤測試用模擬頻率
 let simFreq = 0;
+let micUsedThisGame = false; // 本局是否有用麥克風吹過（上傳成績用來擋鍵盤洗分）
 window.addEventListener('keydown', (e) => {
   if (!document.getElementById('keyTest').checked) return;
   if (e.key === 'f' || e.key === 'F') simFreq = TARGETS[0].freq;
   if (e.key === 'c' || e.key === 'C') simFreq = TARGETS[1].freq;
 });
 window.addEventListener('keyup', () => { simFreq = 0; });
-// 鍵盤測試模式：免麥克風也能試玩遊戲邏輯（方便上課前先測）
+// 鍵盤測試模式：老師專用（需密碼），且該局成績不列入上傳
+const KEY_TEST_PASSWORD = '8888'; // 老師專用密碼，可改這裡
 document.getElementById('keyTest').addEventListener('change', (e) => {
-  if (e.target.checked && !analyser) {
+  if (!e.target.checked) return; // 取消勾選不用密碼
+  const input = window.prompt('鍵盤測試模式是老師專用的，請輸入密碼：');
+  if (input !== KEY_TEST_PASSWORD) {
+    e.target.checked = false;
+    showToast('🔒 密碼不對！請用直笛吹麥克風練習');
+    return;
+  }
+  showToast('🔓 鍵盤測試已啟用（此模式成績不列入）');
+  if (!analyser) {
     document.getElementById('startBtn').disabled = false;
   }
 });
@@ -535,7 +548,7 @@ document.getElementById('keyTest').addEventListener('change', (e) => {
 function resetGame() {
   floors = [];
   cameraY = 0;
-  score = 0; hoverT = 0; targetIdx = 0;
+  score = 0; hoverT = 0; targetIdx = 0; micUsedThisGame = false;
   let y = 220;
   for (let i = 0; i < 8; i++) { floors.push(makeFloor(y)); y += 130; }
   // 玩家停在第一層洞口上方：不吹對就不會自己往下掉
@@ -752,6 +765,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   if (!(grade >= 1 && grade <= 6)) { showToast('🐣 請先選年級！'); return; }
   if (!nickname) { showToast('🐣 請填暱稱（不要寫真名喔）！'); return; }
   if (score <= 0) { showToast('🐣 先玩到至少 1 層再上傳吧！'); return; }
+  if (!micUsedThisGame) { showToast('🔒 鍵盤測試不列入成績，請用直笛吹麥克風再上傳！'); return; }
   try {
     const res = await fetch(API_BASE + '/api/practice', {
       method: 'POST',
@@ -787,7 +801,7 @@ async function loadBoard() {
     const medals = ['🥇', '🥈', '🥉'];
     list.innerHTML = rows.map((r, i) => {
       const medal = medals[i] || ('第' + (i + 1) + '名');
-      return '<li><span>' + medal + ' ' + escapeHtml(r.nickname) + '・' + r.grade + '年級</span><span>最佳 ' + r.best + ' 層</span></li>';
+      return '<li><span>' + medal + ' ' + escapeHtml(r.nickname) + '・' + escapeHtml(r.school) + '・' + r.grade + '年級</span><span>最佳 ' + r.best + ' 層</span></li>';
     }).join('');
   } catch (e) {
     list.innerHTML = '<li>讀取失敗，請檢查網路再試一次</li>';
