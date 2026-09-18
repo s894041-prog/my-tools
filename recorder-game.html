@@ -3,88 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>直笛小遊戲：升F升C下樓梯</title>
+<title>🎶 直笛大冒險：升F升C下樓梯</title>
 <style>
-  /* ===== 版面樣式 ===== */
+  /* ===== 可愛糖果風 ===== */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    min-height: 100vh; color: #fff;
+    font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
+    background: linear-gradient(180deg, #FFF6E9 0%, #FFE9F3 45%, #E3F6FF 100%);
+    min-height: 100vh; color: #5a4a3a;
     display: flex; flex-direction: column; align-items: center;
-    padding: 16px;
+    padding: 16px 12px 40px;
   }
-  h1 { font-size: 1.6rem; margin: 8px 0 2px; letter-spacing: 1px; }
-  .sub { font-size: 0.85rem; color: rgba(255,255,255,0.65); margin-bottom: 12px; }
+  h1 { font-size: 1.7rem; margin: 8px 0 2px; letter-spacing: 1px; color: #e2548b; text-shadow: 2px 2px 0 #fff; }
+  .sub { font-size: 0.85rem; color: #a08a70; margin-bottom: 12px; }
+  .mascot { font-size: 3rem; line-height: 1; animation: bob 2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
   .panel {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 14px; padding: 14px 16px;
+    background: #fff;
+    border: 3px solid #ffd1e3;
+    border-radius: 22px; padding: 14px 16px;
     width: 100%; max-width: 460px; margin-bottom: 12px;
+    box-shadow: 0 4px 0 rgba(226,84,139,0.15);
   }
+  .panel h2 { font-size: 1.05rem; color: #e2548b; margin-bottom: 8px; }
   .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
-  label { font-size: 0.9rem; }
-  select, input[type=range] { font-family: inherit; }
-  select {
-    background: rgba(255,255,255,0.12); color: #fff;
-    border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 6px 10px;
+  label { font-size: 0.92rem; font-weight: 700; color: #7a6450; }
+  select, input[type=text] {
+    font-family: inherit; font-size: 1rem;
+    background: #FFF9F0; color: #5a4a3a;
+    border: 2px solid #ffd1e3; border-radius: 12px; padding: 8px 12px;
+    max-width: 100%;
   }
-  select option { color: #000; }
+  select:focus, input[type=text]:focus { outline: none; border-color: #e2548b; }
+  input[type=range] { font-family: inherit; accent-color: #e2548b; }
   button {
     font-family: inherit; cursor: pointer;
-    padding: 10px 22px; border: none; border-radius: 26px;
-    font-size: 1rem; font-weight: 700;
-    background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a2e;
-    transition: transform 0.2s;
+    padding: 12px 26px; border: none; border-radius: 999px;
+    font-size: 1.05rem; font-weight: 900; color: #fff;
+    background: linear-gradient(135deg, #ff8fb1, #e2548b);
+    box-shadow: 0 4px 0 #b83a6c;
+    transition: transform 0.15s;
   }
-  button:hover:not(:disabled) { transform: translateY(-2px); }
+  button:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
   button:disabled { opacity: 0.45; cursor: not-allowed; }
   button.ghost {
-    background: rgba(255,255,255,0.1); color: #fff;
-    border: 2px solid rgba(255,255,255,0.25); font-weight: 400; font-size: 0.9rem;
-    padding: 7px 16px;
+    background: #fff; color: #e2548b;
+    border: 2px solid #ff8fb1; box-shadow: 0 3px 0 rgba(226,84,139,0.2);
+    font-weight: 700; font-size: 0.92rem; padding: 8px 18px;
   }
+  button.mint {
+    background: linear-gradient(135deg, #4ecdc4, #2aa79f);
+    box-shadow: 0 4px 0 #1e7a75;
+  }
+  .note-small { font-size: 0.8rem; color: #b09a80; }
+  .warn { font-size: 0.82rem; color: #e2548b; font-weight: 700; }
   /* ===== 調音器顯示 ===== */
-  #tuner { text-align: center; }
-  #detected { font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
+  #tuner { text-align: center; border-color: #bfe9ff; box-shadow: 0 4px 0 rgba(80,170,220,0.15); }
+  #tuner h2 { color: #2a9dc8; }
+  #detected { font-size: 2rem; font-weight: 900; letter-spacing: 1px; color: #5a4a3a; }
   #centsBarWrap {
-    height: 14px; background: rgba(255,255,255,0.12);
+    height: 14px; background: #f3e9dc;
     border-radius: 7px; margin: 8px 0; position: relative; overflow: hidden;
   }
   #centsBar {
     position: absolute; top: 0; bottom: 0; left: 50%;
     background: #ff6b6b; border-radius: 7px; width: 4px;
   }
-  #centsText { font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+  #centsText { font-size: 0.88rem; color: #7a6450; font-weight: 700; }
   #micLevelWrap {
-    height: 10px; background: rgba(255,255,255,0.12);
+    height: 10px; background: #f3e9dc;
     border-radius: 5px; overflow: hidden; margin-top: 8px;
   }
   #micLevel { height: 100%; width: 0%; background: #4ecdc4; }
   .target-tag {
-    display: inline-block; padding: 4px 14px; border-radius: 16px;
-    font-weight: 700; margin: 2px 4px;
+    display: inline-block; padding: 5px 14px; border-radius: 16px;
+    font-weight: 900; margin: 2px 4px; font-size: 0.9rem;
   }
-  .target-F { background: rgba(247,151,30,0.25); border: 1px solid #f7971e; }
-  .target-C { background: rgba(78,205,196,0.2); border: 1px solid #4ecdc4; }
+  .target-F { background: #fff3d6; border: 2px solid #f5a623; color: #b57700; }
+  .target-C { background: #dcf7f3; border: 2px solid #2aa79f; color: #157a74; }
   /* ===== 遊戲畫布 ===== */
-  #game { border-radius: 14px; border: 2px solid rgba(255,255,255,0.25); background: #101820; touch-action: none; max-width: 100%; height: auto; }
-  #hud { display: flex; justify-content: space-between; width: 100%; max-width: 460px; margin: 6px 0; font-size: 0.95rem; }
-  .hint { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 460px; }
-  #fingeringImg { max-width: 100%; border-radius: 10px; margin-top: 8px; }
-  kbd { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 1px 6px; font-family: inherit; }
+  #game {
+    border-radius: 22px; border: 4px solid #fff;
+    box-shadow: 0 6px 0 rgba(226,84,139,0.18);
+    background: #e8f7ff; touch-action: none; max-width: 100%; height: auto;
+  }
+  #hud { display: flex; justify-content: space-between; width: 100%; max-width: 460px; margin: 8px 0; font-size: 1rem; font-weight: 900; color: #e2548b; }
+  .hint { font-size: 0.85rem; color: #a08a70; line-height: 1.8; max-width: 460px; background: #fff; border-radius: 16px; padding: 10px 14px; }
+  #fingeringImg { max-width: 100%; border-radius: 12px; margin-top: 8px; border: 2px solid #ffe3ee; }
+  kbd { background: #f3e9dc; border-radius: 6px; padding: 1px 7px; font-family: inherit; border: 1px solid #e0d0b8; }
+  /* ===== 排行榜 ===== */
+  #board { border-color: #ffe08a; box-shadow: 0 4px 0 rgba(220,170,40,0.18); }
+  #board h2 { color: #c89300; }
+  #boardList { list-style: none; margin-top: 8px; }
+  #boardList li {
+    background: #FFF9F0; border-radius: 12px; padding: 8px 12px; margin: 6px 0;
+    font-size: 0.92rem; font-weight: 700; color: #7a6450;
+    display: flex; justify-content: space-between;
+  }
+  #boardList li:first-child { background: #fff3d6; border: 2px solid #f5c542; }
+  /* ===== QR ===== */
+  #qrBox { text-align: center; border-color: #c9e7c9; box-shadow: 0 4px 0 rgba(80,180,80,0.15); }
+  #qrBox h2 { color: #3d9e46; }
+  #qrImg { width: 180px; height: 180px; border-radius: 12px; border: 3px solid #c9e7c9; margin: 6px 0; }
+  /* ===== 吐司訊息 ===== */
+  #toast {
+    position: fixed; bottom: 90px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #5a4a3a; color: #fff;
+    border-radius: 999px; padding: 12px 26px;
+    font-size: 0.95rem; font-weight: 700; white-space: nowrap;
+    opacity: 0; transition: opacity 0.3s, transform 0.3s;
+    z-index: 2000; pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* ===== 撒花 ===== */
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(600deg); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed; top: 0; pointer-events: none; z-index: 999;
+    animation: confettiFall linear forwards;
+  }
 </style>
 </head>
 <body>
 
-<h1>🎶 直笛小遊戲：升F升C下樓梯</h1>
-<p class="sub">免費・免登入・單一檔案・麥克風吹直笛控制</p>
+<div class="mascot">🐣🎶</div>
+<h1>直笛大冒險</h1>
+<p class="sub">升F升C下樓梯・免費・免登入・麥克風吹直笛控制</p>
+
+<!-- ===== 小朋友資料卡 ===== -->
+<div class="panel">
+  <h2>🐣 小朋友資料卡</h2>
+  <div class="row">
+    <label>學校：
+      <select id="school">
+        <option value="">請選擇學校</option>
+        <option value="鐵山國小">鐵山國小</option>
+        <option value="安定國小">安定國小</option>
+        <option value="馬鳴國小">馬鳴國小</option>
+      </select>
+    </label>
+    <label>年級：
+      <select id="grade">
+        <option value="">請選年級</option>
+        <option value="1">1年級</option>
+        <option value="2">2年級</option>
+        <option value="3">3年級</option>
+        <option value="4">4年級</option>
+        <option value="5">5年級</option>
+        <option value="6">6年級</option>
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>暱稱：<input type="text" id="nickname" maxlength="12" placeholder="例如：直笛小王子"></label>
+  </div>
+  <p class="warn">⚠️ 請用綽號，不要寫真實姓名喔！</p>
+</div>
 
 <!-- ===== 設定面板 ===== -->
 <div class="panel">
+  <h2>🎤 開始挑戰</h2>
   <div class="row">
     <button id="micBtn">🎤 啟用麥克風</button>
-    <button id="startBtn" class="ghost" disabled>▶ 開始遊戲</button>
+    <button id="startBtn" class="mint" disabled>▶ 開始遊戲</button>
   </div>
   <div class="row">
     <label>容許誤差：
@@ -112,6 +196,7 @@
 
 <!-- ===== 調音器面板 ===== -->
 <div class="panel" id="tuner">
+  <h2>🎯 調音器</h2>
   <div>
     <span class="target-tag target-F">目標① 升F (F#5) 740Hz</span>
     <span class="target-tag target-C">目標② 升C (C#5) 554Hz</span>
@@ -124,19 +209,65 @@
 
 <div id="hud">
   <span>🧱 <span id="score">0</span> 層</span>
-  <span>🏆 最佳 <span id="best">0</span></span>
+  <span>🌟 最佳 <span id="best">0</span></span>
 </div>
 <canvas id="game" width="400" height="560"></canvas>
 
+<div class="row" style="justify-content:center; max-width:460px; width:100%;">
+  <button id="submitBtn" class="mint">🚀 上傳成績</button>
+</div>
+
+<!-- ===== 排行榜 ===== -->
+<div class="panel" id="board">
+  <h2>🏆 排行榜</h2>
+  <div class="row">
+    <label>學校：
+      <select id="boardSchool">
+        <option value="鐵山國小">鐵山國小</option>
+        <option value="安定國小">安定國小</option>
+        <option value="馬鳴國小" selected>馬鳴國小</option>
+      </select>
+    </label>
+    <label>年級：
+      <select id="boardGrade">
+        <option value="0">全部年級</option>
+        <option value="1">1年級</option>
+        <option value="2">2年級</option>
+        <option value="3">3年級</option>
+        <option value="4">4年級</option>
+        <option value="5">5年級</option>
+        <option value="6">6年級</option>
+      </select>
+    </label>
+    <button class="ghost" id="boardBtn">查詢</button>
+  </div>
+  <ol id="boardList"></ol>
+</div>
+
+<!-- ===== QR Code ===== -->
+<div class="panel" id="qrBox">
+  <h2>📱 掃碼自己練</h2>
+  <img id="qrImg" src="recorder-qr.png" alt="遊戲網址 QR Code">
+  <p class="note-small">用手機相機掃一下就能開遊戲練習！<br>老師可把這張圖列印出來貼在教室。</p>
+</div>
+
 <p class="hint">
-  玩法：每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），角色才會往下鑽過洞。<br>
-  沒吹對就停在原地、不會往下，也不會扣血，慢慢對指法就好。<br>
-  吹錯會顯示你吹了什麼音、再對照指法重吹。<br>
-  升C指法圖（資料夾內附圖）：<br>
+  🌈 玩法：每一層樓的洞口都標了目標音，對著麥克風吹準那個音（含指法），小雞才會往下鑽過洞。<br>
+  🐣 沒吹對就停在原地、不會往下，也不會扣血，慢慢對指法就好。<br>
+  💡 吹錯會顯示你吹了什麼音、再對照指法重吹。<br>
+  升C指法圖：<br>
   <img id="fingeringImg" src="升C.jpg" alt="升C指法圖" onerror="this.style.display='none'">
 </p>
 
+<div id="toast"></div>
+
 <script>
+// ============================================================
+//  後端設定（Backend config：Cloudflare Workers＋D1 共用庫）
+// ============================================================
+const API_BASE = 'https://recorder-api.s894041.workers.dev';
+const SCHOOLS = ['鐵山國小', '安定國小', '馬鳴國小'];
+
 // ============================================================
 //  目標音定義（Target notes）
 //  升F = F#5 = 739.99Hz，升C = C#5 = 554.37Hz（低八度，初學者適用）
@@ -145,6 +276,37 @@ const TARGETS = [
   { key: 'F', label: '升F', note: 'F#5', freq: 739.99 },
   { key: 'C', label: '升C', note: 'C#5', freq: 554.37 },
 ];
+
+// ============================================================
+//  小朋友資料卡（Profile：學校／年級／暱稱，存本機）
+// ============================================================
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem('recorderProfile') || '{}');
+    if (SCHOOLS.includes(p.school)) document.getElementById('school').value = p.school;
+    if (p.grade >= 1 && p.grade <= 6) document.getElementById('grade').value = String(p.grade);
+    if (p.nickname) document.getElementById('nickname').value = p.nickname;
+  } catch (e) {}
+}
+function saveProfile() {
+  localStorage.setItem('recorderProfile', JSON.stringify({
+    school: document.getElementById('school').value,
+    grade: Number(document.getElementById('grade').value) || 0,
+    nickname: document.getElementById('nickname').value.trim(),
+  }));
+}
+['school', 'grade', 'nickname'].forEach(id => {
+  document.getElementById(id).addEventListener('change', saveProfile);
+});
+loadProfile();
+
+// 吐司訊息
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
 
 // ============================================================
 //  音高偵測（Pitch detection，自相關演算法）
@@ -223,8 +385,8 @@ function updatePitch(now) {
     micRMS = 0.05;
   }
   updateTunerUI();
-  // 判定：有吹對就好，不用持續時間（音樂老師回饋①）
-  // 吹錯則顯示小朋友實際吹了什麼音＋短音提醒（音樂老師回饋③）
+  // 判定：有吹對就好，不用持續時間
+  // 吹錯則顯示小朋友實際吹了什麼音＋短音提醒
   const tol = parseFloat(document.getElementById('tolerance').value);
   if (detectedFreq > 0) {
     const off = centsOff(detectedFreq, currentTarget.freq);
@@ -276,8 +438,8 @@ function updateTunerUI() {
   document.getElementById('micLevel').style.width = Math.min(micRMS * 1500, 100) + '%';
   if (detectedFreq <= 0) {
     det.textContent = '-- Hz';
-    det.style.color = '#fff';
-    bar.style.left = '50%'; bar.style.width = '4px'; bar.style.background = '#888';
+    det.style.color = '#c9a87c';
+    bar.style.left = '50%'; bar.style.width = '4px'; bar.style.background = '#e0d0b8';
     txt.textContent = '沒收到聲音（檢查麥克風＋音量門檻）・目前目標：' + currentTarget.label;
     return;
   }
@@ -285,12 +447,12 @@ function updateTunerUI() {
   const tol = parseFloat(document.getElementById('tolerance').value);
   det.textContent = detectedFreq.toFixed(1) + ' Hz';
   const ok = Math.abs(off) <= tol;
-  det.style.color = ok ? '#7dffaa' : (off < 0 ? '#ff9a9a' : '#ffd200');
+  det.style.color = ok ? '#1e9e6a' : (off < 0 ? '#e2548b' : '#e8930c');
   // 中央為準，左右偏移顯示
   const px = Math.max(-1, Math.min(1, off / 100)) * 45;
   bar.style.left = (50 + Math.min(px, 0)) + '%';
   bar.style.width = Math.max(Math.abs(px), 4) + 'px';
-  bar.style.background = ok ? '#7dffaa' : '#ff6b6b';
+  bar.style.background = ok ? '#1e9e6a' : '#ff6b6b';
   txt.textContent = ok
     ? '✅ 吹對了！往下鑽！（你吹：' + freqToNote(detectedFreq) + '）'
     : '❌ 吹錯囉！你吹的是' + freqToNote(detectedFreq) + '，目標是' + currentTarget.label;
@@ -317,7 +479,7 @@ document.getElementById('micBtn').addEventListener('click', async () => {
   }
 });
 
-// 練習模式也跑調音器（不開始遊戲）
+// 沒開始遊戲時也跑調音器（暖身用）
 let inGame = false;
 function tunerLoop(now) {
   if (!lastFrameTime) lastFrameTime = now;
@@ -343,7 +505,7 @@ document.getElementById('playF').addEventListener('click', () => playRef(TARGETS
 document.getElementById('playC').addEventListener('click', () => playRef(TARGETS[1].freq));
 
 // ============================================================
-//  遊戲本體（下樓梯玩法，操作 = 嘴＋指法）
+//  遊戲本體（吹對才往下，沒有死亡）
 // ============================================================
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -351,6 +513,9 @@ const W = canvas.width, H = canvas.height;
 let player = null, floors = [], cameraY = 0, score = 0, hoverT = 0, targetIdx = 0, gameLoopId = 0;
 let best = parseInt(localStorage.getItem('recorderBest') || '0', 10);
 document.getElementById('best').textContent = best;
+
+// 彩虹樓層配色
+const FLOOR_COLORS = ['#FF9EBB', '#FFB84D', '#FFD93D', '#6BCB77', '#4D96FF', '#B983FF'];
 
 // 鍵盤測試用模擬頻率
 let simFreq = 0;
@@ -383,7 +548,8 @@ function makeFloor(y) {
   const holeW = 90;
   const holeX = 30 + Math.random() * (W - 60 - holeW);
   const target = TARGETS[Math.floor(Math.random() * TARGETS.length)];
-  return { y, holeX, holeW, target, passed: false };
+  const color = FLOOR_COLORS[Math.floor(Math.random() * FLOOR_COLORS.length)];
+  return { y, holeX, holeW, target, color, passed: false };
 }
 
 // 開始遊戲（隨時可按 = 重新開始；吹對才往下，沒有死亡）
@@ -422,7 +588,8 @@ function gameLoop(now) {
         localStorage.setItem('recorderBest', String(best));
         document.getElementById('best').textContent = best;
       }
-      blip();
+      fanfare();
+      launchConfetti();
       targetIdx++;
       player.vy = 0;
       // 下方補新樓、上方清舊樓（索引跟著調整）
@@ -450,81 +617,190 @@ function gameLoop(now) {
   gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// 過關音效（免費：Web Audio 合成）
-function blip() {
+// 過關音效：開心的上行音階（免費：Web Audio 合成）
+function fanfare() {
   try {
-    const t = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.type = 'sine'; osc.frequency.value = 880;
-    g.gain.setValueAtTime(0.3, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-    osc.start(t); osc.stop(t + 0.2);
+    if (!audioCtx) return;
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.type = 'triangle'; osc.frequency.value = freq;
+      const t = audioCtx.currentTime + i * 0.07;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.3, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      osc.start(t); osc.stop(t + 0.25);
+    });
   } catch (e) {}
 }
 
-// 畫面繪製
-function draw() {
-  ctx.clearRect(0, 0, W, H);
-  // 背景格線
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  for (let y = 0; y < H; y += 40) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+// 過關撒花（純前端，免圖片）
+const CONFETTI_COLORS = ['#FF6B9D', '#FFC93D', '#6BCB77', '#4D96FF', '#B983FF', '#FF8FB1'];
+function launchConfetti() {
+  for (let i = 0; i < 24; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      const size = 6 + Math.random() * 8;
+      el.style.cssText =
+        'left:' + (Math.random() * 100) + 'vw;' +
+        'width:' + size + 'px;height:' + size + 'px;' +
+        'background:' + CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)] + ';' +
+        'border-radius:' + (Math.random() > 0.5 ? '50%' : '3px') + ';' +
+        'animation-duration:' + (1.4 + Math.random() * 1.6) + 's;';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }, i * 30);
   }
-  // 樓層
+}
+
+// 畫面繪製（可愛風：晴空＋雲朵＋彩虹樓梯）
+function draw() {
+  // 天空
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#BDE9FF');
+  sky.addColorStop(1, '#E8F9FF');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+  // 雲朵（依鏡頭捲動）
+  ctx.font = '28px serif';
+  ctx.textAlign = 'center';
+  for (let i = 0; i < 5; i++) {
+    const cy = ((i * 170 - cameraY * 0.4) % (H + 80) + H + 80) % (H + 80) - 40;
+    ctx.fillText('☁️', 40 + i * 85, cy);
+  }
+  // 樓層（彩虹色＋甜甜圈洞口）
   for (const f of floors) {
     const sy = f.y - cameraY;
     if (sy < -30 || sy > H + 30) continue;
-    ctx.fillStyle = f.passed ? 'rgba(125,255,170,0.35)' : 'rgba(247,151,30,0.55)';
-    ctx.fillRect(0, sy, f.holeX, 14);
-    ctx.fillRect(f.holeX + f.holeW, sy, W - f.holeX - f.holeW, 14);
-    // 洞口標籤
-    ctx.fillStyle = '#101820';
-    ctx.fillRect(f.holeX, sy - 22, f.holeW, 22);
-    ctx.fillStyle = f.target.key === 'F' ? '#ffd200' : '#7dffaa';
+    ctx.fillStyle = f.passed ? '#D8D8D8' : f.color;
+    roundRect(0, sy, f.holeX, 16, 8); ctx.fill();
+    roundRect(f.holeX + f.holeW, sy, W - f.holeX - f.holeW, 16, 8); ctx.fill();
+    // 洞口粉紅圈圈＋標籤
+    ctx.strokeStyle = '#FF6B9D';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(f.holeX + f.holeW / 2, sy + 8, f.holeW / 2, 12, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    roundRect(f.holeX + 5, sy - 26, f.holeW - 10, 22, 11); ctx.fill();
+    ctx.fillStyle = f.target.key === 'F' ? '#d98a00' : '#0e8a80';
     ctx.font = 'bold 15px "Microsoft JhengHei", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(f.target.label, f.holeX + f.holeW / 2, sy - 6);
+    ctx.fillText((f.passed ? '✅ ' : '') + f.target.label, f.holeX + f.holeW / 2, sy - 10);
   }
-  // 玩家（待機時不畫，只顯示提示文字；懸浮等待時加呼吸浮動）
+  // 玩家小雞（待機時不畫，只顯示提示文字；懸浮等待時加呼吸浮動）
   if (player) {
     const bob = (!pitchLocked && inGame) ? Math.sin(hoverT * 3) * 4 : 0;
     const py = player.y - cameraY + bob;
-    ctx.font = '24px serif';
+    ctx.font = '30px serif';
     ctx.textAlign = 'center';
-    ctx.fillText(pitchLocked ? '🚀' : '🎵', player.x, py + 8);
+    ctx.fillText(pitchLocked ? '🚀' : '🐣', player.x, py + 10);
     // 下鑽特效線
     if (pitchLocked) {
-      ctx.strokeStyle = 'rgba(125,255,170,0.7)';
-      ctx.beginPath(); ctx.moveTo(player.x, py - 30); ctx.lineTo(player.x, py - 8); ctx.stroke();
+      ctx.strokeStyle = '#1e9e6a';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(player.x, py - 34); ctx.lineTo(player.x, py - 10); ctx.stroke();
     }
   } else {
     // 待機提示文字
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.fillRect(40, H / 2 - 52, W - 80, 96);
-    ctx.fillStyle = '#ffd200';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    roundRect(36, H / 2 - 56, W - 72, 104, 18); ctx.fill();
+    ctx.fillStyle = '#e2548b';
     ctx.font = 'bold 17px "Microsoft JhengHei", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('🎤 先按「啟用麥克風」', W / 2, H / 2 - 18);
-    ctx.fillStyle = '#fff';
-    ctx.fillText('再按「開始遊戲」', W / 2, H / 2 + 10);
-    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.fillText('🎤 先按「啟用麥克風」', W / 2, H / 2 - 20);
+    ctx.fillStyle = '#7a6450';
+    ctx.fillText('再按「開始遊戲」', W / 2, H / 2 + 8);
+    ctx.fillStyle = '#b09a80';
     ctx.font = '13px "Microsoft JhengHei", sans-serif';
     ctx.fillText('只想試玩法可勾鍵盤測試模式', W / 2, H / 2 + 32);
   }
 }
 
+// 圓角矩形小工具
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 // 待機預覽樓層（還沒開始遊戲先讓畫面有東西）
-// 初次繪製待機畫面
 (function initIdle() {
   floors = [
-    { y: 150, holeX: 60, holeW: 90, target: TARGETS[0], passed: false },
-    { y: 300, holeX: 220, holeW: 90, target: TARGETS[1], passed: false },
-    { y: 450, holeX: 130, holeW: 90, target: TARGETS[0], passed: false },
+    { y: 150, holeX: 60, holeW: 90, target: TARGETS[0], color: FLOOR_COLORS[0], passed: false },
+    { y: 300, holeX: 220, holeW: 90, target: TARGETS[1], color: FLOOR_COLORS[3], passed: false },
+    { y: 450, holeX: 130, holeW: 90, target: TARGETS[0], color: FLOOR_COLORS[4], passed: false },
   ];
   cameraY = 0;
   draw();
 })();
+
+// ============================================================
+//  上傳成績＋排行榜（後端：Cloudflare Workers＋D1）
+// ============================================================
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  saveProfile();
+  const school = document.getElementById('school').value;
+  const grade = Number(document.getElementById('grade').value) || 0;
+  const nickname = document.getElementById('nickname').value.trim();
+  if (!school) { showToast('🐣 請先選學校！'); return; }
+  if (!(grade >= 1 && grade <= 6)) { showToast('🐣 請先選年級！'); return; }
+  if (!nickname) { showToast('🐣 請填暱稱（不要寫真名喔）！'); return; }
+  if (score <= 0) { showToast('🐣 先玩到至少 1 層再上傳吧！'); return; }
+  try {
+    const res = await fetch(API_BASE + '/api/practice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ school, grade, nickname, score }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('🎉 上傳成功！' + nickname + ' ' + score + ' 層');
+      loadBoard();
+    } else {
+      showToast('😢 ' + (data.error || '上傳失敗'));
+    }
+  } catch (e) {
+    showToast('😢 連不上排行榜（檢查網路）');
+  }
+});
+
+document.getElementById('boardBtn').addEventListener('click', loadBoard);
+
+async function loadBoard() {
+  const school = document.getElementById('boardSchool').value;
+  const grade = document.getElementById('boardGrade').value;
+  const list = document.getElementById('boardList');
+  list.innerHTML = '<li>讀取中…</li>';
+  try {
+    const res = await fetch(API_BASE + '/api/board?school=' + encodeURIComponent(school) + '&grade=' + grade + '&limit=20');
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      list.innerHTML = '<li>還沒有人上傳，來當第一名吧！🐣</li>';
+      return;
+    }
+    const medals = ['🥇', '🥈', '🥉'];
+    list.innerHTML = rows.map((r, i) => {
+      const medal = medals[i] || ('第' + (i + 1) + '名');
+      return '<li><span>' + medal + ' ' + escapeHtml(r.nickname) + '・' + r.grade + '年級</span><span>最佳 ' + r.best + ' 層</span></li>';
+    }).join('');
+  } catch (e) {
+    list.innerHTML = '<li>讀取失敗，請檢查網路再試一次</li>';
+  }
+}
+
+// 簡易跳脫（排行榜暱稱顯示用，避免 HTML 注入）
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// 開頁自動帶入一次排行榜
+loadBoard();
 </script>
 </body>
 </html>

@@ -1,0 +1,9 @@
+name = "recorder-api"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# 共用庫 school_apps（小工具共用，不另建新庫）
+[[d1_databases]]
+binding = "DB"
+database_name = "school_apps"
+database_id = "6ca9528d-7b8b-4338-b810-a1eaeddd2cb7"
