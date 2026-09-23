@@ -48,22 +48,23 @@
     color: var(--ink);
     font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-variant-numeric: tabular-nums;
-    line-height: 1.5;
+    line-height: 1.45;
   }
-  .page { max-width: 1580px; margin: 0 auto; padding: 18px 20px 50px; }
+  .page { max-width: 1580px; margin: 0 auto; padding: 14px 18px 30px; }
 
+  /* 精巧緊緻的頂部標題列，節省垂直空間 */
   header.top {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding-bottom: 14px;
-    margin-bottom: 18px;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
     border-bottom: 2px solid var(--line-strong);
   }
   .title-block .eyebrow {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: .12em;
     color: var(--accent);
@@ -72,39 +73,38 @@
   .title-block h1 {
     font-family: "Noto Serif TC", serif;
     font-weight: 900;
-    font-size: clamp(23px, 3.0vw, 32px);
-    margin: .2em 0 .15em;
+    font-size: clamp(20px, 2.6vw, 28px);
+    margin: .1em 0;
     color: var(--ink);
     letter-spacing: .02em;
   }
   .title-block p {
     margin: 0;
     color: var(--ink-muted);
-    font-size: 14px;
-    max-width: 70ch;
+    font-size: 13px;
   }
   .meta-stats {
     display: flex;
-    gap: 18px;
+    gap: 16px;
   }
   .meta-stats div { text-align: right; }
   .meta-stats .num {
     font-family: "Noto Serif TC", serif;
     font-weight: 700;
-    font-size: 25px;
+    font-size: 22px;
     color: var(--accent);
     display: block;
     line-height: 1;
   }
   .meta-stats .lbl {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--ink-muted);
   }
 
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(430px, 1fr);
-    gap: 22px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(420px, 1fr);
+    gap: 18px;
     align-items: start;
   }
   @media (max-width: 1080px) {
@@ -114,9 +114,9 @@
   .map-card {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 14px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.04);
   }
   
   .card-topbar {
@@ -124,24 +124,24 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
   .tabs {
     display: flex;
     background: var(--surface-2);
-    padding: 4px;
-    border-radius: 10px;
-    gap: 4px;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 3px;
   }
   .tab-btn {
     border: none;
     background: transparent;
-    padding: 7px 15px;
-    font-size: 13px;
+    padding: 6px 14px;
+    font-size: 12.5px;
     font-weight: 700;
     font-family: inherit;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     color: var(--ink-muted);
     transition: all .15s ease;
@@ -149,24 +149,24 @@
   .tab-btn.active {
     background: var(--surface);
     color: var(--accent);
-    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
   }
   
   .action-links {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
   .btn-download {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11.5px;
     font-weight: 700;
     color: #0284C7;
     background: #F0F9FF;
     border: 1px solid #BAE6FD;
-    border-radius: 8px;
-    padding: 6px 11px;
+    border-radius: 6px;
+    padding: 5px 10px;
     text-decoration: none;
     transition: all .15s ease;
   }
@@ -178,11 +178,13 @@
 
   .map-wrap {
     position: relative;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid var(--line);
     background: #FFFFFF;
-    height: 680px;
+    height: calc(100vh - 190px);
+    min-height: 480px;
+    max-height: 720px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -205,17 +207,16 @@
   }
   .zoom-hint {
     position: absolute;
-    bottom: 12px;
-    right: 14px;
+    bottom: 10px;
+    right: 12px;
     background: rgba(15, 23, 42, 0.82);
     color: #FFF;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 5px 11px;
-    border-radius: 8px;
+    padding: 4px 10px;
+    border-radius: 6px;
     backdrop-filter: blur(6px);
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,.2);
   }
 
   .interactive-view {
@@ -238,7 +239,7 @@
     stroke-width: 2.2;
     stroke-linejoin: round;
     fill: #FFF9FB;
-    transition: fill .2s ease, stroke .2s ease, stroke-width .2s ease, opacity .25s ease, filter .2s ease;
+    transition: fill .2s ease, stroke .2s ease, stroke-width .2s ease, opacity .25s ease;
     cursor: pointer;
   }
   .dist-poly:hover { fill: #FFEBF4; }
@@ -257,7 +258,6 @@
     transition: all .2s ease;
   }
 
-  /* 行政區選中時的特別高亮變色 */
   .dist-poly.active-district {
     fill: #FFE0EE !important;
     stroke: #D81B60 !important;
@@ -324,7 +324,6 @@
     transform: scale(1.3);
   }
 
-  /* 場地號碼 Pin 及發光呼吸特效 */
   @keyframes pin-pulse-glow {
     0% { r: 14px; opacity: 0.95; }
     50% { r: 28px; opacity: 0.25; }
@@ -418,20 +417,20 @@
   .tooltip .addr { font-size: 12px; color: #94A3B8; margin-bottom: 6px; }
   .tooltip .hq-tag { color: #F59E0B; font-weight: 800; font-size: 13px; margin-bottom: 4px; display: inline-block; background: rgba(245,158,11,.15); padding: 1px 6px; border-radius: 4px; }
 
-  /* === 右側清單 (乾淨全寬搜尋框 ＋ 專屬常駐滾動條) === */
+  /* === 右側清單 (自適應螢幕高度 ＋ 永久醒目可滑動滾動條) === */
   .side-search {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .search-input {
     width: 100%;
-    padding: 10px 14px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13.5px;
     font-family: inherit;
     border: 1px solid var(--line-strong);
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--surface);
     color: var(--ink);
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    box-shadow: 0 1px 3px rgba(0,0,0,.03);
     outline: none;
     transition: border-color .15s;
   }
@@ -444,18 +443,17 @@
   .district-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-    padding-bottom: 2px;
+    gap: 5px;
+    margin-bottom: 10px;
   }
   .dist-chip {
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
-    padding: 5px 12px;
-    border-radius: 20px;
+    padding: 4px 10px;
+    border-radius: 16px;
     cursor: pointer;
     transition: all .15s ease;
     white-space: nowrap;
@@ -469,31 +467,35 @@
     background: #0284C7;
     color: #FFFFFF;
     border-color: #0284C7;
-    box-shadow: 0 2px 6px rgba(2,132,199,.25);
+    box-shadow: 0 2px 5px rgba(2,132,199,.25);
   }
 
-  /* ★★★ 核心 2：右側專屬常駐滾動條，明確、好拖曳、與地圖等高 ★★★ */
+  /* ★★★ 核心修復：自適應螢幕高度，確保所有場館完全在可滑動視窗內 ★★★ */
   .side {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    height: 680px; /* 與左側地圖高度鎖定對齊 */
-    overflow-y: scroll; /* 常駐捲軸，絕對不會隱藏！ */
-    padding-right: 8px;
+    gap: 12px;
+    /* 永遠自適應視窗，不被推擠到螢幕底下！ */
+    height: calc(100vh - 190px);
+    min-height: 480px;
+    max-height: 720px;
+    overflow-y: scroll !important; /* 確保滾動條常駐且隨時能滑動！ */
+    padding-right: 6px;
+    overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: #0284C7 #E2E8F0;
   }
   .side::-webkit-scrollbar {
-    width: 8px;
+    width: 9px;
   }
   .side::-webkit-scrollbar-track {
-    background: #E2E8F0;
+    background: #F1F5F9;
     border-radius: 6px;
   }
   .side::-webkit-scrollbar-thumb {
     background: #0284C7;
     border-radius: 6px;
-    border: 1px solid #BAE6FD;
+    border: 2px solid #F1F5F9;
   }
   .side::-webkit-scrollbar-thumb:hover {
     background: #0369A1;
@@ -502,21 +504,17 @@
   /* 行政區卡片 */
   .district-card {
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--surface);
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,.03);
-    transition: box-shadow .15s;
-  }
-  .district-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,.07);
+    box-shadow: 0 1px 4px rgba(0,0,0,.03);
   }
   
   .dist-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 15px;
+    padding: 8px 12px;
     background: #F8FAFC;
     border-bottom: 1px solid var(--line);
     border-left: 4px solid #0284C7;
@@ -529,7 +527,7 @@
   }
   
   .dist-title {
-    font-size: 14.5px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--ink);
     display: flex;
@@ -537,11 +535,11 @@
     gap: 6px;
   }
   .dist-count {
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 800;
     color: #0284C7;
     background: #E0F2FE;
-    padding: 2px 9px;
+    padding: 2px 8px;
     border-radius: 999px;
   }
   @media (prefers-color-scheme: dark) {
@@ -551,9 +549,9 @@
     }
   }
 
-  /* 緊湊化場館排版 (Compact UI) */
+  /* 緊湊精緻場館排版 (Compact UI) */
   .venue-item {
-    padding: 10px 14px;
+    padding: 7px 12px;
     border-bottom: 1px solid var(--line);
     transition: all .15s ease;
     cursor: pointer;
@@ -565,7 +563,7 @@
   .venue-item.active {
     background: #F0F9FF;
     border-left: 4px solid #0284C7;
-    padding-left: 10px;
+    padding-left: 8px;
     box-shadow: inset 0 0 10px rgba(2,132,199,.06);
   }
   .venue-item.hq.active {
@@ -589,15 +587,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 22px;
-    height: 22px;
+    min-width: 20px;
+    height: 20px;
     background: #00ABEB;
     color: #FFF;
     border-radius: 50%;
     font-size: 11px;
     font-weight: 800;
-    padding: 0 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    padding: 0 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
   }
   .venue-item.hq .vnum {
     background: #E84091;
@@ -609,29 +607,29 @@
   }
   .vname {
     font-weight: 800;
-    font-size: 14px;
+    font-size: 13.5px;
     color: var(--ink);
   }
   .hq-badge {
     background: #FFFBEB;
     color: #D97706;
     border: 1px solid #F59E0B;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 800;
-    padding: 1px 6px;
+    padding: 1px 5px;
     border-radius: 4px;
   }
   .vsublist {
-    margin: 4px 0 3px 28px;
+    margin: 3px 0 2px 26px;
     padding: 0;
     list-style: none;
-    font-size: 12.5px;
+    font-size: 12px;
     color: var(--ink-muted);
-    line-height: 1.45;
+    line-height: 1.4;
   }
   .vsublist li {
     position: relative;
-    padding-left: 12px;
+    padding-left: 10px;
     margin-bottom: 1px;
   }
   .vsublist li::before {
@@ -640,27 +638,27 @@
     left: 0;
     color: #E84091;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
   }
   .vaddr {
-    font-size: 11.5px;
+    font-size: 11px;
     color: var(--ink-muted);
-    margin-left: 28px;
+    margin-left: 26px;
   }
   .navlink {
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
     color: #0284C7;
     background: #F0F9FF;
     border: 1px solid #BAE6FD;
     border-radius: 999px;
-    padding: 3px 10px;
+    padding: 2px 9px;
     white-space: nowrap;
     text-decoration: none;
     transition: all .12s ease;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
   }
   .navlink:hover {
     background: #0284C7;
@@ -669,11 +667,11 @@
   }
 
   footer.note {
-    margin-top: 20px;
-    font-size: 12px;
+    margin-top: 14px;
+    font-size: 11.5px;
     color: var(--ink-muted);
     border-top: 1px solid var(--line);
-    padding-top: 12px;
+    padding-top: 8px;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -728,17 +726,16 @@
       </div>
     </div>
 
-    <!-- 右側依行政區彙整清單 (單一全寬搜尋框 ＋ 專屬常駐滾動條) -->
+    <!-- 右側依行政區彙整清單 -->
     <div>
       <div class="side-search">
         <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋場館編號、學校、運動項目或行政區..." oninput="onSearchInput()">
       </div>
       
-      <!-- 行政區切換 Chips -->
       <div class="district-chips" id="districtChips"></div>
 
-      <!-- 2 的部分：專屬常駐獨立滾動條 -->
-      <div class="side" id="sideList"></div>
+      <!-- 專屬常駐滾動條，確保滑鼠滾輪/按鍵即時響應 -->
+      <div class="side" id="sideList" tabindex="0"></div>
     </div>
   </div>
 
@@ -925,8 +922,9 @@ function setDistrictFilter(dist) {
     document.querySelectorAll(`.leader-line[data-district="${dist}"]`).forEach(l => l.classList.add("in-active-district"));
     document.querySelectorAll(`.orig-dot[data-district="${dist}"]`).forEach(d => d.classList.add("in-active-district"));
 
-    const card = document.getElementById("dist-card-" + dist);
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+    // 內部滾動至頂部
+    const sideList = document.getElementById("sideList");
+    if (sideList) sideList.scrollTop = 0;
   }
 }
 
@@ -1034,9 +1032,12 @@ function selectVenue(id, district = null) {
   }
 
   const item = document.getElementById("item-" + id);
-  if (item) {
+  const container = document.getElementById("sideList");
+  if (item && container) {
     item.classList.add("active");
-    item.scrollIntoView({ behavior: "smooth", block: "center" });
+    // 精準在內部容器滾動至目標，不牽動全螢幕 window
+    const itemOffset = item.offsetTop - container.offsetTop - 20;
+    container.scrollTo({ top: itemOffset, behavior: "smooth" });
   }
 }
 
