@@ -429,7 +429,6 @@
     line-height: 1.5;
     pointer-events: none;
     opacity: 0;
-    transform: translate(-50%, -100%) translateY(-10px);
     transition: opacity .12s ease, transform .12s ease;
     box-shadow: 0 8px 24px rgba(0,0,0,.3);
     max-width: 320px;
@@ -437,7 +436,6 @@
   }
   .tooltip.show {
     opacity: 1;
-    transform: translate(-50%, -100%) translateY(-14px);
   }
   .tooltip b { display: block; font-size: 15px; margin-bottom: 2px; color: #38BDF8; }
   .tooltip .addr { font-size: 12px; color: #94A3B8; margin-bottom: 6px; }
@@ -454,6 +452,7 @@
   .side-search {
     margin-bottom: 6px;
     flex-shrink: 0;
+    position: relative;
   }
   .search-input {
     width: 100%;
@@ -770,13 +769,13 @@
           <button class="tab-btn" id="tabInteractive" onclick="switchView('interactive')">🧭 互動定位導航地圖</button>
         </div>
         <div class="action-links">
-          <a class="btn-download" href="taoyuan-venue-map.png" target="_blank" download="115全民運_桃園場館分布圖(交通排車1-34版).png">📥 下載大圖 (PNG)</a>
-          <a class="btn-download" href="taoyuan-venue-map.pdf" target="_blank" download="115全民運_桃園場館分布圖(交通排車1-34版).pdf">📄 向量 PDF</a>
+          <a class="btn-download" href="taoyuan-venue-map.png" target="_blank" rel="noopener noreferrer" download="115全民運_桃園場館分布圖(交通排車1-34版).png">📥 下載大圖 (PNG)</a>
+          <a class="btn-download" href="taoyuan-venue-map.pdf" target="_blank" rel="noopener noreferrer" download="115全民運_桃園場館分布圖(交通排車1-34版).pdf">📄 向量 PDF</a>
         </div>
       </div>
 
       <div class="map-wrap">
-        <div class="poster-view" id="posterView" onclick="window.open('taoyuan-venue-map.png', '_blank')">
+        <div class="poster-view" id="posterView" onclick="window.open('taoyuan-venue-map.png', '_blank', 'noopener,noreferrer')">
           <img src="taoyuan-venue-map.png" alt="115年全民運動會 桃園競賽場館與交通接駁分布圖" />
           <div class="zoom-hint">🔍 點擊開新分頁檢視 300 DPI 超清原圖</div>
         </div>
@@ -948,7 +947,10 @@ function renderChips() {
   const allChip = document.createElement("button");
   allChip.className = "dist-chip" + (activeDistrictFilter === "ALL" ? " active" : "");
   allChip.textContent = `全部 (34)`;
-  allChip.onclick = () => setDistrictFilter("ALL");
+  allChip.onclick = () => {
+    document.getElementById("searchInput").value = "";
+    setDistrictFilter("ALL");
+  };
   container.appendChild(allChip);
 
   districtOrder.forEach(dist => {
@@ -956,7 +958,10 @@ function renderChips() {
     const chip = document.createElement("button");
     chip.className = "dist-chip" + (activeDistrictFilter === dist ? " active" : "");
     chip.textContent = `${dist} (${count})`;
-    chip.onclick = () => setDistrictFilter(dist);
+    chip.onclick = () => {
+      document.getElementById("searchInput").value = "";
+      setDistrictFilter(dist);
+    };
     container.appendChild(chip);
   });
 }
@@ -1003,7 +1008,11 @@ function renderSideList(filterText = "") {
   container.innerHTML = "";
   const query = (filterText || document.getElementById("searchInput").value).trim().toLowerCase();
 
-  const targetDistricts = activeDistrictFilter === "ALL" ? districtOrder : [activeDistrictFilter];
+  // ★ 修正 2：搜尋時自動切換為全局 34 館檢索，無搜尋時依 activeDistrictFilter 呈現
+  const isSearching = query.length > 0;
+  const targetDistricts = (activeDistrictFilter === "ALL" || isSearching) ? districtOrder : [activeDistrictFilter];
+
+  let totalFound = 0;
 
   targetDistricts.forEach((dist) => {
     const distVenues = venues.filter(v => v.district === dist);
@@ -1016,6 +1025,7 @@ function renderSideList(filterText = "") {
     });
 
     if (filtered.length === 0) return;
+    totalFound += filtered.length;
 
     const card = document.createElement("div");
     card.className = "district-card";
@@ -1028,10 +1038,13 @@ function renderSideList(filterText = "") {
       <span class="dist-count">${filtered.length} 處場館</span>
     `;
     head.style.cursor = "pointer";
-    head.onclick = () => setDistrictFilter(dist);
+    head.onclick = () => {
+      document.getElementById("searchInput").value = "";
+      setDistrictFilter(dist);
+    };
     card.appendChild(head);
 
-    // ★★★ 核心 2：雙欄網格容器 ★★★
+    // 雙欄網格容器
     const body = document.createElement("div");
     body.className = "dist-venues-grid";
 
@@ -1056,7 +1069,7 @@ function renderSideList(filterText = "") {
         </div>
         <div class="vfoot">
           <span class="vaddr" title="${v.addr}">📍 ${v.addr}</span>
-          <a class="navlink" href="https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lon}" target="_blank">🧭 導航</a>
+          <a class="navlink" href="https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lon}" target="_blank" rel="noopener noreferrer">🧭 導航</a>
         </div>
       `;
 
@@ -1072,10 +1085,25 @@ function renderSideList(filterText = "") {
     card.appendChild(body);
     container.appendChild(card);
   });
+
+  if (isSearching && totalFound === 0) {
+    const emptyMsg = document.createElement("div");
+    emptyMsg.style.cssText = "text-align: center; padding: 40px 10px; color: var(--ink-muted); font-size: 13.5px;";
+    emptyMsg.innerHTML = `🔍 找不到符合「<b>${query}</b>」的場館或運動項目<br><span style="font-size:12px;margin-top:6px;display:inline-block;">請嘗試搜尋學校名稱、運動名稱（如：足球、健力）或場館編號</span>`;
+    container.appendChild(emptyMsg);
+  }
 }
 
+// ★ 修正 1 & 3：點擊地圖自動切換行政區 + 手機版平滑滾動至卡片
 function selectVenue(id, district = null) {
   switchView('interactive');
+
+  // 如果目前選取的不是 ALL，且該場館不在目前分區，自動切換該行政區
+  if (district && activeDistrictFilter !== "ALL" && activeDistrictFilter !== district) {
+    activeDistrictFilter = district;
+    renderChips();
+    renderSideList();
+  }
 
   document.querySelectorAll(".pin").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".venue-item").forEach(i => i.classList.remove("active"));
@@ -1095,12 +1123,23 @@ function selectVenue(id, district = null) {
     if (v) showTooltip(v);
   }
 
+  // 同步更新地圖上的行政區高亮
   if (district) {
+    const mapsvg = document.getElementById("mapsvg");
+    mapsvg.classList.add("has-active-district");
+
+    document.querySelectorAll(".dist-poly").forEach(p => p.classList.remove("active-district"));
+    document.querySelectorAll(".dist-label").forEach(l => l.classList.remove("active-district-label"));
+
     const activePath = document.getElementById("dist-poly-" + district);
-    if (activePath && !activePath.classList.contains("active-district")) {
-      document.querySelectorAll(".dist-poly").forEach(p => p.classList.remove("active-district"));
-      activePath.classList.add("active-district");
-    }
+    if (activePath) activePath.classList.add("active-district");
+
+    const activeLbl = document.getElementById("dist-lbl-" + district);
+    if (activeLbl) activeLbl.classList.add("active-district-label");
+
+    document.querySelectorAll(".pin").forEach(p => p.classList.toggle("in-active-district", p.getAttribute("data-district") === district));
+    document.querySelectorAll(".leader-line").forEach(l => l.classList.toggle("in-active-district", l.getAttribute("data-district") === district));
+    document.querySelectorAll(".orig-dot").forEach(d => d.classList.toggle("in-active-district", d.getAttribute("data-district") === district));
   }
 
   const item = document.getElementById("item-" + id);
@@ -1109,9 +1148,17 @@ function selectVenue(id, district = null) {
     item.classList.add("active");
     const itemOffset = item.offsetTop - container.offsetTop - 15;
     container.scrollTo({ top: itemOffset, behavior: "smooth" });
+
+    // ★ 修正 3：手機版螢幕寬度 (<=1080px) 自動將視窗平滑滾動至該卡片
+    if (window.innerWidth <= 1080) {
+      setTimeout(() => {
+        item.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 80);
+    }
   }
 }
 
+// ★ 修正 3：Tooltip 邊界碰撞防溢出偵測
 function showTooltip(v, e) {
   const tt = document.getElementById("tooltip");
   const rect = document.getElementById("mapsvg").getBoundingClientRect();
@@ -1128,8 +1175,23 @@ function showTooltip(v, e) {
       ${subHtml}
     </div>
   `;
-  tt.style.left = (v.svg_x * scale) + "px";
-  tt.style.top = (v.svg_y * scale) + "px";
+  
+  let posX = v.svg_x * scale;
+  let posY = v.svg_y * scale;
+
+  // 上邊界保護：太靠頂部時改為向下彈出
+  if (v.svg_y < 140) {
+    tt.style.transform = "translate(-50%, 14px)";
+  } else {
+    tt.style.transform = "translate(-50%, -100%) translateY(-14px)";
+  }
+
+  // 左右邊界保護
+  if (posX < 110) posX = 110;
+  if (posX > rect.width - 110) posX = rect.width - 110;
+
+  tt.style.left = posX + "px";
+  tt.style.top = posY + "px";
   tt.classList.add("show");
 }
 
