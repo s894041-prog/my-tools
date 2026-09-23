@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #F8FAFC;
@@ -103,7 +103,7 @@
 
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(420px, 1fr);
+    grid-template-columns: minmax(0, 1.38fr) minmax(430px, 1fr);
     gap: 24px;
     align-items: start;
   }
@@ -225,13 +225,16 @@
     width: 100%;
     height: auto;
     background: #FFFFFF;
+    transition: all .25s ease;
   }
+  
+  /* === 行政區多邊形樣式 === */
   .dist-poly {
     stroke: #E84091;
     stroke-width: 2.2;
     stroke-linejoin: round;
     fill: #FFF9FB;
-    transition: fill .15s;
+    transition: fill .2s ease, stroke .2s ease, stroke-width .2s ease, opacity .25s ease, filter .2s ease;
     cursor: pointer;
   }
   .dist-poly:hover { fill: #FFEBF4; }
@@ -247,44 +250,110 @@
     fill: #B89CA8;
     text-anchor: middle;
     pointer-events: none;
+    transition: all .2s ease;
+  }
+
+  /* 行政區選中時的特別高亮變色！ */
+  .dist-poly.active-district {
+    fill: #FFE0EE !important;
+    stroke: #D81B60 !important;
+    stroke-width: 3.8 !important;
+    filter: drop-shadow(0 0 10px rgba(216,27,96,0.32));
+  }
+  .dist-label.active-district-label {
+    fill: #D81B60 !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+  }
+
+  /* 當有選中特定行政區時，其他未選中區域柔化淡化，焦點鮮明 */
+  svg.mapsvg.has-active-district .dist-poly:not(.active-district):not(.inactive) {
+    fill: #FAFAFA;
+    stroke: #E2CBD5;
+    opacity: 0.45;
+  }
+  svg.mapsvg.has-active-district .dist-label:not(.active-district-label) {
+    opacity: 0.35;
+  }
+  svg.mapsvg.has-active-district .pin:not(.in-active-district) {
+    opacity: 0.35;
+  }
+  svg.mapsvg.has-active-district .leader-line:not(.in-active-district),
+  svg.mapsvg.has-active-district .orig-dot:not(.in-active-district) {
+    opacity: 0.25;
   }
   
+  /* 引線與實體原點 */
   .leader-line {
     stroke: #0284C7;
     stroke-width: 1.4;
     stroke-dasharray: 2, 2;
     opacity: 0.85;
     pointer-events: none;
+    transition: all .2s ease;
   }
   .leader-line.hq {
     stroke: #E84091;
     stroke-width: 1.8;
     stroke-dasharray: none;
   }
+  .leader-line.active {
+    stroke: #E84091 !important;
+    stroke-width: 2.6 !important;
+    stroke-dasharray: none !important;
+    opacity: 1 !important;
+  }
   .orig-dot {
     fill: #0284C7;
     stroke: #FFFFFF;
     stroke-width: 1.0;
     pointer-events: none;
+    transition: all .2s ease;
   }
   .orig-dot.hq {
     fill: #E84091;
     stroke: #F59E0B;
     stroke-width: 1.4;
   }
+  .orig-dot.active {
+    fill: #E84091 !important;
+    stroke: #F59E0B !important;
+    stroke-width: 2.0 !important;
+    transform: scale(1.3);
+  }
 
-  .pin { cursor: pointer; }
+  /* === 場地號碼 Pin 及發光呼吸特效 === */
+  @keyframes pin-pulse-glow {
+    0% {
+      r: 14px;
+      opacity: 0.95;
+    }
+    50% {
+      r: 28px;
+      opacity: 0.25;
+    }
+    100% {
+      r: 14px;
+      opacity: 0.95;
+    }
+  }
+
+  .pin {
+    cursor: pointer;
+    transition: opacity .25s ease;
+  }
   .pin circle.halo {
-    fill: var(--accent);
+    fill: #E84091;
     opacity: 0;
     transition: opacity .15s ease;
   }
-  .pin:hover circle.halo, .pin.active circle.halo { opacity: .35; }
+  .pin:hover circle.halo { opacity: .35; }
+  
   .pin circle.dot {
     fill: #00ABEB;
     stroke: #FFFFFF;
     stroke-width: 1.8;
-    transition: transform .15s cubic-bezier(.34,1.56,.64,1);
+    transition: all .2s cubic-bezier(.34,1.56,.64,1);
     transform-origin: center;
   }
   .pin.hq circle.dot {
@@ -292,7 +361,7 @@
     stroke: #F59E0B;
     stroke-width: 2.8;
   }
-  .pin:hover circle.dot, .pin.active circle.dot {
+  .pin:hover circle.dot {
     fill: var(--accent);
     transform: scale(1.28);
   }
@@ -303,6 +372,25 @@
     fill: #FFFFFF;
     text-anchor: middle;
     pointer-events: none;
+    transition: all .2s ease;
+  }
+
+  /* ★★★ 點中場地號碼時：發光發亮變顏色！ ★★★ */
+  .pin.active circle.halo {
+    opacity: 1 !important;
+    fill: #F59E0B !important; /* 金黃光芒 */
+    animation: pin-pulse-glow 1.4s infinite ease-in-out !important;
+  }
+  .pin.active circle.dot {
+    fill: #E84091 !important; /* 變換鮮明桃紅色 */
+    stroke: #FFFBEB !important;
+    stroke-width: 2.8px !important;
+    transform: scale(1.42) !important;
+    filter: drop-shadow(0 0 10px rgba(232, 64, 145, 0.85)) drop-shadow(0 0 4px rgba(245, 158, 11, 0.9)) !important;
+  }
+  .pin.active text.num {
+    font-size: 10px !important;
+    font-weight: 900 !important;
   }
 
   .hq-svg-badge {
@@ -374,7 +462,7 @@
     color: var(--ink-muted);
     font-size: 12.5px;
     font-weight: 700;
-    padding: 5px 11px;
+    padding: 5px 12px;
     border-radius: 20px;
     cursor: pointer;
     transition: all .15s ease;
@@ -402,7 +490,7 @@
     padding-right: 6px;
   }
 
-  /* 行政區卡片 (徹底捨棄深藍實心色塊，改用優雅白底卡片) */
+  /* 行政區卡片 */
   .district-card {
     border: 1px solid var(--line);
     border-radius: 14px;
@@ -458,7 +546,7 @@
   .venue-item {
     padding: 14px 18px;
     border-bottom: 1px solid var(--line);
-    transition: background .12s ease;
+    transition: all .15s ease;
     cursor: pointer;
   }
   .venue-item:last-child { border-bottom: none; }
@@ -469,6 +557,7 @@
     background: #F0F9FF;
     border-left: 4px solid #0284C7;
     padding-left: 14px;
+    box-shadow: inset 0 0 12px rgba(2,132,199,.06);
   }
   .venue-item.hq.active {
     background: #FFF5F9;
@@ -502,6 +591,10 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.12);
   }
   .venue-item.hq .vnum {
+    background: #E84091;
+    box-shadow: 0 0 0 2px #F59E0B;
+  }
+  .venue-item.active .vnum {
     background: #E84091;
     box-shadow: 0 0 0 2px #F59E0B;
   }
@@ -628,7 +721,7 @@
       </div>
     </div>
 
-    <!-- 右側依行政區彙整清單 (徹底移除折疊藍條，以 Chips 切換與乾淨卡片呈現) -->
+    <!-- 右側依行政區彙整清單 -->
     <div>
       <div class="side-search">
         <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋場館編號、學校、運動項目或行政區..." oninput="onSearchInput()">
@@ -654,6 +747,19 @@ const svgDistricts = [{"name": "蘆竹區", "d": "M424.3,32.4 L428.2,34.3 L431.4
 const districtOrder = ["桃園區", "龜山區", "中壢區", "蘆竹區", "大園區", "觀音區", "大溪區", "龍潭區", "復興區"];
 let activeDistrictFilter = "ALL";
 
+// 行政區中心坐標（用於點擊後在地圖上放置行政區文字）
+const districtCentroids = {
+  "桃園區": [492, 236],
+  "龜山區": [556, 172],
+  "中壢區": [356, 260],
+  "蘆竹區": [426, 120],
+  "大園區": [316, 136],
+  "觀音區": [250, 196],
+  "大溪區": [468, 396],
+  "龍潭區": [374, 436],
+  "復興區": [550, 520]
+};
+
 function initMap() {
   const districtsG = document.getElementById("districtsG");
   const districtLabelsG = document.getElementById("districtLabelsG");
@@ -663,8 +769,29 @@ function initMap() {
   svgDistricts.forEach(d => {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", d.d);
+    path.setAttribute("id", "dist-poly-" + d.name);
+    path.setAttribute("data-district", d.name);
     path.setAttribute("class", "dist-poly" + (districtOrder.includes(d.name) ? "" : " inactive"));
+    
+    // 點擊地圖多邊形亦可直接切換行政區！
+    if (districtOrder.includes(d.name)) {
+      path.addEventListener("click", () => {
+        setDistrictFilter(d.name);
+      });
+    }
+    
     districtsG.appendChild(path);
+
+    // 建立行政區文字標籤
+    if (districtCentroids[d.name]) {
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("class", "dist-label");
+      text.setAttribute("id", "dist-lbl-" + d.name);
+      text.setAttribute("x", districtCentroids[d.name][0]);
+      text.setAttribute("y", districtCentroids[d.name][1]);
+      text.textContent = d.name;
+      districtLabelsG.appendChild(text);
+    }
   });
 
   venues.forEach(v => {
@@ -676,6 +803,8 @@ function initMap() {
       line.setAttribute("y1", v.orig_y);
       line.setAttribute("x2", v.svg_x);
       line.setAttribute("y2", v.svg_y);
+      line.setAttribute("id", "leader-" + v.id);
+      line.setAttribute("data-district", v.district);
       line.setAttribute("class", "leader-line" + (isHq ? " hq" : ""));
       leadersG.appendChild(line);
 
@@ -683,6 +812,8 @@ function initMap() {
       origCircle.setAttribute("cx", v.orig_x);
       origCircle.setAttribute("cy", v.orig_y);
       origCircle.setAttribute("r", isHq ? 3.5 : 2.5);
+      origCircle.setAttribute("id", "orig-" + v.id);
+      origCircle.setAttribute("data-district", v.district);
       origCircle.setAttribute("class", "orig-dot" + (isHq ? " hq" : ""));
       leadersG.appendChild(origCircle);
     }
@@ -690,6 +821,7 @@ function initMap() {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     g.setAttribute("class", "pin" + (isHq ? " hq" : ""));
     g.setAttribute("id", "pin-" + v.id);
+    g.setAttribute("data-district", v.district);
 
     const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     halo.setAttribute("class", "halo");
@@ -761,12 +893,37 @@ function renderChips() {
   });
 }
 
+// ★★★ 核心功能 1：點選行政區，地圖上該區特別變色高亮！ ★★★
 function setDistrictFilter(dist) {
   activeDistrictFilter = dist;
   renderChips();
   renderSideList();
-  
-  if (dist !== "ALL") {
+
+  const mapsvg = document.getElementById("mapsvg");
+  document.querySelectorAll(".dist-poly").forEach(p => p.classList.remove("active-district"));
+  document.querySelectorAll(".dist-label").forEach(l => l.classList.remove("active-district-label"));
+  document.querySelectorAll(".pin").forEach(p => p.classList.remove("in-active-district"));
+  document.querySelectorAll(".leader-line").forEach(l => l.classList.remove("in-active-district"));
+  document.querySelectorAll(".orig-dot").forEach(d => d.classList.remove("in-active-district"));
+
+  if (dist === "ALL") {
+    mapsvg.classList.remove("has-active-district");
+  } else {
+    mapsvg.classList.add("has-active-district");
+    
+    // 該區多邊形特別變色高亮
+    const activePath = document.getElementById("dist-poly-" + dist);
+    if (activePath) activePath.classList.add("active-district");
+
+    // 該區文字標籤放大加深
+    const activeLbl = document.getElementById("dist-lbl-" + dist);
+    if (activeLbl) activeLbl.classList.add("active-district-label");
+
+    // 標記該區的 pins 與引線
+    document.querySelectorAll(`.pin[data-district="${dist}"]`).forEach(p => p.classList.add("in-active-district"));
+    document.querySelectorAll(`.leader-line[data-district="${dist}"]`).forEach(l => l.classList.add("in-active-district"));
+    document.querySelectorAll(`.orig-dot[data-district="${dist}"]`).forEach(d => d.classList.add("in-active-district"));
+
     const card = document.getElementById("dist-card-" + dist);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -796,7 +953,6 @@ function renderSideList(filterText = "") {
 
     if (filtered.length === 0) return;
 
-    // 清爽的獨立卡片，絕無任何擠壓藍色厚條！
     const card = document.createElement("div");
     card.className = "district-card";
     card.id = "dist-card-" + dist;
@@ -807,6 +963,8 @@ function renderSideList(filterText = "") {
       <div class="dist-title">📍 ${dist}</div>
       <span class="dist-count">${filtered.length} 處場館</span>
     `;
+    head.style.cursor = "pointer";
+    head.onclick = () => setDistrictFilter(dist);
     card.appendChild(head);
 
     const body = document.createElement("div");
@@ -845,18 +1003,38 @@ function renderSideList(filterText = "") {
   });
 }
 
+// ★★★ 核心功能 2：點選特定場地號碼，地圖上那個點特別「發光變色」！ ★★★
 function selectVenue(id, district = null) {
+  // 點選場館時，若使用者當前在海報版，自動貼心切到互動地圖
+  switchView('interactive');
+
   document.querySelectorAll(".pin").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".venue-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".leader-line").forEach(l => l.classList.remove("active"));
+  document.querySelectorAll(".orig-dot").forEach(d => d.classList.remove("active"));
 
   const pin = document.getElementById("pin-" + id);
-  if (pin) pin.classList.add("active");
+  if (pin) {
+    pin.classList.add("active"); // 觸發 @keyframes 發光呼吸、變色
+    
+    // 若該 pin 有引線與原點，一併高亮加粗
+    const leader = document.getElementById("leader-" + id);
+    if (leader) leader.classList.add("active");
+    const origDot = document.getElementById("orig-" + id);
+    if (origDot) origDot.classList.add("active");
 
-  // 若當前過濾不在該區，切換至該區或全部
-  if (district && activeDistrictFilter !== "ALL" && activeDistrictFilter !== district) {
-    activeDistrictFilter = "ALL";
-    renderChips();
-    renderSideList();
+    // 自動彈出資訊卡
+    const v = venues.find(item => item.id === id);
+    if (v) showTooltip(v);
+  }
+
+  // 同步高亮其所屬行政區
+  if (district) {
+    const activePath = document.getElementById("dist-poly-" + district);
+    if (activePath && !activePath.classList.contains("active-district")) {
+      document.querySelectorAll(".dist-poly").forEach(p => p.classList.remove("active-district"));
+      activePath.classList.add("active-district");
+    }
   }
 
   const item = document.getElementById("item-" + id);
@@ -888,7 +1066,7 @@ function showTooltip(v, e) {
 }
 
 function hideTooltip() {
-  document.getElementById("tooltip").classList.remove("show");
+  // 保持 active pin 的 tooltip 顯示或隨鼠標移動
 }
 
 function switchView(mode) {
