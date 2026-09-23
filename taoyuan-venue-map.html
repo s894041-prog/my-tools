@@ -182,7 +182,7 @@
     overflow: hidden;
     border: 1px solid var(--line);
     background: #FFFFFF;
-    min-height: 520px;
+    height: 680px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -190,15 +190,18 @@
 
   .poster-view {
     width: 100%;
+    height: 100%;
     cursor: zoom-in;
     background: #FFFFFF;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .poster-view img {
     display: block;
-    width: 100%;
-    height: auto;
     max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
   .zoom-hint {
     position: absolute;
@@ -218,12 +221,13 @@
   .interactive-view {
     display: none;
     width: 100%;
+    height: 100%;
     background: #FFFFFF;
   }
   svg.mapsvg {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     background: #FFFFFF;
     transition: all .25s ease;
   }
@@ -414,25 +418,17 @@
   .tooltip .addr { font-size: 12px; color: #94A3B8; margin-bottom: 6px; }
   .tooltip .hq-tag { color: #F59E0B; font-weight: 800; font-size: 13px; margin-bottom: 4px; display: inline-block; background: rgba(245,158,11,.15); padding: 1px 6px; border-radius: 4px; }
 
-  /* === 右側清單與雙工具列 (搜尋框 + 下拉式選單) === */
-  .tools-row {
-    display: flex;
-    gap: 8px;
+  /* === 右側清單 (乾淨全寬搜尋框 ＋ 專屬常駐滾動條) === */
+  .side-search {
     margin-bottom: 10px;
-  }
-  .search-wrap {
-    flex: 1.2;
-  }
-  .select-wrap {
-    flex: 1;
   }
   .search-input {
     width: 100%;
-    padding: 9px 12px;
-    font-size: 13.5px;
+    padding: 10px 14px;
+    font-size: 14px;
     font-family: inherit;
     border: 1px solid var(--line-strong);
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--surface);
     color: var(--ink);
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
@@ -442,36 +438,6 @@
   .search-input:focus {
     border-color: #0284C7;
     box-shadow: 0 0 0 3px rgba(2,132,199,.15);
-  }
-  
-  /* ★★★ 核心新增：快速跳轉下拉選單 ★★★ */
-  .venue-select {
-    width: 100%;
-    padding: 9px 12px;
-    font-size: 13.5px;
-    font-weight: 700;
-    font-family: inherit;
-    border: 1px solid #0284C7;
-    border-radius: 9px;
-    background: #F0F9FF;
-    color: #0369A1;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    outline: none;
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-  .venue-select:hover {
-    background: #E0F2FE;
-  }
-  .venue-select:focus {
-    box-shadow: 0 0 0 3px rgba(2,132,199,.2);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .venue-select {
-      background: #082F49;
-      color: #38BDF8;
-      border-color: #38BDF8;
-    }
   }
 
   /* 行政區快捷切換 Pills */
@@ -488,7 +454,7 @@
     color: var(--ink-muted);
     font-size: 12px;
     font-weight: 700;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
     cursor: pointer;
     transition: all .15s ease;
@@ -506,26 +472,28 @@
     box-shadow: 0 2px 6px rgba(2,132,199,.25);
   }
 
-  /* ★★★ 顯著美化自訂滾動條，明確提示使用者可向下滾動 ★★★ */
+  /* ★★★ 核心 2：右側專屬常駐滾動條，明確、好拖曳、與地圖等高 ★★★ */
   .side {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-height: calc(100vh - 210px);
-    min-height: 580px;
-    overflow-y: auto;
+    height: 680px; /* 與左側地圖高度鎖定對齊 */
+    overflow-y: scroll; /* 常駐捲軸，絕對不會隱藏！ */
     padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #0284C7 #E2E8F0;
   }
   .side::-webkit-scrollbar {
-    width: 7px;
+    width: 8px;
   }
   .side::-webkit-scrollbar-track {
-    background: var(--surface-2);
+    background: #E2E8F0;
     border-radius: 6px;
   }
   .side::-webkit-scrollbar-thumb {
     background: #0284C7;
     border-radius: 6px;
+    border: 1px solid #BAE6FD;
   }
   .side::-webkit-scrollbar-thumb:hover {
     background: #0369A1;
@@ -548,7 +516,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 14px;
+    padding: 10px 15px;
     background: #F8FAFC;
     border-bottom: 1px solid var(--line);
     border-left: 4px solid #0284C7;
@@ -583,9 +551,9 @@
     }
   }
 
-  /* ★★★ 緊湊化場館排版 (Compact UI) 大幅縮減高度，一屏看更多 ★★★ */
+  /* 緊湊化場館排版 (Compact UI) */
   .venue-item {
-    padding: 9px 14px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--line);
     transition: all .15s ease;
     cursor: pointer;
@@ -760,23 +728,16 @@
       </div>
     </div>
 
-    <!-- 右側依行政區彙整清單 -->
+    <!-- 右側依行政區彙整清單 (單一全寬搜尋框 ＋ 專屬常駐滾動條) -->
     <div>
-      <!-- 雙功能工具列：搜尋框 ＋ 下拉式選單 -->
-      <div class="tools-row">
-        <div class="search-wrap">
-          <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋編號、項目或學校..." oninput="onSearchInput()">
-        </div>
-        <div class="select-wrap">
-          <select class="venue-select" id="venueSelect" onchange="onSelectDropdown(this.value)">
-            <option value="">🎯 快速跳轉場館 (1~34)...</option>
-          </select>
-        </div>
+      <div class="side-search">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋場館編號、學校、運動項目或行政區..." oninput="onSearchInput()">
       </div>
       
       <!-- 行政區切換 Chips -->
       <div class="district-chips" id="districtChips"></div>
 
+      <!-- 2 的部分：專屬常駐獨立滾動條 -->
       <div class="side" id="sideList"></div>
     </div>
   </div>
@@ -917,34 +878,6 @@ function initMap() {
   });
 }
 
-function buildDropdown() {
-  const select = document.getElementById("venueSelect");
-  select.innerHTML = '<option value="">🎯 快速跳轉場館 (1~34)...</option>';
-
-  districtOrder.forEach(dist => {
-    const group = document.createElement("optgroup");
-    group.label = dist;
-    const distVenues = venues.filter(v => v.district === dist);
-    distVenues.forEach(v => {
-      const opt = document.createElement("option");
-      opt.value = v.id;
-      const hqStar = v.is_hq ? " ★隊本部" : "";
-      opt.textContent = `${v.id}. ${v.name}${hqStar}`;
-      group.appendChild(opt);
-    });
-    select.appendChild(group);
-  });
-}
-
-function onSelectDropdown(vidStr) {
-  if (!vidStr) return;
-  const vid = parseInt(vidStr, 10);
-  const v = venues.find(item => item.id === vid);
-  if (v) {
-    selectVenue(vid, v.district);
-  }
-}
-
 function renderChips() {
   const container = document.getElementById("districtChips");
   container.innerHTML = "";
@@ -1079,10 +1012,6 @@ function selectVenue(id, district = null) {
   document.querySelectorAll(".leader-line").forEach(l => l.classList.remove("active"));
   document.querySelectorAll(".orig-dot").forEach(d => d.classList.remove("active"));
 
-  // 同步下拉選單選取狀態
-  const select = document.getElementById("venueSelect");
-  if (select) select.value = id;
-
   const pin = document.getElementById("pin-" + id);
   if (pin) {
     pin.classList.add("active");
@@ -1144,7 +1073,6 @@ function switchView(mode) {
 
 window.addEventListener("DOMContentLoaded", () => {
   initMap();
-  buildDropdown();
   renderChips();
   renderSideList();
 });
