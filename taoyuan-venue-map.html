@@ -1067,7 +1067,7 @@ function renderSideList(filterText = "") {
         </div>
         <div class="vfoot">
           <span class="vaddr" title="${v.addr}">📍 ${v.addr}</span>
-          <a class="navlink" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.poi_query || v.name)}" target="_blank" rel="noopener noreferrer">🧭 導航</a>
+          <a class="navlink" href="https://www.google.com/maps/place/${encodeURIComponent(v.poi_query || v.name)}/@${v.lat},${v.lon},17z" target="_blank" rel="noopener noreferrer">🧭 導航</a>
         </div>
       `;
 
