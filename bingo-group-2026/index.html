@@ -6,7 +6,6 @@
   <title>🎯 課堂賓果分組互動工具</title>
   <style>
     :root {
-      --bg-page: #f0f5ff;
       --bg-card: #ffffff;
       --bg-subtle: #f8fafc;
       --text-main: #1e293b;
@@ -19,7 +18,6 @@
       --wrong: #f43f5e;
       --wrong-dark: #e11d48;
       --amber: #f59e0b;
-      --line-stroke: #ef4444;
     }
 
     * {
@@ -33,10 +31,10 @@
       background: linear-gradient(135deg, #e0e7ff 0%, #f0fdf4 50%, #fef3c7 100%);
       color: var(--text-main);
       min-height: 100vh;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       user-select: none;
     }
 
@@ -46,38 +44,38 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       background: var(--bg-card);
-      padding: 10px 16px;
-      border-radius: 16px;
+      padding: 8px 14px;
+      border-radius: 14px;
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
       border: 1px solid #e2e8f0;
     }
 
     .brand {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .brand-title {
-      font-size: 1.25rem;
-      font-weight: 800;
+      font-size: 1.18rem;
+      font-weight: 900;
       color: #1e3a8a;
-      letter-spacing: 0.5px;
     }
 
     .unit-badge {
       background: #dbeafe;
       color: #1d4ed8;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 999px;
     }
 
     .sync-status {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
       padding: 3px 8px;
       border-radius: 6px;
@@ -89,39 +87,39 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
 
-    .group-switcher {
+    .pill-switcher {
       display: flex;
       align-items: center;
       background: var(--bg-subtle);
       padding: 3px;
       border-radius: 10px;
       border: 1px solid var(--border-color);
-      gap: 3px;
+      gap: 2px;
     }
 
-    .group-switcher span {
-      font-size: 0.82rem;
+    .pill-switcher span {
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-muted);
-      padding: 0 6px;
+      padding: 0 5px;
     }
 
-    .grp-btn {
+    .pill-btn {
       border: none;
       background: transparent;
-      padding: 5px 10px;
+      padding: 4px 9px;
       border-radius: 7px;
-      font-size: 0.85rem;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 800;
       color: var(--text-main);
       cursor: pointer;
       transition: all 0.15s;
     }
 
-    .grp-btn.active {
+    .pill-btn.active {
       background: var(--primary);
       color: #fff;
       box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
@@ -131,10 +129,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 7px 14px;
-      border-radius: 10px;
-      font-size: 0.9rem;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 9px;
+      font-size: 0.84rem;
       font-weight: 700;
       border: 1px solid transparent;
       cursor: pointer;
@@ -174,11 +172,25 @@
       background: #4338ca;
     }
 
-    /* 上半部：左題目區 + 右 4x4 題號區 */
+    .btn-amber {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 900;
+      padding: 9px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-amber:hover {
+      background: linear-gradient(135deg, #d97706, #b45309);
+    }
+
+    /* 上半部：左題目區 + 右 N×N 題號選擇區 */
     .upper-section {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 14px;
+      grid-template-columns: 1fr 330px;
+      gap: 12px;
     }
 
     @media (max-width: 960px) {
@@ -187,17 +199,16 @@
       }
     }
 
-    /* 題目主面板 */
     .question-panel {
       background: var(--bg-card);
-      border-radius: 18px;
-      padding: 16px 20px;
+      border-radius: 16px;
+      padding: 14px 18px;
       box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
       border: 2px solid #bfdbfe;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .question-header {
@@ -211,21 +222,30 @@
     .q-badge-wrap {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .q-number-badge {
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 800;
-      padding: 6px 16px;
-      border-radius: 10px;
+      padding: 5px 14px;
+      border-radius: 9px;
       box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
     }
 
+    .q-type-tag {
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
     .q-status-tag {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 700;
       padding: 4px 10px;
       border-radius: 8px;
@@ -235,19 +255,19 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .tts-toggle-label {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 0.82rem;
+      gap: 4px;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
       background: var(--bg-subtle);
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
     }
@@ -256,38 +276,66 @@
       background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
       border: 2px dashed #93c5fd;
       border-radius: 14px;
-      padding: 20px 24px;
-      min-height: 128px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      gap: 10px;
-      position: relative;
+      gap: 12px;
     }
 
     .question-text {
-      font-size: clamp(1.35rem, 2.4vw, 2rem);
+      font-size: clamp(1.25rem, 2.1vw, 1.75rem);
       font-weight: 800;
       color: #0f172a;
-      line-height: 1.4;
+      line-height: 1.38;
       word-break: break-word;
     }
 
-    .answer-reveal-box {
-      background: #fef3c7;
-      border: 1px solid #fde68a;
-      color: #92400e;
-      font-weight: 800;
-      font-size: 1.1rem;
-      padding: 5px 16px;
-      border-radius: 999px;
-      display: none;
+    /* 題目選項顯示區 (選擇題 4 格 / 是非題 2 格) */
+    .question-options-grid {
+      width: 100%;
+      display: grid;
+      gap: 8px;
     }
 
-    .answer-reveal-box.visible {
-      display: inline-block;
+    .question-options-grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .question-options-grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 460px;
+    }
+
+    @media (max-width: 680px) {
+      .question-options-grid.cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .q-option-card {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .q-option-card.correct-revealed {
+      background: var(--correct);
+      border-color: var(--correct-dark);
+      color: #ffffff;
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
     .judge-bar {
@@ -295,52 +343,37 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .judge-buttons {
+    .legend-tags {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
     }
 
-    .btn-correct {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
-      font-size: 1.05rem;
-      padding: 10px 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    .legend-pill {
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .btn-correct:hover {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
-
-    .btn-wrong {
-      background: linear-gradient(135deg, #f43f5e, #e11d48);
-      color: #fff;
-      font-size: 1.05rem;
-      padding: 10px 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-    }
-
-    .btn-wrong:hover {
-      background: linear-gradient(135deg, #e11d48, #be123c);
-    }
-
-    /* 右側：4x4 題號選擇盤 */
+    /* 右側：N×N 題號選擇盤 */
     .selector-panel {
       background: var(--bg-card);
-      border-radius: 18px;
-      padding: 14px;
+      border-radius: 16px;
+      padding: 12px;
       box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
       border: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
     .selector-header {
@@ -350,31 +383,39 @@
     }
 
     .selector-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 800;
       color: #1e293b;
     }
 
     .selector-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 7px;
+      gap: 5px;
+      flex: 1;
     }
 
+    .selector-grid.dim-3 { grid-template-columns: repeat(3, 1fr); }
+    .selector-grid.dim-4 { grid-template-columns: repeat(4, 1fr); }
+    .selector-grid.dim-5 { grid-template-columns: repeat(5, 1fr); }
+
     .q-num-btn {
-      height: 44px;
-      border-radius: 10px;
+      min-height: 34px;
+      border-radius: 9px;
       border: 2px solid #cbd5e1;
       background: #f8fafc;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 800;
       color: #334155;
       cursor: pointer;
       transition: all 0.15s;
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .selector-grid.dim-5 .q-num-btn {
+      min-height: 29px;
+      font-size: 0.85rem;
     }
 
     .q-num-btn:hover {
@@ -384,27 +425,21 @@
 
     .q-num-btn.current {
       border-color: var(--primary);
-      background: #dbeafe;
-      color: #1e40af;
+      background: #2563eb;
+      color: #fff;
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
     }
 
-    .q-num-btn.answered-correct {
-      background: var(--correct);
-      border-color: var(--correct-dark);
-      color: #fff;
+    .q-num-btn.revealed:not(.current) {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+      color: #475569;
     }
 
-    .q-num-btn.answered-wrong {
-      background: #fef3c7;
-      border-color: #f59e0b;
-      color: #b45309;
-    }
-
-    /* 下半部：各組 4x4 賓果分組盤 */
+    /* 下半部：2~5 組賓果分組盤 */
     .groups-section {
       display: grid;
-      gap: 12px;
+      gap: 10px;
       flex: 1;
     }
 
@@ -428,17 +463,17 @@
     .group-card {
       background: var(--bg-card);
       border-radius: 16px;
-      padding: 12px;
+      padding: 10px;
       box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
       border: 3px solid #e2e8f0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       transition: transform 0.2s, border-color 0.2s;
     }
 
     .group-card.has-bingo {
-      box-shadow: 0 8px 22px rgba(245, 158, 11, 0.18);
+      box-shadow: 0 8px 22px rgba(245, 158, 11, 0.22);
     }
 
     .group-card-header {
@@ -449,10 +484,10 @@
     }
 
     .group-name-badge {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 800;
       color: #fff;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
@@ -461,9 +496,9 @@
     }
 
     .line-counter {
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 800;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 999px;
       background: #f1f5f9;
       color: #475569;
@@ -475,12 +510,76 @@
       border: 1px solid #f59e0b;
     }
 
+    /* 各組專屬作答區 */
+    .group-answer-box {
+      background: var(--bg-subtle);
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .group-answer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .group-choice-grid {
+      display: grid;
+      gap: 5px;
+    }
+
+    .group-choice-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    .group-choice-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .choice-btn {
+      padding: 5px 0;
+      border-radius: 7px;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .choice-btn.picked {
+      background: var(--primary);
+      border-color: #1e40af;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .choice-btn.judged-correct {
+      background: var(--correct);
+      border-color: var(--correct-dark);
+      color: #ffffff;
+    }
+
+    .choice-btn.judged-wrong {
+      background: var(--wrong);
+      border-color: var(--wrong-dark);
+      color: #ffffff;
+    }
+
     /* 賓果盤容器 (含 SVG 連線覆蓋層) */
     .bingo-board-wrap {
       position: relative;
       width: 100%;
       aspect-ratio: 1 / 1;
-      max-height: 290px;
+      max-height: 250px;
       margin: 0 auto;
     }
 
@@ -488,40 +587,73 @@
       width: 100%;
       height: 100%;
       display: grid;
+      gap: 5px;
+    }
+
+    .bingo-grid.dim-3 {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    .bingo-grid.dim-4 {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 6px;
+      gap: 5px;
+    }
+
+    .bingo-grid.dim-5 {
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      gap: 4px;
     }
 
     .bingo-cell {
-      border-radius: 10px;
+      border-radius: 9px;
       background: #f8fafc;
       border: 2px solid #cbd5e1;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+      font-size: clamp(0.9rem, 1.5vw, 1.2rem);
       font-weight: 800;
       color: #334155;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
+      cursor: pointer;
+    }
+
+    .bingo-grid.dim-5 .bingo-cell {
+      font-size: clamp(0.78rem, 1.2vw, 1rem);
+      border-radius: 7px;
     }
 
     .bingo-cell.current-highlight {
       border-color: var(--primary);
-      background: #eff6ff;
-      color: var(--primary);
+      background: #dbeafe;
+      color: #1e40af;
+      box-shadow: inset 0 0 0 1px var(--primary);
     }
 
-    /* 答對後所有組別該數字一起變色 */
-    .bingo-cell.lit {
-      color: #fff;
-      transform: scale(1.02);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+    /* 🟢 答對：獲得賓果連線權利 */
+    .bingo-cell.status-correct {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #047857;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, 0.28);
+    }
+
+    /* 🔴 答錯：喪失賓果連線權利 (死格鎖定) */
+    .bingo-cell.status-wrong {
+      background: #ffe4e6;
+      border-color: #fda4af;
+      color: #e11d48;
+      text-decoration: line-through;
+      opacity: 0.82;
     }
 
     .bingo-cell.in-line {
-      box-shadow: 0 0 0 2px #fde047, 0 4px 10px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 0 0 2px #fde047, 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     /* SVG 畫線標示層 */
@@ -538,7 +670,7 @@
       stroke: #ffffff;
       stroke-width: 7;
       stroke-linecap: round;
-      opacity: 0.9;
+      opacity: 0.92;
     }
 
     .bingo-line-fg {
@@ -556,7 +688,7 @@
       }
     }
 
-    /* 原生 Dialog 彈窗樣式 (答對/答錯/題庫編輯) */
+    /* 原生 Dialog 彈窗樣式 */
     dialog {
       margin: auto;
       border: none;
@@ -573,31 +705,21 @@
     }
 
     .feedback-card {
-      width: min(540px, 90vw);
+      width: min(580px, 92vw);
       background: #ffffff;
       border-radius: 24px;
-      padding: 32px 28px;
+      padding: 28px 24px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feedback-card.correct-theme {
-      border: 5px solid #10b981;
-      background: radial-gradient(circle at top, #ecfdf5 0%, #ffffff 70%);
-    }
-
-    .feedback-card.wrong-theme {
-      border: 5px solid #f43f5e;
-      background: radial-gradient(circle at top, #fff1f2 0%, #ffffff 70%);
+      border: 5px solid #f59e0b;
+      background: radial-gradient(circle at top, #fffbeb 0%, #ffffff 70%);
     }
 
     .feedback-icon {
-      font-size: 4.5rem;
+      font-size: 3.8rem;
       line-height: 1;
       animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -608,27 +730,51 @@
     }
 
     .feedback-title {
-      font-size: 2.1rem;
+      font-size: 1.75rem;
       font-weight: 900;
+      color: #0f172a;
     }
 
-    .correct-theme .feedback-title { color: #047857; }
-    .wrong-theme .feedback-title { color: #be123c; }
+    .result-groups-box {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      text-align: left;
+    }
 
-    .feedback-sub {
-      font-size: 1.1rem;
-      color: #475569;
-      font-weight: 600;
-      line-height: 1.5;
+    @media (max-width: 520px) {
+      .result-groups-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .result-col {
+      padding: 12px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+    }
+
+    .result-col.col-correct {
+      background: #ecfdf5;
+      border: 2px solid #6ee7b7;
+      color: #065f46;
+    }
+
+    .result-col.col-wrong {
+      background: #fff1f2;
+      border: 2px solid #fda4af;
+      color: #9f1239;
     }
 
     .new-bingo-alert {
+      width: 100%;
       background: linear-gradient(135deg, #fef3c7, #fde68a);
       border: 2px solid #f59e0b;
       color: #92400e;
-      padding: 10px 18px;
+      padding: 10px 16px;
       border-radius: 14px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       display: none;
     }
@@ -639,8 +785,8 @@
 
     /* 老師題庫管理後台 Dialog */
     .editor-card {
-      width: min(860px, 94vw);
-      max-height: 88vh;
+      width: min(980px, 95vw);
+      max-height: 90vh;
       background: #ffffff;
       border-radius: 20px;
       display: flex;
@@ -650,7 +796,7 @@
     }
 
     .editor-header {
-      padding: 16px 22px;
+      padding: 14px 20px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
@@ -661,11 +807,11 @@
     }
 
     .editor-body {
-      padding: 18px 22px;
+      padding: 16px 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .unit-bar {
@@ -680,51 +826,71 @@
     }
 
     .unit-bar select, .unit-bar input {
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 8px;
       border: 1px solid #93c5fd;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
     }
 
-    .editor-questions-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+    .editor-questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    @media (max-width: 720px) {
-      .editor-questions-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .q-edit-row {
-      display: grid;
-      grid-template-columns: 38px 1fr 120px 76px;
-      gap: 6px;
-      align-items: center;
+    .q-edit-card {
       background: #f8fafc;
-      padding: 8px;
+      padding: 10px;
       border-radius: 10px;
       border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .q-edit-top {
+      display: grid;
+      grid-template-columns: 42px 110px 1fr 110px 88px;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .q-edit-opts {
+      display: grid;
+      grid-template-columns: 42px repeat(4, 1fr);
+      gap: 6px;
+      align-items: center;
+    }
+
+    .q-edit-opts.hidden {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .q-edit-top {
+        grid-template-columns: 42px 1fr 1fr;
+      }
+      .q-edit-opts {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     .q-edit-num {
       font-weight: 800;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       color: #fff;
       background: var(--primary);
       border-radius: 6px;
       text-align: center;
-      padding: 4px 0;
+      padding: 5px 0;
     }
 
-    .q-edit-row input, .q-edit-row select {
+    .q-edit-card input, .q-edit-card select {
       padding: 6px 8px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      font-size: 0.86rem;
+      font-size: 0.84rem;
       width: 100%;
     }
 
@@ -748,15 +914,16 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid #94a3b8;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-family: inherit;
     }
 
     .editor-footer {
-      padding: 14px 22px;
+      padding: 12px 20px;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
@@ -774,18 +941,27 @@
     </div>
 
     <div class="toolbar-actions">
-      <div class="group-switcher" role="group" aria-label="選擇分組數量">
-        <span>分組數：</span>
-        <button type="button" class="grp-btn" onclick="changeGroupCount(2)" id="grpBtn2">2組</button>
-        <button type="button" class="grp-btn" onclick="changeGroupCount(3)" id="grpBtn3">3組</button>
-        <button type="button" class="grp-btn active" onclick="changeGroupCount(4)" id="grpBtn4">4組</button>
-        <button type="button" class="grp-btn" onclick="changeGroupCount(5)" id="grpBtn5">5組</button>
+      <!-- 題數規格切換 (9 / 16 / 25) -->
+      <div class="pill-switcher" role="group" aria-label="選擇題數與賓果格數">
+        <span>題數：</span>
+        <button type="button" class="pill-btn" onclick="changeGridSize(9)" id="sizeBtn9">9題(3×3)</button>
+        <button type="button" class="pill-btn active" onclick="changeGridSize(16)" id="sizeBtn16">16題(4×4)</button>
+        <button type="button" class="pill-btn" onclick="changeGridSize(25)" id="sizeBtn25">25題(5×5)</button>
       </div>
 
-      <button type="button" class="btn btn-outline" onclick="shuffleAllBoards()" title="重新隨機排列各組的 1~16 數字">
-        🔀 重排各組數字
+      <!-- 分組數切換 (2~5組) -->
+      <div class="pill-switcher" role="group" aria-label="選擇分組數量">
+        <span>分組：</span>
+        <button type="button" class="pill-btn" onclick="changeGroupCount(2)" id="grpBtn2">2組</button>
+        <button type="button" class="pill-btn" onclick="changeGroupCount(3)" id="grpBtn3">3組</button>
+        <button type="button" class="pill-btn active" onclick="changeGroupCount(4)" id="grpBtn4">4組</button>
+        <button type="button" class="pill-btn" onclick="changeGroupCount(5)" id="grpBtn5">5組</button>
+      </div>
+
+      <button type="button" class="btn btn-outline" onclick="shuffleAllBoards()" title="重新隨機排列各組的賓果數字">
+        🔀 重排數字
       </button>
-      <button type="button" class="btn btn-outline" onclick="resetGameProgress()" title="清除答題顏色紀錄，重新開始本局">
+      <button type="button" class="btn btn-outline" onclick="resetGameProgress()" title="清除答題紀錄，重新開始本局">
         🔄 新局重置
       </button>
       <button type="button" class="btn btn-indigo" onclick="openEditorDialog()">
@@ -794,14 +970,15 @@
     </div>
   </header>
 
-  <!-- 上半部：左題目區 (含 TTS 語音) + 右 4x4 (1~16) 選題區 -->
+  <!-- 上半部：左題目區 (含 TTS 語音與選項) + 右 N×N 選題區 -->
   <section class="upper-section">
-    <!-- 左側題目與作答判定區 -->
+    <!-- 左側題目與公布答案區 -->
     <div class="question-panel">
       <div class="question-header">
         <div class="q-badge-wrap">
           <span id="activeQNumber" class="q-number-badge">第 1 題</span>
-          <span id="activeQStatus" class="q-status-tag" style="background:#e2e8f0;color:#475569;">尚未作答</span>
+          <span id="activeQType" class="q-type-tag">選擇題</span>
+          <span id="activeQStatus" class="q-status-tag" style="background:#e2e8f0;color:#475569;">各組作答中</span>
         </div>
 
         <div class="tts-controls">
@@ -824,57 +1001,70 @@
       </div>
 
       <div class="question-stage">
-        <div id="questionTextDisplay" class="question-text">請點選右側 1～16 題號開始答題！</div>
-        <div id="answerRevealBox" class="answer-reveal-box">💡 參考答案：蘋果</div>
+        <div id="questionTextDisplay" class="question-text">請點選右側題號開始作答！</div>
+        <div id="questionOptionsContainer" class="question-options-grid cols-4">
+          <!-- JS 動態渲染選擇題 A/B/C/D 或是非題 ⭕/❌ -->
+        </div>
       </div>
 
       <div class="judge-bar">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button type="button" class="btn btn-outline" onclick="toggleAnswerReveal()">
-            💡 顯示/隱藏答案
-          </button>
+        <div class="legend-tags">
+          <span class="legend-pill" style="background:#d1fae5;color:#065f46;">🟢 答對：獲得賓果連線權 (✓)</span>
+          <span class="legend-pill" style="background:#ffe4e6;color:#9f1239;">🔴 答錯：喪失賓果連線權 (✗)</span>
           <button type="button" class="btn btn-outline" onclick="pickRandomUnanswered()">
             🎲 隨機抽題
           </button>
         </div>
 
-        <div class="judge-buttons">
-          <button type="button" class="btn btn-correct" onclick="handleJudgeResult(true)">
-            ⭕ 答對！（跳畫面＋亮燈）
-          </button>
-          <button type="button" class="btn btn-wrong" onclick="handleJudgeResult(false)">
-            ❌ 答錯！（跳畫面）
+        <div>
+          <button type="button" class="btn btn-amber" onclick="revealAndJudgeCurrentQuestion()">
+            📢 老師公布答案（批改各組）
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 右側 4x4 (1~16) 題號選擇區 -->
+    <!-- 右側 N×N 題號選擇區 -->
     <div class="selector-panel">
       <div class="selector-header">
-        <span class="selector-title">🔢 題號選擇區 (4×4)</span>
-        <span id="progressCounter" style="font-size:0.82rem;font-weight:700;color:var(--text-muted);">已答對 0 / 16 題</span>
+        <span id="selectorTitle" class="selector-title">🔢 題號選擇區 (4×4)</span>
+        <span id="progressCounter" style="font-size:0.8rem;font-weight:700;color:var(--text-muted);">已公布 0 / 16 題</span>
       </div>
-      <div id="questionSelectorGrid" class="selector-grid">
-        <!-- JS 產生 1~16 按鈕 -->
+      <div id="questionSelectorGrid" class="selector-grid dim-4">
+        <!-- JS 產生 1~N 按鈕 -->
       </div>
     </div>
   </section>
 
-  <!-- 下半部：2~5 組隨機 4x4 賓果盤 -->
+  <!-- 下半部：2~5 組隨機 N×N 賓果盤 (含每組專屬作答區) -->
   <section id="groupsContainer" class="groups-section groups-count-4">
-    <!-- JS 產生各組賓果盤與 SVG 連線標示 -->
+    <!-- JS 產生各組作答按鈕與賓果盤 -->
   </section>
 
-  <!-- 答對 / 答錯 獨立互動畫面 Dialog (支援 light-dismiss) -->
+  <!-- 公布答案批改結果 Dialog (支援 light-dismiss) -->
   <dialog id="feedbackDialog" closedby="any" aria-labelledby="feedbackTitle">
-    <div id="feedbackCard" class="feedback-card correct-theme">
-      <div id="feedbackIcon" class="feedback-icon">🎉</div>
-      <h2 id="feedbackTitle" class="feedback-title">太棒了！答對了！</h2>
-      <p id="feedbackSub" class="feedback-sub">所有組別賓果盤上的數字已同步變色亮起！</p>
+    <div class="feedback-card">
+      <div id="feedbackIcon" class="feedback-icon">📢</div>
+      <h2 id="feedbackTitle" class="feedback-title">第 1 題・答案揭曉！</h2>
+      <div id="feedbackCorrectAns" style="font-size:1.2rem;font-weight:900;color:#047857;background:#d1fae5;padding:6px 18px;border-radius:999px;">
+        正確答案：(A) 蘋果
+      </div>
+
+      <div class="result-groups-box">
+        <div class="result-col col-correct">
+          <div style="font-weight:900;margin-bottom:4px;">🟢 答對（獲得該格連線權 ✓）</div>
+          <div id="feedbackCorrectGroups" style="font-weight:700;">無</div>
+        </div>
+        <div class="result-col col-wrong">
+          <div style="font-weight:900;margin-bottom:4px;">🔴 答錯（喪失該格連線權 ✗）</div>
+          <div id="feedbackWrongGroups" style="font-weight:700;">無</div>
+        </div>
+      </div>
+
       <div id="newBingoAlert" class="new-bingo-alert">🎊 恭喜達成新連線！</div>
-      <div style="margin-top:8px;display:flex;gap:10px;">
-        <button type="button" class="btn btn-primary" style="padding:10px 28px;font-size:1.05rem;" onclick="closeFeedbackDialog()">
+
+      <div style="margin-top:4px;">
+        <button type="button" class="btn btn-primary" style="padding:10px 28px;font-size:1rem;" onclick="closeFeedbackDialog()">
           ↩ 回到主畫面
         </button>
       </div>
@@ -886,11 +1076,11 @@
     <div class="editor-card">
       <div class="editor-header">
         <div>
-          <h2 id="editorDialogTitle" style="font-size:1.15rem;font-weight:800;">⚙️ 老師題庫管理後台（1～16 題）</h2>
-          <p style="font-size:0.8rem;color:var(--text-muted);">修改後會自動儲存於瀏覽器本機（亦可選填自訂雲端 API）</p>
+          <h2 id="editorDialogTitle" style="font-size:1.1rem;font-weight:800;">⚙️ 老師題庫管理後台（支援 1～25 題・選擇題 / 是非題）</h2>
+          <p style="font-size:0.78rem;color:var(--text-muted);">修改後會自動儲存於瀏覽器本機（亦可選填自訂雲端 API）</p>
         </div>
         <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-outline" onclick="toggleBatchPaste()">📋 批次貼上 16 題</button>
+          <button type="button" class="btn btn-outline" onclick="toggleBatchPaste()">📋 批次貼上題庫</button>
           <button type="button" class="btn btn-outline" onclick="closeEditorDialog()">✕ 關閉</button>
         </div>
       </div>
@@ -898,7 +1088,7 @@
       <div class="editor-body">
         <!-- 題庫單元選擇與命名 -->
         <div class="unit-bar">
-          <span style="font-size:0.88rem;font-weight:800;color:#1e40af;">📚 題庫單元：</span>
+          <span style="font-size:0.85rem;font-weight:800;color:#1e40af;">📚 題庫單元：</span>
           <select id="unitSelect" onchange="onSelectUnitChange()"></select>
           <input type="text" id="unitTitleInput" placeholder="輸入題庫單元名稱..." style="flex:1;min-width:180px;">
           <button type="button" class="btn btn-outline" onclick="createNewUnit()">＋ 新增單元</button>
@@ -907,25 +1097,27 @@
 
         <!-- 批次貼上區 -->
         <div id="batchPasteBox" class="batch-paste-box">
-          <div style="font-size:0.84rem;font-weight:700;color:#334155;">
-            請貼上最多 16 行題目（每行一題，若包含答案可用逗號或 Tab 分隔，例如：<code>請問 Apple 是什麼意思？,蘋果</code>）
+          <div style="font-size:0.82rem;font-weight:700;color:#334155;line-height:1.5;">
+            請貼上題目（每行一題，最多 25 題，用逗號或 Tab 分隔）：<br>
+            • <strong>選擇題格式</strong>：<code>題目,選項A,選項B,選項C,選項D,正確答案(A/B/C/D)</code><br>
+            • <strong>是非題格式</strong>：<code>題目,O</code> 或 <code>題目,X</code>
           </div>
-          <textarea id="batchPasteTextarea" placeholder="第1題題目,答案&#10;第2題題目,答案&#10;..."></textarea>
+          <textarea id="batchPasteTextarea" placeholder="請問 Apple 的中文是什麼？,蘋果,香蕉,西瓜,草莓,A&#10;太陽從東方升起對嗎？,O"></textarea>
           <div style="display:flex;justify-content:flex-end;gap:8px;">
-            <button type="button" class="btn btn-primary" onclick="applyBatchPaste()">✓ 套用至下方 1～16 題</button>
+            <button type="button" class="btn btn-primary" onclick="applyBatchPaste()">✓ 套用至下方題庫</button>
           </div>
         </div>
 
-        <!-- 1~16 題編輯表單 -->
-        <div id="editorQuestionsGrid" class="editor-questions-grid">
-          <!-- JS 動態渲染 1~16 題輸入框 -->
+        <!-- 1~25 題編輯表單 -->
+        <div id="editorQuestionsList" class="editor-questions-list">
+          <!-- JS 動態渲染 1~25 題輸入框 -->
         </div>
       </div>
 
       <div class="editor-footer">
-        <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-muted);">
+        <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-muted);">
           <span>☁️ 雲端 API：</span>
-          <input type="text" id="workerUrlInput" placeholder="" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;width:270px;font-size:0.78rem;">
+          <input type="text" id="workerUrlInput" placeholder="" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;width:270px;font-size:0.76rem;">
         </div>
         <div style="display:flex;gap:10px;">
           <button type="button" class="btn btn-outline" onclick="closeEditorDialog()">取消</button>
@@ -937,72 +1129,65 @@
 
   <script>
     // ==========================================
-    // 1. 預設題庫與全域狀態
+    // 1. 預設 25 題題庫（選擇題 + 是非題混合示範）與全域狀態
     // ==========================================
-    const STORAGE_KEY = 'classroom_bingo_state_v1';
+    const STORAGE_KEY = 'classroom_bingo_state_v3';
     const DEFAULT_WORKER_URL = '';
 
     const DEFAULT_QUESTIONS = [
-      { num: 1, text: "請問英文單字「Apple」的中文意思是什麼？", answer: "蘋果", lang: "zh-TW" },
-      { num: 2, text: "請問英文單字「Banana」的中文意思是什麼？", answer: "香蕉", lang: "zh-TW" },
-      { num: 3, text: "請問「7 × 8」等於多少？", answer: "56", lang: "zh-TW" },
-      { num: 4, text: "台灣最高的山是什麼山？", answer: "玉山", lang: "zh-TW" },
-      { num: 5, text: "請問英文單字「Elephant」的中文意思是什麼？", answer: "大象", lang: "zh-TW" },
-      { num: 6, text: "一年之中有幾個月份是 31 天？", answer: "7 個月", lang: "zh-TW" },
-      { num: 7, text: "請問「太陽從哪一個方向升起」？", answer: "東方", lang: "zh-TW" },
-      { num: 8, text: "請問英文「Good morning」是什麼意思？", answer: "早安", lang: "zh-TW" },
-      { num: 9, text: "請問「100 減去 37」等於多少？", answer: "63", lang: "zh-TW" },
-      { num: 10, text: "水在攝氏幾度時會結冰？", answer: "0 度", lang: "zh-TW" },
-      { num: 11, text: "請問英文單字「Rainbow」的中文意思是什麼？", answer: "彩虹", lang: "zh-TW" },
-      { num: 12, text: "一個正方形有幾條對稱軸？", answer: "4 條", lang: "zh-TW" },
-      { num: 13, text: "請問英文單字「Library」的中文意思是什麼？", answer: "圖書館", lang: "zh-TW" },
-      { num: 14, text: "蜘蛛有幾隻腳？", answer: "8 隻腳", lang: "zh-TW" },
-      { num: 15, text: "請問「9 × 6」等於多少？", answer: "54", lang: "zh-TW" },
-      { num: 16, text: "火警報案專線是幾號？", answer: "119", lang: "zh-TW" }
+      { num: 1, type: 'mc', text: "請問英文單字「Apple」的中文意思是什麼？", options: ["蘋果", "香蕉", "西瓜", "鳳梨"], answer: "A", lang: "zh-TW" },
+      { num: 2, type: 'mc', text: "請問英文單字「Banana」的中文意思是什麼？", options: ["草莓", "香蕉", "葡萄", "橘子"], answer: "B", lang: "zh-TW" },
+      { num: 3, type: 'mc', text: "請問數學「7 × 8」等於多少？", options: ["48", "54", "56", "64"], answer: "C", lang: "zh-TW" },
+      { num: 4, type: 'mc', text: "台灣最高的山是哪一座山？", options: ["阿里山", "合歡山", "雪山", "玉山"], answer: "D", lang: "zh-TW" },
+      { num: 5, type: 'tf', text: "太陽每天都是從「東方」升起、西方落下，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
+      { num: 6, type: 'mc', text: "請問英文單字「Elephant」是指哪一種動物？", options: ["獅子", "大象", "長頸鹿", "河馬"], answer: "B", lang: "zh-TW" },
+      { num: 7, type: 'tf', text: "一年之中總共有 7 個大月（31 天），請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
+      { num: 8, type: 'mc', text: "請問英文「Good morning」是什麼意思？", options: ["早安", "午安", "晚安", "再見"], answer: "A", lang: "zh-TW" },
+      { num: 9, type: 'mc', text: "請問「100 減去 37」等於多少？", options: ["53", "63", "67", "73"], answer: "B", lang: "zh-TW" },
+      { num: 10, type: 'tf', text: "水在一般標準大氣壓下，攝氏 0 度時會結冰，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
+      { num: 11, type: 'mc', text: "請問英文單字「Rainbow」的中文意思是什麼？", options: ["雲朵", "閃電", "彩虹", "暴風雨"], answer: "C", lang: "zh-TW" },
+      { num: 12, type: 'mc', text: "一個正方形總共有幾條對稱軸？", options: ["2 條", "3 條", "4 條", "8 條"], answer: "C", lang: "zh-TW" },
+      { num: 13, type: 'mc', text: "請問英文單字「Library」是指學校的哪個地方？", options: ["保健室", "操場", "音樂教室", "圖書館"], answer: "D", lang: "zh-TW" },
+      { num: 14, type: 'tf', text: "蜘蛛屬於昆蟲類，所以只有 6 隻腳，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
+      { num: 15, type: 'mc', text: "請問「9 × 6」等於多少？", options: ["45", "54", "56", "63"], answer: "B", lang: "zh-TW" },
+      { num: 16, type: 'mc', text: "發現火災時，應該撥打哪一個報案專線？", options: ["119", "110", "113", "165"], answer: "A", lang: "zh-TW" },
+      { num: 17, type: 'mc', text: "請問英文單字「Wednesday」是星期幾？", options: ["星期一", "星期二", "星期三", "星期四"], answer: "C", lang: "zh-TW" },
+      { num: 18, type: 'tf', text: "鯨魚是用「肺」呼吸的哺乳類動物，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
+      { num: 19, type: 'mc', text: "請問「36 ÷ 4」等於多少？", options: ["7", "8", "9", "12"], answer: "C", lang: "zh-TW" },
+      { num: 20, type: 'mc', text: "台灣四面環海，請問台灣東邊緊鄰哪一個大洋？", options: ["大西洋", "印度洋", "北極海", "太平洋"], answer: "D", lang: "zh-TW" },
+      { num: 21, type: 'tf', text: "三角形的內角和是 360 度，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
+      { num: 22, type: 'mc', text: "請問英文單字「Hospital」的中文意思是什麼？", options: ["醫院", "郵局", "銀行", "車站"], answer: "A", lang: "zh-TW" },
+      { num: 23, type: 'mc', text: "端午節的傳統習俗不包含下列哪一項？", options: ["划龍舟", "吃粽子", "戴香包", "賞月吃月餅"], answer: "D", lang: "zh-TW" },
+      { num: 24, type: 'tf', text: "磁鐵的「同極」會互相吸引、「異極」會互相排斥，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
+      { num: 25, type: 'mc', text: "請問英文單字「Summer」是指哪一個季節？", options: ["春天", "夏天", "秋天", "冬天"], answer: "B", lang: "zh-TW" }
     ];
 
     const GROUP_PALETTES = [
-      { name: "第 1 組", border: "#fda4af", badge: "#e11d48", cellLit: "#f43f5e" },
-      { name: "第 2 組", border: "#fcd34d", badge: "#d97706", cellLit: "#f59e0b" },
-      { name: "第 3 組", border: "#6ee7b7", badge: "#059669", cellLit: "#10b981" },
-      { name: "第 4 組", border: "#93c5fd", badge: "#2563eb", cellLit: "#3b82f6" },
-      { name: "第 5 組", border: "#d8b4fe", badge: "#7c3aed", cellLit: "#8b5cf6" }
-    ];
-
-    // 4x4 賓果所有 10 條連線定義 (格號 index 0~15 及對應 SVG 座標百分比)
-    const BINGO_LINES = [
-      // 4 條橫線
-      { indices: [0, 1, 2, 3], x1: 6, y1: 12.5, x2: 94, y2: 12.5 },
-      { indices: [4, 5, 6, 7], x1: 6, y1: 37.5, x2: 94, y2: 37.5 },
-      { indices: [8, 9, 10, 11], x1: 6, y1: 62.5, x2: 94, y2: 62.5 },
-      { indices: [12, 13, 14, 15], x1: 6, y1: 87.5, x2: 94, y2: 87.5 },
-      // 4 條直線
-      { indices: [0, 4, 8, 12], x1: 12.5, y1: 6, x2: 12.5, y2: 94 },
-      { indices: [1, 5, 9, 13], x1: 37.5, y1: 6, x2: 37.5, y2: 94 },
-      { indices: [2, 6, 10, 14], x1: 62.5, y1: 6, x2: 62.5, y2: 94 },
-      { indices: [3, 7, 11, 15], x1: 87.5, y1: 6, x2: 87.5, y2: 94 },
-      // 2 條斜線
-      { indices: [0, 5, 10, 15], x1: 8, y1: 8, x2: 92, y2: 92 },
-      { indices: [3, 6, 9, 12], x1: 92, y1: 8, x2: 8, y2: 92 }
+      { name: "第 1 組", border: "#fda4af", badge: "#e11d48" },
+      { name: "第 2 組", border: "#fcd34d", badge: "#d97706" },
+      { name: "第 3 組", border: "#6ee7b7", badge: "#059669" },
+      { name: "第 4 組", border: "#93c5fd", badge: "#2563eb" },
+      { name: "第 5 組", border: "#d8b4fe", badge: "#7c3aed" }
     ];
 
     let state = {
       workerUrl: DEFAULT_WORKER_URL,
-      groupCount: 4,
+      gridSize: 16,             // 9 | 16 | 25
+      groupCount: 4,            // 2 | 3 | 4 | 5
       currentNum: 1,
-      questionStatus: {}, // { 1: 'correct' | 'wrong' }
-      groups: [],         // [{ name, numbers: [1..16], lineCount: 0 }]
+      revealedQuestions: {},    // { [num]: true } 記錄該題是否已公布答案
+      groups: [],               // [{ name, numbers, picks: { [num]: 'A' }, cellStatus: { [num]: 'correct'|'wrong' }, lineCount: 0 }]
       unitSets: [
-        { id: 1, title: "預設範例題庫（綜合問答 16 題）", questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)) }
+        { id: 1, title: "預設範例題庫（選擇＋是非 25 題）", questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)) }
       ],
       currentUnitIndex: 0
     };
 
     // ==========================================
-    // 2. 工具函式：隨機洗牌、音效合成、TTS 語音
+    // 2. 工具函式：動態連線座標、隨機洗牌、音效、TTS
     // ==========================================
-    function generateShuffled16() {
-      const arr = Array.from({ length: 16 }, (_, i) => i + 1);
+    function generateShuffledNumbers(size) {
+      const arr = Array.from({ length: size }, (_, i) => i + 1);
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -1010,12 +1195,70 @@
       return arr;
     }
 
+    function getBingoLinesForSize(size) {
+      const dim = Math.round(Math.sqrt(size));
+      const lines = [];
+      const centerPos = (idx) => Number((((idx + 0.5) / dim) * 100).toFixed(2));
+
+      // 橫線
+      for (let r = 0; r < dim; r++) {
+        const indices = [];
+        for (let c = 0; c < dim; c++) indices.push(r * dim + c);
+        const y = centerPos(r);
+        lines.push({ indices, x1: 6, y1: y, x2: 94, y2: y });
+      }
+      // 直線
+      for (let c = 0; c < dim; c++) {
+        const indices = [];
+        for (let r = 0; r < dim; r++) indices.push(r * dim + c);
+        const x = centerPos(c);
+        lines.push({ indices, x1: x, y1: 6, x2: x, y2: 94 });
+      }
+      // 主對角線 (左上 -> 右下)
+      const diag1 = [];
+      for (let i = 0; i < dim; i++) diag1.push(i * dim + i);
+      lines.push({ indices: diag1, x1: 7, y1: 7, x2: 93, y2: 93 });
+
+      // 副對角線 (右上 -> 左下)
+      const diag2 = [];
+      for (let i = 0; i < dim; i++) diag2.push(i * dim + (dim - 1 - i));
+      lines.push({ indices: diag2, x1: 93, y1: 7, x2: 7, y2: 93 });
+
+      return lines;
+    }
+
+    function normalizeQuestion(q, indexNum) {
+      const num = q?.num || indexNum;
+      const type = q?.type === 'tf' ? 'tf' : 'mc';
+      const text = q?.text || `第 ${num} 題`;
+      const lang = q?.lang === 'en-US' ? 'en-US' : 'zh-TW';
+
+      if (type === 'tf') {
+        const ans = (q?.answer === 'X' || q?.answer === '非' || q?.answer === 'false') ? 'X' : 'O';
+        return { num, type: 'tf', text, options: ['是', '非'], answer: ans, lang };
+      } else {
+        const opts = Array.isArray(q?.options) && q.options.length === 4
+          ? q.options
+          : [q?.answer || '選項 A', '選項 B', '選項 C', '選項 D'];
+        const ans = ['A', 'B', 'C', 'D'].includes(q?.answer) ? q.answer : 'A';
+        return { num, type: 'mc', text, options: opts, answer: ans, lang };
+      }
+    }
+
+    function normalizeQuestionsArray(arr) {
+      const result = [];
+      for (let i = 1; i <= 25; i++) {
+        const found = Array.isArray(arr) ? arr.find(item => Number(item.num) === i) : null;
+        result.push(normalizeQuestion(found || DEFAULT_QUESTIONS[i - 1], i));
+      }
+      return result;
+    }
+
     function playSoundEffect(type) {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const now = ctx.currentTime;
         if (type === 'correct') {
-          // 歡快上揚和弦 (C5 - E5 - G5 - C6)
           [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -1028,24 +1271,21 @@
             osc.start(now + idx * 0.09);
             osc.stop(now + idx * 0.09 + 0.36);
           });
-        } else if (type === 'wrong') {
-          // 低音提示 (G3 -> Eb3)
-          [196.0, 155.56].forEach((freq, idx) => {
+        } else {
+          [220.0, 174.61].forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = 'sawtooth';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.14, now + idx * 0.18);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.3);
+            gain.gain.setValueAtTime(0.14, now + idx * 0.16);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.28);
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.start(now + idx * 0.18);
-            osc.stop(now + idx * 0.18 + 0.32);
+            osc.start(now + idx * 0.16);
+            osc.stop(now + idx * 0.16 + 0.3);
           });
         }
-      } catch (e) {
-        // 忽略瀏覽器未解鎖音效的狀況
-      }
+      } catch (e) {}
     }
 
     function speakCurrentQuestion() {
@@ -1057,7 +1297,11 @@
       if (!qObj || !qObj.text) return;
 
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(qObj.text);
+      let speakStr = qObj.text;
+      if (qObj.type === 'mc' && Array.isArray(qObj.options)) {
+        speakStr += `。選項 A：${qObj.options[0]}，選項 B：${qObj.options[1]}，選項 C：${qObj.options[2]}，選項 D：${qObj.options[3]}`;
+      }
+      const utter = new SpeechSynthesisUtterance(speakStr);
       utter.lang = qObj.lang || 'zh-TW';
       utter.rate = parseFloat(document.getElementById('ttsRateSelect').value) || 1.0;
       window.speechSynthesis.speak(utter);
@@ -1075,6 +1319,31 @@
       return unit ? unit.questions : DEFAULT_QUESTIONS;
     }
 
+    function ensureGroupsStructure() {
+      if (![9, 16, 25].includes(state.gridSize)) state.gridSize = 16;
+      if (!Array.isArray(state.groups) || state.groups.length < 5) {
+        state.groups = GROUP_PALETTES.map(p => ({
+          name: p.name,
+          numbers: generateShuffledNumbers(state.gridSize),
+          picks: {},
+          cellStatus: {},
+          lineCount: 0
+        }));
+      } else {
+        state.groups.forEach((g, idx) => {
+          if (!g.name) g.name = GROUP_PALETTES[idx].name;
+          if (!Array.isArray(g.numbers) || g.numbers.length !== state.gridSize) {
+            g.numbers = generateShuffledNumbers(state.gridSize);
+          }
+          if (!g.picks || typeof g.picks !== 'object') g.picks = {};
+          if (!g.cellStatus || typeof g.cellStatus !== 'object') g.cellStatus = {};
+        });
+      }
+      state.unitSets.forEach(u => {
+        u.questions = normalizeQuestionsArray(u.questions);
+      });
+    }
+
     function saveLocalState() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1089,14 +1358,7 @@
           state = { ...state, ...parsed };
         }
       } catch (e) {}
-
-      if (!Array.isArray(state.groups) || state.groups.length < 5) {
-        state.groups = GROUP_PALETTES.map(p => ({
-          name: p.name,
-          numbers: generateShuffled16(),
-          lineCount: 0
-        }));
-      }
+      ensureGroupsStructure();
     }
 
     async function fetchCloudUnits() {
@@ -1107,7 +1369,10 @@
         const res = await fetch(`${state.workerUrl.replace(/\/$/, '')}/api/sets`);
         const data = await res.json();
         if (data && data.ok && Array.isArray(data.sets) && data.sets.length > 0) {
-          state.unitSets = data.sets;
+          state.unitSets = data.sets.map(s => ({
+            ...s,
+            questions: normalizeQuestionsArray(s.questions)
+          }));
           if (state.currentUnitIndex >= state.unitSets.length) {
             state.currentUnitIndex = 0;
           }
@@ -1146,13 +1411,19 @@
     }
 
     // ==========================================
-    // 4. 畫面渲染邏輯 (題目、1~16 選題區、各組賓果盤 + SVG 畫線)
+    // 4. 畫面渲染邏輯
     // ==========================================
     function renderAll() {
       const unit = getCurrentUnit();
       document.getElementById('currentUnitBadge').textContent = unit ? unit.title : '預設題庫';
 
-      // 分組按鈕狀態
+      // 題數按鈕狀態 (9 / 16 / 25)
+      [9, 16, 25].forEach(sz => {
+        const btn = document.getElementById(`sizeBtn${sz}`);
+        if (btn) btn.classList.toggle('active', state.gridSize === sz);
+      });
+
+      // 分組按鈕狀態 (2 ~ 5)
       [2, 3, 4, 5].forEach(n => {
         const btn = document.getElementById(`grpBtn${n}`);
         if (btn) btn.classList.toggle('active', state.groupCount === n);
@@ -1165,67 +1436,87 @@
 
     function renderQuestionStage() {
       const questions = getCurrentQuestions();
-      const qObj = questions.find(q => q.num === state.currentNum) || {
-        num: state.currentNum,
-        text: `第 ${state.currentNum} 題`,
-        answer: ''
-      };
+      const qObj = questions.find(q => q.num === state.currentNum) || normalizeQuestion(null, state.currentNum);
+      const isRevealed = !!state.revealedQuestions[qObj.num];
 
       document.getElementById('activeQNumber').textContent = `第 ${qObj.num} 題`;
+      document.getElementById('activeQType').textContent = qObj.type === 'tf' ? '是非題 (⭕/❌)' : '選擇題 (A/B/C/D)';
       document.getElementById('questionTextDisplay').textContent = qObj.text;
 
-      const ansBox = document.getElementById('answerRevealBox');
-      ansBox.textContent = qObj.answer ? `💡 參考答案：${qObj.answer}` : '💡（本題未設定參考答案）';
-      ansBox.classList.remove('visible');
-
-      const st = state.questionStatus[qObj.num];
-      const tag = document.getElementById('activeQStatus');
-      if (st === 'correct') {
-        tag.textContent = '✓ 已答對（各組已亮燈）';
-        tag.style.background = '#d1fae5';
-        tag.style.color = '#065f46';
-      } else if (st === 'wrong') {
-        tag.textContent = '✗ 曾答錯（可再次挑戰）';
-        tag.style.background = '#fef3c7';
-        tag.style.color = '#92400e';
+      const statusTag = document.getElementById('activeQStatus');
+      if (isRevealed) {
+        const ansLabel = qObj.type === 'tf'
+          ? (qObj.answer === 'O' ? '⭕ 是' : '❌ 非')
+          : `${qObj.answer}`;
+        statusTag.textContent = `✓ 已公布答案（正解：${ansLabel}）`;
+        statusTag.style.background = '#d1fae5';
+        statusTag.style.color = '#065f46';
       } else {
-        tag.textContent = '尚未作答';
-        tag.style.background = '#e2e8f0';
-        tag.style.color = '#475569';
+        statusTag.textContent = '請各組點選下方答案後，按「老師公布答案」';
+        statusTag.style.background = '#fef3c7';
+        statusTag.style.color = '#92400e';
+      }
+
+      // 渲染題目選項卡片
+      const optsContainer = document.getElementById('questionOptionsContainer');
+      if (qObj.type === 'tf') {
+        optsContainer.className = 'question-options-grid cols-2';
+        const tfList = [
+          { key: 'O', label: '⭕ 是 (True)' },
+          { key: 'X', label: '❌ 非 (False)' }
+        ];
+        optsContainer.innerHTML = tfList.map(item => {
+          const isRight = isRevealed && qObj.answer === item.key;
+          return `<div class="q-option-card ${isRight ? 'correct-revealed' : ''}">${item.label}</div>`;
+        }).join('');
+      } else {
+        optsContainer.className = 'question-options-grid cols-4';
+        const keys = ['A', 'B', 'C', 'D'];
+        optsContainer.innerHTML = keys.map((k, idx) => {
+          const optText = (qObj.options && qObj.options[idx]) ? qObj.options[idx] : `選項 ${k}`;
+          const isRight = isRevealed && qObj.answer === k;
+          return `<div class="q-option-card ${isRight ? 'correct-revealed' : ''}">(${k}) ${optText}</div>`;
+        }).join('');
       }
     }
 
     function renderSelectorGrid() {
-      const grid = document.getElementById('questionSelectorGrid');
-      let correctCount = 0;
+      const dim = Math.round(Math.sqrt(state.gridSize));
+      document.getElementById('selectorTitle').textContent = `🔢 題號選擇區 (${dim}×${dim})`;
 
+      const grid = document.getElementById('questionSelectorGrid');
+      grid.className = `selector-grid dim-${dim}`;
+
+      let revealedCount = 0;
       let html = '';
-      for (let num = 1; num <= 16; num++) {
-        const st = state.questionStatus[num];
-        if (st === 'correct') correctCount++;
+
+      for (let num = 1; num <= state.gridSize; num++) {
+        const isRev = !!state.revealedQuestions[num];
+        if (isRev) revealedCount++;
         const isCurrent = state.currentNum === num;
 
         let cls = 'q-num-btn';
         if (isCurrent) cls += ' current';
-        if (st === 'correct') cls += ' answered-correct';
-        else if (st === 'wrong') cls += ' answered-wrong';
+        else if (isRev) cls += ' revealed';
 
-        const label = st === 'correct' ? `${num} ✓` : num;
+        const label = isRev ? `${num}✓` : num;
         html += `<button type="button" class="${cls}" onclick="selectQuestionNumber(${num})">${label}</button>`;
       }
 
       grid.innerHTML = html;
-      document.getElementById('progressCounter').textContent = `已答對 ${correctCount} / 16 題`;
+      document.getElementById('progressCounter').textContent = `已公布 ${revealedCount} / ${state.gridSize} 題`;
     }
 
-    function evaluateBoardLines(numbers) {
+    function evaluateGroupLines(grp) {
+      const lines = getBingoLinesForSize(state.gridSize);
       const completedLines = [];
       const cellsInLines = new Set();
 
-      BINGO_LINES.forEach(line => {
+      lines.forEach(line => {
+        // 只有狀態為 'correct' (答對亮綠燈) 的格子才擁有連線權利！
         const isComplete = line.indices.every(idx => {
-          const num = numbers[idx];
-          return state.questionStatus[num] === 'correct';
+          const num = grp.numbers[idx];
+          return grp.cellStatus[num] === 'correct';
         });
         if (isComplete) {
           completedLines.push(line);
@@ -1237,29 +1528,67 @@
     }
 
     function renderGroupBoards() {
+      const dim = Math.round(Math.sqrt(state.gridSize));
       const container = document.getElementById('groupsContainer');
       container.className = `groups-section groups-count-${state.groupCount}`;
+
+      const questions = getCurrentQuestions();
+      const qObj = questions.find(q => q.num === state.currentNum) || normalizeQuestion(null, state.currentNum);
+      const isCurrentRevealed = !!state.revealedQuestions[state.currentNum];
+      const choices = qObj.type === 'tf' ? ['O', 'X'] : ['A', 'B', 'C', 'D'];
 
       let html = '';
       for (let i = 0; i < state.groupCount; i++) {
         const grp = state.groups[i];
         const palette = GROUP_PALETTES[i];
-        const { completedLines, cellsInLines } = evaluateBoardLines(grp.numbers);
+        const { completedLines, cellsInLines } = evaluateGroupLines(grp);
         grp.lineCount = completedLines.length;
 
         const hasBingoClass = completedLines.length > 0 ? 'has-bingo' : '';
         const lineBadgeClass = completedLines.length > 0 ? 'line-counter active-lines' : 'line-counter';
+        const curPick = grp.picks[state.currentNum] || '';
 
+        // 渲染該組的作答按鈕區 (A/B/C/D 或 ⭕/❌)
+        const choiceButtonsHtml = choices.map(c => {
+          const isPicked = curPick === c;
+          let btnCls = 'choice-btn';
+          if (isCurrentRevealed) {
+            if (isPicked && c === qObj.answer) btnCls += ' judged-correct';
+            else if (isPicked && c !== qObj.answer) btnCls += ' judged-wrong';
+          } else if (isPicked) {
+            btnCls += ' picked';
+          }
+          const disp = c === 'O' ? '⭕ 是' : c === 'X' ? '❌ 非' : c;
+          return `<button type="button" class="${btnCls}" onclick="setGroupPick(${i}, '${c}')">${disp}</button>`;
+        }).join('');
+
+        let pickStatusText = '尚未作答';
+        if (curPick) {
+          const dispPick = curPick === 'O' ? '⭕' : curPick === 'X' ? '❌' : curPick;
+          if (isCurrentRevealed) {
+            pickStatusText = curPick === qObj.answer ? `已選 ${dispPick}（🟢 答對）` : `已選 ${dispPick}（🔴 答錯）`;
+          } else {
+            pickStatusText = `已選：${dispPick}`;
+          }
+        } else if (isCurrentRevealed) {
+          pickStatusText = '未作答（🔴 算錯）';
+        }
+
+        // 渲染該組的 N×N 賓果盤格子
         const cellsHtml = grp.numbers.map((num, idx) => {
-          const isLit = state.questionStatus[num] === 'correct';
-          const isCurrent = state.currentNum === num && !isLit;
+          const st = grp.cellStatus[num]; // 'correct' | 'wrong' | undefined
+          const isCurrent = state.currentNum === num && !st;
           const isInLine = cellsInLines.has(idx);
 
           let cellCls = 'bingo-cell';
-          let inlineStyle = '';
-          if (isLit) {
-            cellCls += ' lit';
-            inlineStyle = `background:${palette.cellLit};border-color:${palette.badge};`;
+          let label = num;
+
+          if (st === 'correct') {
+            cellCls += ' status-correct';
+            label = state.gridSize === 25 ? `${num}✓` : `${num} ✓`;
+          } else if (st === 'wrong') {
+            cellCls += ' status-wrong';
+            label = state.gridSize === 25 ? `${num}✗` : `${num} ✗`;
           } else if (isCurrent) {
             cellCls += ' current-highlight';
           }
@@ -1267,10 +1596,10 @@
             cellCls += ' in-line';
           }
 
-          return `<div class="${cellCls}" style="${inlineStyle}" onclick="selectQuestionNumber(${num})" title="點擊切換至第 ${num} 題">${num}</div>`;
+          return `<div class="${cellCls}" onclick="onCellClick(${i}, ${num})" title="第 ${num} 題（點擊可切換至此題）">${label}</div>`;
         }).join('');
 
-        // 產生連線 SVG 畫線標示
+        // 渲染 SVG 連線紅線
         const svgLinesHtml = completedLines.map(line => `
           <line class="bingo-line-bg" x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}" />
           <line class="bingo-line-fg" x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}" />
@@ -1286,8 +1615,21 @@
                 🏆 連線：${completedLines.length} 條
               </span>
             </div>
+
+            <!-- 每個組別專屬的作答區 -->
+            <div class="group-answer-box">
+              <div class="group-answer-header">
+                <span>第 ${state.currentNum} 題作答：</span>
+                <span style="color:#1e40af;">${pickStatusText}</span>
+              </div>
+              <div class="group-choice-grid cols-${choices.length}">
+                ${choiceButtonsHtml}
+              </div>
+            </div>
+
+            <!-- N×N 賓果盤 + SVG 連線標示 -->
             <div class="bingo-board-wrap">
-              <div class="bingo-grid">
+              <div class="bingo-grid dim-${dim}">
                 ${cellsHtml}
               </div>
               <svg class="bingo-lines-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -1302,7 +1644,7 @@
     }
 
     // ==========================================
-    // 5. 互動操作：選題、答對/答錯彈窗、分組與洗牌
+    // 5. 互動操作：選題、各組作答、老師公布答案與批改
     // ==========================================
     function selectQuestionNumber(num) {
       state.currentNum = num;
@@ -1315,38 +1657,55 @@
       }
     }
 
-    function pickRandomUnanswered() {
-      const remaining = [];
-      for (let n = 1; n <= 16; n++) {
-        if (state.questionStatus[n] !== 'correct') remaining.push(n);
-      }
-      if (remaining.length === 0) {
-        alert('🎉 16 道題目已經全部答對囉！可以點選右上角「🔄 新局重置」開始下一局。');
-        return;
-      }
-      const chosen = remaining[Math.floor(Math.random() * remaining.length)];
-      selectQuestionNumber(chosen);
+    function onCellClick(groupIndex, num) {
+      selectQuestionNumber(num);
     }
 
-    function toggleAnswerReveal() {
-      const ansBox = document.getElementById('answerRevealBox');
-      ansBox.classList.toggle('visible');
-    }
-
-    function handleJudgeResult(isCorrect) {
+    function setGroupPick(groupIndex, choice) {
       const num = state.currentNum;
+      state.groups[groupIndex].picks[num] = choice;
 
-      // 記錄原本各組的連線數，用來檢查是否有新連線產生
-      const prevLines = state.groups.slice(0, state.groupCount).map(g => evaluateBoardLines(g.numbers).completedLines.length);
+      // 如果這題已經公布過答案，老師再幫該組改答案時，即時重算該格對錯狀態！
+      if (state.revealedQuestions[num]) {
+        const qObj = getCurrentQuestions().find(q => q.num === num) || normalizeQuestion(null, num);
+        state.groups[groupIndex].cellStatus[num] = (choice === qObj.answer) ? 'correct' : 'wrong';
+      }
 
-      if (isCorrect) {
-        state.questionStatus[num] = 'correct';
-        playSoundEffect('correct');
-      } else {
-        if (state.questionStatus[num] !== 'correct') {
-          state.questionStatus[num] = 'wrong';
+      saveLocalState();
+      renderAll();
+    }
+
+    function revealAndJudgeCurrentQuestion() {
+      const num = state.currentNum;
+      const qObj = getCurrentQuestions().find(q => q.num === num) || normalizeQuestion(null, num);
+
+      // 檢查是否有組別尚未作答
+      const activeGroups = state.groups.slice(0, state.groupCount);
+      const unpickedGroups = activeGroups.filter(g => !g.picks[num]);
+      if (unpickedGroups.length > 0 && !state.revealedQuestions[num]) {
+        const names = unpickedGroups.map(g => g.name).join('、');
+        if (!confirm(`還有組別尚未點選答案（${names}），未作答將視為答錯。\n確定現在要公布第 ${num} 題的答案嗎？`)) {
+          return;
         }
-        playSoundEffect('wrong');
+      }
+
+      // 記錄批改前各組的連線數
+      const prevLines = activeGroups.map(g => evaluateGroupLines(g).completedLines.length);
+
+      state.revealedQuestions[num] = true;
+      const correctGroups = [];
+      const wrongGroups = [];
+
+      for (let i = 0; i < state.groupCount; i++) {
+        const grp = state.groups[i];
+        const pick = grp.picks[num];
+        if (pick === qObj.answer) {
+          grp.cellStatus[num] = 'correct';
+          correctGroups.push(grp.name);
+        } else {
+          grp.cellStatus[num] = 'wrong';
+          wrongGroups.push(grp.name);
+        }
       }
 
       saveLocalState();
@@ -1354,46 +1713,49 @@
 
       // 檢查哪些組別新增了連線
       const newlyBingoGroups = [];
-      if (isCorrect) {
-        for (let i = 0; i < state.groupCount; i++) {
-          const newCount = evaluateBoardLines(state.groups[i].numbers).completedLines.length;
-          if (newCount > prevLines[i]) {
-            newlyBingoGroups.push(`${state.groups[i].name}（共 ${newCount} 條線）`);
-          }
+      for (let i = 0; i < state.groupCount; i++) {
+        const newCount = evaluateGroupLines(state.groups[i]).completedLines.length;
+        if (newCount > prevLines[i]) {
+          newlyBingoGroups.push(`${state.groups[i].name}（共 ${newCount} 條線）`);
         }
       }
 
-      showFeedbackModal(isCorrect, num, newlyBingoGroups);
+      if (correctGroups.length > 0) {
+        playSoundEffect('correct');
+      } else {
+        playSoundEffect('wrong');
+      }
+
+      showRevealFeedbackModal(qObj, correctGroups, wrongGroups, newlyBingoGroups);
     }
 
-    function showFeedbackModal(isCorrect, num, newlyBingoGroups) {
+    function showRevealFeedbackModal(qObj, correctGroups, wrongGroups, newlyBingoGroups) {
       const dialog = document.getElementById('feedbackDialog');
-      const card = document.getElementById('feedbackCard');
       const icon = document.getElementById('feedbackIcon');
       const title = document.getElementById('feedbackTitle');
-      const sub = document.getElementById('feedbackSub');
+      const ansBadge = document.getElementById('feedbackCorrectAns');
+      const rightBox = document.getElementById('feedbackCorrectGroups');
+      const wrongBox = document.getElementById('feedbackWrongGroups');
       const alertBox = document.getElementById('newBingoAlert');
 
-      const qObj = getCurrentQuestions().find(q => q.num === num);
-      const ansText = qObj && qObj.answer ? `（正確答案：${qObj.answer}）` : '';
+      icon.textContent = correctGroups.length > 0 ? '🎉' : '📢';
+      title.textContent = `第 ${qObj.num} 題・答案公布！`;
 
-      if (isCorrect) {
-        card.className = 'feedback-card correct-theme';
-        icon.textContent = '🎉';
-        title.textContent = `第 ${num} 題・答對了！`;
-        sub.textContent = `太棒了！所有組別賓果盤上的「數字 ${num}」已經一起變色亮起！${ansText}`;
-
-        if (newlyBingoGroups.length > 0) {
-          alertBox.textContent = `🎊 賓果連線成功：${newlyBingoGroups.join('、')}！`;
-          alertBox.classList.add('show');
-        } else {
-          alertBox.classList.remove('show');
-        }
+      if (qObj.type === 'tf') {
+        ansBadge.textContent = `正確答案：${qObj.answer === 'O' ? '⭕ 是 (True)' : '❌ 非 (False)'}`;
       } else {
-        card.className = 'feedback-card wrong-theme';
-        icon.textContent = '💪';
-        title.textContent = `第 ${num} 題・答錯了！`;
-        sub.textContent = `別灰心，再接再厲！返回主畫面後可請其他組別挑戰或重試。`;
+        const idx = ['A', 'B', 'C', 'D'].indexOf(qObj.answer);
+        const optText = (qObj.options && qObj.options[idx]) ? qObj.options[idx] : '';
+        ansBadge.textContent = `正確答案：(${qObj.answer}) ${optText}`;
+      }
+
+      rightBox.textContent = correctGroups.length > 0 ? correctGroups.join('、') : '（本題無組別答對）';
+      wrongBox.textContent = wrongGroups.length > 0 ? wrongGroups.join('、') : '（全數答對！）';
+
+      if (newlyBingoGroups.length > 0) {
+        alertBox.textContent = `🎊 賓果連線成功：${newlyBingoGroups.join('、')}！`;
+        alertBox.classList.add('show');
+      } else {
         alertBox.classList.remove('show');
       }
 
@@ -1402,6 +1764,38 @@
 
     function closeFeedbackDialog() {
       document.getElementById('feedbackDialog').close();
+    }
+
+    function pickRandomUnanswered() {
+      const remaining = [];
+      for (let n = 1; n <= state.gridSize; n++) {
+        if (!state.revealedQuestions[n]) remaining.push(n);
+      }
+      if (remaining.length === 0) {
+        alert(`🎉 全部 ${state.gridSize} 道題目都已經公布過答案囉！可點選「🔄 新局重置」開始下一局。`);
+        return;
+      }
+      const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+      selectQuestionNumber(chosen);
+    }
+
+    function changeGridSize(newSize) {
+      if (state.gridSize === newSize) return;
+      const hasProgress = Object.keys(state.revealedQuestions).length > 0;
+      if (hasProgress && !confirm(`切換為 ${newSize} 題規格將會重新洗牌各組賓果盤並重置本局進度，確定要切換嗎？`)) {
+        return;
+      }
+      state.gridSize = newSize;
+      state.currentNum = 1;
+      state.revealedQuestions = {};
+      state.groups.forEach(g => {
+        g.numbers = generateShuffledNumbers(newSize);
+        g.picks = {};
+        g.cellStatus = {};
+        g.lineCount = 0;
+      });
+      saveLocalState();
+      renderAll();
     }
 
     function changeGroupCount(count) {
@@ -1421,24 +1815,29 @@
     }
 
     function shuffleAllBoards() {
-      if (!confirm('確定要重新隨機排列所有組別的 1～16 賓果數字嗎？')) return;
+      if (!confirm(`確定要重新隨機排列所有組別的 1～${state.gridSize} 賓果數字嗎？`)) return;
       state.groups.forEach(g => {
-        g.numbers = generateShuffled16();
+        g.numbers = generateShuffledNumbers(state.gridSize);
       });
       saveLocalState();
       renderAll();
     }
 
     function resetGameProgress() {
-      if (!confirm('確定要清除本局已答題的變色紀錄，重新開始新的一局嗎？')) return;
-      state.questionStatus = {};
+      if (!confirm('確定要清除本局各組作答與對錯紀錄，重新開始新的一局嗎？')) return;
+      state.revealedQuestions = {};
       state.currentNum = 1;
+      state.groups.forEach(g => {
+        g.picks = {};
+        g.cellStatus = {};
+        g.lineCount = 0;
+      });
       saveLocalState();
       renderAll();
     }
 
     // ==========================================
-    // 6. 老師題庫管理後台
+    // 6. 老師題庫管理後台 (1~25 題，支援選擇題 & 是非題)
     // ==========================================
     function openEditorDialog() {
       document.getElementById('workerUrlInput').value = state.workerUrl || DEFAULT_WORKER_URL;
@@ -1469,24 +1868,71 @@
       renderAll();
     }
 
+    function onEditorQTypeChange(num) {
+      const typeVal = document.getElementById(`editQType_${num}`).value;
+      const optsRow = document.getElementById(`editQOptsRow_${num}`);
+      const ansSelect = document.getElementById(`editQAns_${num}`);
+
+      if (typeVal === 'tf') {
+        optsRow.classList.add('hidden');
+        ansSelect.innerHTML = `
+          <option value="O">正解：⭕ 是</option>
+          <option value="X">正解：❌ 非</option>
+        `;
+      } else {
+        optsRow.classList.remove('hidden');
+        ansSelect.innerHTML = `
+          <option value="A">正解：A</option>
+          <option value="B">正解：B</option>
+          <option value="C">正解：C</option>
+          <option value="D">正解：D</option>
+        `;
+      }
+    }
+
     function renderEditorInputs() {
-      const questions = getCurrentQuestions();
-      const container = document.getElementById('editorQuestionsGrid');
+      const questions = normalizeQuestionsArray(getCurrentQuestions());
+      const container = document.getElementById('editorQuestionsList');
       let html = '';
 
-      for (let i = 1; i <= 16; i++) {
-        const q = questions.find(item => item.num === i) || { num: i, text: '', answer: '', lang: 'zh-TW' };
+      for (let i = 1; i <= 25; i++) {
+        const q = questions[i - 1];
         const safeText = (q.text || '').replace(/"/g, '&quot;');
-        const safeAns = (q.answer || '').replace(/"/g, '&quot;');
+        const opts = q.options || ['選項 A', '選項 B', '選項 C', '選項 D'];
+        const isTf = q.type === 'tf';
+
+        const ansOptionsHtml = isTf
+          ? `<option value="O" ${q.answer === 'O' ? 'selected' : ''}>正解：⭕ 是</option>
+             <option value="X" ${q.answer === 'X' ? 'selected' : ''}>正解：❌ 非</option>`
+          : `<option value="A" ${q.answer === 'A' ? 'selected' : ''}>正解：A</option>
+             <option value="B" ${q.answer === 'B' ? 'selected' : ''}>正解：B</option>
+             <option value="C" ${q.answer === 'C' ? 'selected' : ''}>正解：C</option>
+             <option value="D" ${q.answer === 'D' ? 'selected' : ''}>正解：D</option>`;
+
         html += `
-          <div class="q-edit-row">
-            <span class="q-edit-num">#${i}</span>
-            <input type="text" id="editQText_${i}" value="${safeText}" placeholder="輸入第 ${i} 題題目...">
-            <input type="text" id="editQAns_${i}" value="${safeAns}" placeholder="答案(選填)">
-            <select id="editQLang_${i}">
-              <option value="zh-TW" ${q.lang !== 'en-US' ? 'selected' : ''}>中文語音</option>
-              <option value="en-US" ${q.lang === 'en-US' ? 'selected' : ''}>英文語音</option>
-            </select>
+          <div class="q-edit-card">
+            <div class="q-edit-top">
+              <span class="q-edit-num">#${i}</span>
+              <select id="editQType_${i}" onchange="onEditorQTypeChange(${i})">
+                <option value="mc" ${!isTf ? 'selected' : ''}>選擇題(A~D)</option>
+                <option value="tf" ${isTf ? 'selected' : ''}>是非題(⭕/❌)</option>
+              </select>
+              <input type="text" id="editQText_${i}" value="${safeText}" placeholder="輸入第 ${i} 題題目...">
+              <select id="editQAns_${i}">
+                ${ansOptionsHtml}
+              </select>
+              <select id="editQLang_${i}">
+                <option value="zh-TW" ${q.lang !== 'en-US' ? 'selected' : ''}>中文語音</option>
+                <option value="en-US" ${q.lang === 'en-US' ? 'selected' : ''}>英文語音</option>
+              </select>
+            </div>
+            <div id="editQOptsRow_${i}" class="q-edit-opts ${isTf ? 'hidden' : ''}">
+              <span style="font-size:0.75rem;color:var(--text-muted);text-align:right;">選項：</span>
+              <input type="text" id="editQOptA_${i}" value="${(opts[0] || '').replace(/"/g, '&quot;')}" placeholder="(A) 選項內容">
+              <input type="text" id="editQOptB_${i}" value="${(opts[1] || '').replace(/"/g, '&quot;')}" placeholder="(B) 選項內容">
+              <input type="text" id="editQOptC_${i}" value="${(opts[2] || '').replace(/"/g, '&quot;')}" placeholder="(C) 選項內容">
+              <input type="text" id="editQOptD_${i}" value="${(opts[3] || '').replace(/"/g, '&quot;')}" placeholder="(D) 選項內容">
+            </div>
           </div>
         `;
       }
@@ -1501,16 +1947,38 @@
       const raw = document.getElementById('batchPasteTextarea').value.trim();
       if (!raw) return;
       const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
-      lines.slice(0, 16).forEach((line, idx) => {
+
+      lines.slice(0, 25).forEach((line, idx) => {
         const num = idx + 1;
-        const parts = line.split(/[\t,，]/);
-        const qText = (parts[0] || '').trim();
-        const qAns = (parts.slice(1).join(' ') || '').trim();
+        const parts = line.split(/[\t,，]/).map(s => s.trim());
         const textInput = document.getElementById(`editQText_${num}`);
-        const ansInput = document.getElementById(`editQAns_${num}`);
-        if (textInput && qText) textInput.value = qText;
-        if (ansInput && qAns) ansInput.value = qAns;
+        const typeSelect = document.getElementById(`editQType_${num}`);
+        const ansSelect = document.getElementById(`editQAns_${num}`);
+
+        if (!textInput || parts.length === 0) return;
+        textInput.value = parts[0];
+
+        if (parts.length >= 6) {
+          // 選擇題：題目,A,B,C,D,正解
+          typeSelect.value = 'mc';
+          onEditorQTypeChange(num);
+          document.getElementById(`editQOptA_${num}`).value = parts[1];
+          document.getElementById(`editQOptB_${num}`).value = parts[2];
+          document.getElementById(`editQOptC_${num}`).value = parts[3];
+          document.getElementById(`editQOptD_${num}`).value = parts[4];
+          const ansUpper = (parts[5] || 'A').toUpperCase();
+          ansSelect.value = ['A', 'B', 'C', 'D'].includes(ansUpper) ? ansUpper : 'A';
+        } else if (parts.length >= 2) {
+          // 是非題：題目,O 或 題目,X
+          const p1 = parts[1].toUpperCase();
+          if (['O', 'X', '是', '非', 'TRUE', 'FALSE', '⭕', '❌'].includes(p1)) {
+            typeSelect.value = 'tf';
+            onEditorQTypeChange(num);
+            ansSelect.value = (['X', '非', 'FALSE', '❌'].includes(p1)) ? 'X' : 'O';
+          }
+        }
       });
+
       document.getElementById('batchPasteBox').classList.remove('open');
     }
 
@@ -1520,12 +1988,7 @@
       const newUnit = {
         id: null,
         title: name.trim(),
-        questions: Array.from({ length: 16 }, (_, i) => ({
-          num: i + 1,
-          text: `第 ${i + 1} 題題目`,
-          answer: '',
-          lang: 'zh-TW'
-        }))
+        questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS))
       };
       state.unitSets.push(newUnit);
       state.currentUnitIndex = state.unitSets.length - 1;
@@ -1561,11 +2024,25 @@
       unit.title = newTitle;
 
       const updatedQuestions = [];
-      for (let i = 1; i <= 16; i++) {
+      for (let i = 1; i <= 25; i++) {
+        const typeVal = document.getElementById(`editQType_${i}`).value;
         const textVal = document.getElementById(`editQText_${i}`).value.trim() || `第 ${i} 題`;
-        const ansVal = document.getElementById(`editQAns_${i}`).value.trim();
+        const ansVal = document.getElementById(`editQAns_${i}`).value;
         const langVal = document.getElementById(`editQLang_${i}`).value;
-        updatedQuestions.push({ num: i, text: textVal, answer: ansVal, lang: langVal });
+        const opts = [
+          document.getElementById(`editQOptA_${i}`).value.trim() || '選項 A',
+          document.getElementById(`editQOptB_${i}`).value.trim() || '選項 B',
+          document.getElementById(`editQOptC_${i}`).value.trim() || '選項 C',
+          document.getElementById(`editQOptD_${i}`).value.trim() || '選項 D'
+        ];
+        updatedQuestions.push({
+          num: i,
+          type: typeVal,
+          text: textVal,
+          options: typeVal === 'tf' ? ['是', '非'] : opts,
+          answer: ansVal,
+          lang: langVal
+        });
       }
       unit.questions = updatedQuestions;
 
@@ -1580,7 +2057,7 @@
     }
 
     // ==========================================
-    // 7. Dialog Light-Dismiss 相容性 Fallback (Safari 等)
+    // 7. Dialog Light-Dismiss 相容性 Fallback
     // ==========================================
     function setupDialogLightDismissFallback() {
       if (!('closedBy' in HTMLDialogElement.prototype)) {
@@ -1601,7 +2078,6 @@
       }
     }
 
-    // 啟動初始化
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalState();
       setupDialogLightDismissFallback();
