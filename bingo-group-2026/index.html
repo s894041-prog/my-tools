@@ -276,24 +276,57 @@
       background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
       border: 2px dashed #93c5fd;
       border-radius: 14px;
-      padding: 14px 18px;
+      padding: 12px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      gap: 12px;
+      gap: 10px;
+      min-height: 140px;
     }
 
     .question-text {
-      font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+      font-size: clamp(1.2rem, 2vw, 1.7rem);
       font-weight: 800;
       color: #0f172a;
       line-height: 1.38;
       word-break: break-word;
     }
 
-    /* 題目選項顯示區 (選擇題 4 格 / 是非題 2 格) */
+    /* 題目圖片顯示樣式 */
+    .question-image-wrap {
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 4px 0;
+    }
+
+    .question-img {
+      max-height: 220px;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      cursor: zoom-in;
+      background: #ffffff;
+      object-fit: contain;
+      transition: transform 0.18s;
+    }
+
+    .question-img:hover {
+      transform: scale(1.02);
+      border-color: var(--primary);
+    }
+
+    .zoom-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* 題目選項顯示區 */
     .question-options-grid {
       width: 100%;
       display: grid;
@@ -783,9 +816,30 @@
       display: block;
     }
 
+    /* 圖片放大檢視 Dialog */
+    .image-zoom-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 16px;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .image-zoom-img {
+      max-width: 86vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
     /* 老師題庫管理後台 Dialog */
     .editor-card {
-      width: min(980px, 95vw);
+      width: min(1040px, 96vw);
       max-height: 90vh;
       background: #ffffff;
       border-radius: 20px;
@@ -836,13 +890,13 @@
     .editor-questions-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .q-edit-card {
       background: #f8fafc;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
       border: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
@@ -854,6 +908,29 @@
       grid-template-columns: 42px 110px 1fr 110px 88px;
       gap: 6px;
       align-items: center;
+    }
+
+    .q-edit-image-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      font-size: 0.78rem;
+    }
+
+    .q-edit-image-row input[type="file"] {
+      display: none;
+    }
+
+    .image-thumb-preview {
+      width: 44px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1px solid #94a3b8;
     }
 
     .q-edit-opts {
@@ -886,7 +963,7 @@
       padding: 5px 0;
     }
 
-    .q-edit-card input, .q-edit-card select {
+    .q-edit-card input[type="text"], .q-edit-card select {
       padding: 6px 8px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
@@ -916,6 +993,32 @@
       border: 1px solid #94a3b8;
       font-size: 0.84rem;
       font-family: inherit;
+    }
+
+    .paste-preview-table-wrap {
+      max-height: 140px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 0.78rem;
+    }
+
+    .paste-preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .paste-preview-table th, .paste-preview-table td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .paste-preview-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 800;
     }
 
     .editor-footer {
@@ -970,7 +1073,7 @@
     </div>
   </header>
 
-  <!-- 上半部：左題目區 (含 TTS 語音與選項) + 右 N×N 選題區 -->
+  <!-- 上半部：左題目區 (含題目、圖片、TTS 語音與選項) + 右 N×N 選題區 -->
   <section class="upper-section">
     <!-- 左側題目與公布答案區 -->
     <div class="question-panel">
@@ -1002,6 +1105,11 @@
 
       <div class="question-stage">
         <div id="questionTextDisplay" class="question-text">請點選右側題號開始作答！</div>
+        <!-- 題目附圖容器 (點擊可放大) -->
+        <div id="questionImageContainer" class="question-image-wrap" style="display:none;">
+          <img id="questionImageElement" src="" alt="題目附圖" class="question-img" onclick="zoomCurrentImage()">
+          <span class="zoom-hint">🔍 點擊圖片可放大全螢幕檢視</span>
+        </div>
         <div id="questionOptionsContainer" class="question-options-grid cols-4">
           <!-- JS 動態渲染選擇題 A/B/C/D 或是非題 ⭕/❌ -->
         </div>
@@ -1071,13 +1179,21 @@
     </div>
   </dialog>
 
-  <!-- 老師改題目後台 Dialog (支援 light-dismiss) -->
+  <!-- 圖片全螢幕放大檢視 Dialog -->
+  <dialog id="imageZoomDialog" closedby="any">
+    <div class="image-zoom-card">
+      <img id="zoomedImageElement" src="" alt="放大題目圖片" class="image-zoom-img">
+      <button type="button" class="btn btn-outline" onclick="closeImageZoomDialog()">✕ 關閉大圖</button>
+    </div>
+  </dialog>
+
+  <!-- 老師改題目後台 Dialog (支援 1~25 題・圖片上傳/貼圖・選擇/是非・容錯批次貼上) -->
   <dialog id="editorDialog" closedby="any" aria-labelledby="editorDialogTitle">
     <div class="editor-card">
       <div class="editor-header">
         <div>
-          <h2 id="editorDialogTitle" style="font-size:1.1rem;font-weight:800;">⚙️ 老師題庫管理後台（支援 1～25 題・選擇題 / 是非題）</h2>
-          <p style="font-size:0.78rem;color:var(--text-muted);">修改後會自動儲存於瀏覽器本機（亦可選填自訂雲端 API）</p>
+          <h2 id="editorDialogTitle" style="font-size:1.1rem;font-weight:800;">⚙️ 老師題庫管理後台（支援題目附圖／截圖 ＆ 1～25 題）</h2>
+          <p style="font-size:0.78rem;color:var(--text-muted);">每題可直接點「貼上截圖 (Cmd+V)」放入數學圖形；修改後自動儲存於瀏覽器本機</p>
         </div>
         <div style="display:flex;gap:8px;">
           <button type="button" class="btn btn-outline" onclick="toggleBatchPaste()">📋 批次貼上題庫</button>
@@ -1095,22 +1211,40 @@
           <button type="button" class="btn btn-outline" style="color:#e11d48;" onclick="deleteCurrentUnit()">🗑️ 刪除單元</button>
         </div>
 
-        <!-- 批次貼上區 -->
+        <!-- 批次貼上區 (支援 Excel 複製、直線 | 分隔、含逗號題幹智慧倒數法) -->
         <div id="batchPasteBox" class="batch-paste-box">
           <div style="font-size:0.82rem;font-weight:700;color:#334155;line-height:1.5;">
-            請貼上題目（每行一題，最多 25 題，用逗號或 Tab 分隔）：<br>
-            • <strong>選擇題格式</strong>：<code>題目,選項A,選項B,選項C,選項D,正確答案(A/B/C/D)</code><br>
-            • <strong>是非題格式</strong>：<code>題目,O</code> 或 <code>題目,X</code>
+            貼上題目（每行一題，最多 25 題）：<br>
+            • <strong>從 Excel / Google 試算表直接整欄複製貼上（最推薦，題目逗號絕不跑位！）</strong><br>
+            • <strong>選擇題文字格式</strong>：<code>題目,選項A,選項B,選項C,選項D,正解(A/B/C/D)</code>（題幹內若有逗號會自動容錯，正解寫①②③④或A~D皆可）<br>
+            • <strong>是非題文字格式</strong>：<code>題目,O</code> 或 <code>題目,X</code>（或寫 是/非）
           </div>
-          <textarea id="batchPasteTextarea" placeholder="請問 Apple 的中文是什麼？,蘋果,香蕉,西瓜,草莓,A&#10;太陽從東方升起對嗎？,O"></textarea>
+          <textarea id="batchPasteTextarea" oninput="updateBatchPastePreview()" placeholder="下圖是平行四邊形，請問∠ㄅ是幾度？,60度,80度,100度,120度,B&#10;太陽每天都是從東方升起對嗎？,O"></textarea>
+          
+          <!-- 即時解析預覽表 -->
+          <div id="pastePreviewWrap" class="paste-preview-table-wrap" style="display:none;">
+            <table class="paste-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:36px;">題號</th>
+                  <th style="width:50px;">題型</th>
+                  <th>解析出的題目內容</th>
+                  <th style="width:160px;">選項預覽</th>
+                  <th style="width:40px;">答案</th>
+                </tr>
+              </thead>
+              <tbody id="pastePreviewTbody"></tbody>
+            </table>
+          </div>
+
           <div style="display:flex;justify-content:flex-end;gap:8px;">
-            <button type="button" class="btn btn-primary" onclick="applyBatchPaste()">✓ 套用至下方題庫</button>
+            <button type="button" class="btn btn-primary" onclick="applyBatchPaste()">✓ 確認套用至下方題庫</button>
           </div>
         </div>
 
         <!-- 1~25 題編輯表單 -->
         <div id="editorQuestionsList" class="editor-questions-list">
-          <!-- JS 動態渲染 1~25 題輸入框 -->
+          <!-- JS 動態渲染 1~25 題輸入框與圖片上傳/貼圖區 -->
         </div>
       </div>
 
@@ -1129,37 +1263,37 @@
 
   <script>
     // ==========================================
-    // 1. 預設 25 題題庫（選擇題 + 是非題混合示範）與全域狀態
+    // 1. 預設 25 題題庫與全域狀態 (支援 image 欄位)
     // ==========================================
     const STORAGE_KEY = 'classroom_bingo_state_v3';
     const DEFAULT_WORKER_URL = '';
 
     const DEFAULT_QUESTIONS = [
-      { num: 1, type: 'mc', text: "請問英文單字「Apple」的中文意思是什麼？", options: ["蘋果", "香蕉", "西瓜", "鳳梨"], answer: "A", lang: "zh-TW" },
-      { num: 2, type: 'mc', text: "請問英文單字「Banana」的中文意思是什麼？", options: ["草莓", "香蕉", "葡萄", "橘子"], answer: "B", lang: "zh-TW" },
-      { num: 3, type: 'mc', text: "請問數學「7 × 8」等於多少？", options: ["48", "54", "56", "64"], answer: "C", lang: "zh-TW" },
-      { num: 4, type: 'mc', text: "台灣最高的山是哪一座山？", options: ["阿里山", "合歡山", "雪山", "玉山"], answer: "D", lang: "zh-TW" },
-      { num: 5, type: 'tf', text: "太陽每天都是從「東方」升起、西方落下，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
-      { num: 6, type: 'mc', text: "請問英文單字「Elephant」是指哪一種動物？", options: ["獅子", "大象", "長頸鹿", "河馬"], answer: "B", lang: "zh-TW" },
-      { num: 7, type: 'tf', text: "一年之中總共有 7 個大月（31 天），請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
-      { num: 8, type: 'mc', text: "請問英文「Good morning」是什麼意思？", options: ["早安", "午安", "晚安", "再見"], answer: "A", lang: "zh-TW" },
-      { num: 9, type: 'mc', text: "請問「100 減去 37」等於多少？", options: ["53", "63", "67", "73"], answer: "B", lang: "zh-TW" },
-      { num: 10, type: 'tf', text: "水在一般標準大氣壓下，攝氏 0 度時會結冰，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
-      { num: 11, type: 'mc', text: "請問英文單字「Rainbow」的中文意思是什麼？", options: ["雲朵", "閃電", "彩虹", "暴風雨"], answer: "C", lang: "zh-TW" },
-      { num: 12, type: 'mc', text: "一個正方形總共有幾條對稱軸？", options: ["2 條", "3 條", "4 條", "8 條"], answer: "C", lang: "zh-TW" },
-      { num: 13, type: 'mc', text: "請問英文單字「Library」是指學校的哪個地方？", options: ["保健室", "操場", "音樂教室", "圖書館"], answer: "D", lang: "zh-TW" },
-      { num: 14, type: 'tf', text: "蜘蛛屬於昆蟲類，所以只有 6 隻腳，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
-      { num: 15, type: 'mc', text: "請問「9 × 6」等於多少？", options: ["45", "54", "56", "63"], answer: "B", lang: "zh-TW" },
-      { num: 16, type: 'mc', text: "發現火災時，應該撥打哪一個報案專線？", options: ["119", "110", "113", "165"], answer: "A", lang: "zh-TW" },
-      { num: 17, type: 'mc', text: "請問英文單字「Wednesday」是星期幾？", options: ["星期一", "星期二", "星期三", "星期四"], answer: "C", lang: "zh-TW" },
-      { num: 18, type: 'tf', text: "鯨魚是用「肺」呼吸的哺乳類動物，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW" },
-      { num: 19, type: 'mc', text: "請問「36 ÷ 4」等於多少？", options: ["7", "8", "9", "12"], answer: "C", lang: "zh-TW" },
-      { num: 20, type: 'mc', text: "台灣四面環海，請問台灣東邊緊鄰哪一個大洋？", options: ["大西洋", "印度洋", "北極海", "太平洋"], answer: "D", lang: "zh-TW" },
-      { num: 21, type: 'tf', text: "三角形的內角和是 360 度，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
-      { num: 22, type: 'mc', text: "請問英文單字「Hospital」的中文意思是什麼？", options: ["醫院", "郵局", "銀行", "車站"], answer: "A", lang: "zh-TW" },
-      { num: 23, type: 'mc', text: "端午節的傳統習俗不包含下列哪一項？", options: ["划龍舟", "吃粽子", "戴香包", "賞月吃月餅"], answer: "D", lang: "zh-TW" },
-      { num: 24, type: 'tf', text: "磁鐵的「同極」會互相吸引、「異極」會互相排斥，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW" },
-      { num: 25, type: 'mc', text: "請問英文單字「Summer」是指哪一個季節？", options: ["春天", "夏天", "秋天", "冬天"], answer: "B", lang: "zh-TW" }
+      { num: 1, type: 'mc', text: "請問英文單字「Apple」的中文意思是什麼？", options: ["蘋果", "香蕉", "西瓜", "鳳梨"], answer: "A", lang: "zh-TW", image: "" },
+      { num: 2, type: 'mc', text: "請問英文單字「Banana」的中文意思是什麼？", options: ["草莓", "香蕉", "葡萄", "橘子"], answer: "B", lang: "zh-TW", image: "" },
+      { num: 3, type: 'mc', text: "請問數學「7 × 8」等於多少？", options: ["48", "54", "56", "64"], answer: "C", lang: "zh-TW", image: "" },
+      { num: 4, type: 'mc', text: "台灣最高的山是哪一座山？", options: ["阿里山", "合歡山", "雪山", "玉山"], answer: "D", lang: "zh-TW", image: "" },
+      { num: 5, type: 'tf', text: "太陽每天都是從「東方」升起、西方落下，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW", image: "" },
+      { num: 6, type: 'mc', text: "請問英文單字「Elephant」是指哪一種動物？", options: ["獅子", "大象", "長頸鹿", "河馬"], answer: "B", lang: "zh-TW", image: "" },
+      { num: 7, type: 'tf', text: "一年之中總共有 7 個大月（31 天），請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW", image: "" },
+      { num: 8, type: 'mc', text: "請問英文「Good morning」是什麼意思？", options: ["早安", "午安", "晚安", "再見"], answer: "A", lang: "zh-TW", image: "" },
+      { num: 9, type: 'mc', text: "請問「100 減去 37」等於多少？", options: ["53", "63", "67", "73"], answer: "B", lang: "zh-TW", image: "" },
+      { num: 10, type: 'tf', text: "水在一般標準大氣壓下，攝氏 0 度時會結冰，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW", image: "" },
+      { num: 11, type: 'mc', text: "請問英文單字「Rainbow」的中文意思是什麼？", options: ["雲朵", "閃電", "彩虹", "暴風雨"], answer: "C", lang: "zh-TW", image: "" },
+      { num: 12, type: 'mc', text: "一個正方形總共有幾條對稱軸？", options: ["2 條", "3 條", "4 條", "8 條"], answer: "C", lang: "zh-TW", image: "" },
+      { num: 13, type: 'mc', text: "請問英文單字「Library」是指學校的哪個地方？", options: ["保健室", "操場", "音樂教室", "圖書館"], answer: "D", lang: "zh-TW", image: "" },
+      { num: 14, type: 'tf', text: "蜘蛛屬於昆蟲類，所以只有 6 隻腳，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW", image: "" },
+      { num: 15, type: 'mc', text: "請問「9 × 6」等於多少？", options: ["45", "54", "56", "63"], answer: "B", lang: "zh-TW", image: "" },
+      { num: 16, type: 'mc', text: "發現火災時，應該撥打哪一個報案專線？", options: ["119", "110", "113", "165"], answer: "A", lang: "zh-TW", image: "" },
+      { num: 17, type: 'mc', text: "請問英文單字「Wednesday」是星期幾？", options: ["星期一", "星期二", "星期三", "星期四"], answer: "C", lang: "zh-TW", image: "" },
+      { num: 18, type: 'tf', text: "鯨魚是用「肺」呼吸的哺乳類動物，請問對嗎？", options: ["是", "非"], answer: "O", lang: "zh-TW", image: "" },
+      { num: 19, type: 'mc', text: "請問「36 ÷ 4」等於多少？", options: ["7", "8", "9", "12"], answer: "C", lang: "zh-TW", image: "" },
+      { num: 20, type: 'mc', text: "台灣四面環海，請問台灣東邊緊鄰哪一個大洋？", options: ["大西洋", "印度洋", "北極海", "太平洋"], answer: "D", lang: "zh-TW", image: "" },
+      { num: 21, type: 'tf', text: "三角形的內角和是 360 度，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW", image: "" },
+      { num: 22, type: 'mc', text: "請問英文單字「Hospital」的中文意思是什麼？", options: ["醫院", "郵局", "銀行", "車站"], answer: "A", lang: "zh-TW", image: "" },
+      { num: 23, type: 'mc', text: "端午節的傳統習俗不包含下列哪一項？", options: ["划龍舟", "吃粽子", "戴香包", "賞月吃月餅"], answer: "D", lang: "zh-TW", image: "" },
+      { num: 24, type: 'tf', text: "磁鐵的「同極」會互相吸引、「異極」會互相排斥，請問對嗎？", options: ["是", "非"], answer: "X", lang: "zh-TW", image: "" },
+      { num: 25, type: 'mc', text: "請問英文單字「Summer」是指哪一個季節？", options: ["春天", "夏天", "秋天", "冬天"], answer: "B", lang: "zh-TW", image: "" }
     ];
 
     const GROUP_PALETTES = [
@@ -1175,17 +1309,47 @@
       gridSize: 16,             // 9 | 16 | 25
       groupCount: 4,            // 2 | 3 | 4 | 5
       currentNum: 1,
-      revealedQuestions: {},    // { [num]: true } 記錄該題是否已公布答案
-      groups: [],               // [{ name, numbers, picks: { [num]: 'A' }, cellStatus: { [num]: 'correct'|'wrong' }, lineCount: 0 }]
+      revealedQuestions: {},    // { [num]: true }
+      groups: [],               // [{ name, numbers, picks, cellStatus, lineCount }]
       unitSets: [
         { id: 1, title: "預設範例題庫（選擇＋是非 25 題）", questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)) }
       ],
       currentUnitIndex: 0
     };
 
+    // 暫存編輯器中的圖片（避免存檔前未儲存）
+    let editorImagesCache = {};
+
     // ==========================================
-    // 2. 工具函式：動態連線座標、隨機洗牌、音效、TTS
+    // 2. 工具函式：圖片壓縮、洗牌、連線座標、音效、TTS
     // ==========================================
+    function compressImageFile(file, maxWidth = 800, quality = 0.75) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     function generateShuffledNumbers(size) {
       const arr = Array.from({ length: size }, (_, i) => i + 1);
       for (let i = arr.length - 1; i > 0; i--) {
@@ -1214,12 +1378,12 @@
         const x = centerPos(c);
         lines.push({ indices, x1: x, y1: 6, x2: x, y2: 94 });
       }
-      // 主對角線 (左上 -> 右下)
+      // 主對角線
       const diag1 = [];
       for (let i = 0; i < dim; i++) diag1.push(i * dim + i);
       lines.push({ indices: diag1, x1: 7, y1: 7, x2: 93, y2: 93 });
 
-      // 副對角線 (右上 -> 左下)
+      // 副對角線
       const diag2 = [];
       for (let i = 0; i < dim; i++) diag2.push(i * dim + (dim - 1 - i));
       lines.push({ indices: diag2, x1: 93, y1: 7, x2: 7, y2: 93 });
@@ -1230,18 +1394,19 @@
     function normalizeQuestion(q, indexNum) {
       const num = q?.num || indexNum;
       const type = q?.type === 'tf' ? 'tf' : 'mc';
-      const text = q?.text || `第 ${num} 題`;
+      const text = q?.text !== undefined ? q.text : `第 ${num} 題`;
       const lang = q?.lang === 'en-US' ? 'en-US' : 'zh-TW';
+      const image = q?.image || '';
 
       if (type === 'tf') {
         const ans = (q?.answer === 'X' || q?.answer === '非' || q?.answer === 'false') ? 'X' : 'O';
-        return { num, type: 'tf', text, options: ['是', '非'], answer: ans, lang };
+        return { num, type: 'tf', text, options: ['是', '非'], answer: ans, lang, image };
       } else {
         const opts = Array.isArray(q?.options) && q.options.length === 4
           ? q.options
           : [q?.answer || '選項 A', '選項 B', '選項 C', '選項 D'];
         const ans = ['A', 'B', 'C', 'D'].includes(q?.answer) ? q.answer : 'A';
-        return { num, type: 'mc', text, options: opts, answer: ans, lang };
+        return { num, type: 'mc', text, options: opts, answer: ans, lang, image };
       }
     }
 
@@ -1411,19 +1576,17 @@
     }
 
     // ==========================================
-    // 4. 畫面渲染邏輯
+    // 4. 畫面渲染邏輯 (含圖片展示與放大)
     // ==========================================
     function renderAll() {
       const unit = getCurrentUnit();
       document.getElementById('currentUnitBadge').textContent = unit ? unit.title : '預設題庫';
 
-      // 題數按鈕狀態 (9 / 16 / 25)
       [9, 16, 25].forEach(sz => {
         const btn = document.getElementById(`sizeBtn${sz}`);
         if (btn) btn.classList.toggle('active', state.gridSize === sz);
       });
 
-      // 分組按鈕狀態 (2 ~ 5)
       [2, 3, 4, 5].forEach(n => {
         const btn = document.getElementById(`grpBtn${n}`);
         if (btn) btn.classList.toggle('active', state.groupCount === n);
@@ -1441,7 +1604,18 @@
 
       document.getElementById('activeQNumber').textContent = `第 ${qObj.num} 題`;
       document.getElementById('activeQType').textContent = qObj.type === 'tf' ? '是非題 (⭕/❌)' : '選擇題 (A/B/C/D)';
-      document.getElementById('questionTextDisplay').textContent = qObj.text;
+      document.getElementById('questionTextDisplay').textContent = qObj.text || '';
+
+      // 圖片顯示處理
+      const imgContainer = document.getElementById('questionImageContainer');
+      const imgElem = document.getElementById('questionImageElement');
+      if (qObj.image && qObj.image.trim()) {
+        imgElem.src = qObj.image;
+        imgContainer.style.display = 'flex';
+      } else {
+        imgContainer.style.display = 'none';
+        imgElem.src = '';
+      }
 
       const statusTag = document.getElementById('activeQStatus');
       if (isRevealed) {
@@ -1480,6 +1654,18 @@
       }
     }
 
+    function zoomCurrentImage() {
+      const qObj = getCurrentQuestions().find(q => q.num === state.currentNum);
+      if (qObj && qObj.image) {
+        document.getElementById('zoomedImageElement').src = qObj.image;
+        document.getElementById('imageZoomDialog').showModal();
+      }
+    }
+
+    function closeImageZoomDialog() {
+      document.getElementById('imageZoomDialog').close();
+    }
+
     function renderSelectorGrid() {
       const dim = Math.round(Math.sqrt(state.gridSize));
       document.getElementById('selectorTitle').textContent = `🔢 題號選擇區 (${dim}×${dim})`;
@@ -1513,7 +1699,6 @@
       const cellsInLines = new Set();
 
       lines.forEach(line => {
-        // 只有狀態為 'correct' (答對亮綠燈) 的格子才擁有連線權利！
         const isComplete = line.indices.every(idx => {
           const num = grp.numbers[idx];
           return grp.cellStatus[num] === 'correct';
@@ -1548,7 +1733,6 @@
         const lineBadgeClass = completedLines.length > 0 ? 'line-counter active-lines' : 'line-counter';
         const curPick = grp.picks[state.currentNum] || '';
 
-        // 渲染該組的作答按鈕區 (A/B/C/D 或 ⭕/❌)
         const choiceButtonsHtml = choices.map(c => {
           const isPicked = curPick === c;
           let btnCls = 'choice-btn';
@@ -1574,9 +1758,8 @@
           pickStatusText = '未作答（🔴 算錯）';
         }
 
-        // 渲染該組的 N×N 賓果盤格子
         const cellsHtml = grp.numbers.map((num, idx) => {
-          const st = grp.cellStatus[num]; // 'correct' | 'wrong' | undefined
+          const st = grp.cellStatus[num];
           const isCurrent = state.currentNum === num && !st;
           const isInLine = cellsInLines.has(idx);
 
@@ -1599,7 +1782,6 @@
           return `<div class="${cellCls}" onclick="onCellClick(${i}, ${num})" title="第 ${num} 題（點擊可切換至此題）">${label}</div>`;
         }).join('');
 
-        // 渲染 SVG 連線紅線
         const svgLinesHtml = completedLines.map(line => `
           <line class="bingo-line-bg" x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}" />
           <line class="bingo-line-fg" x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}" />
@@ -1644,7 +1826,7 @@
     }
 
     // ==========================================
-    // 5. 互動操作：選題、各組作答、老師公布答案與批改
+    // 5. 互動操作：選題、作答、公布答案
     // ==========================================
     function selectQuestionNumber(num) {
       state.currentNum = num;
@@ -1665,7 +1847,6 @@
       const num = state.currentNum;
       state.groups[groupIndex].picks[num] = choice;
 
-      // 如果這題已經公布過答案，老師再幫該組改答案時，即時重算該格對錯狀態！
       if (state.revealedQuestions[num]) {
         const qObj = getCurrentQuestions().find(q => q.num === num) || normalizeQuestion(null, num);
         state.groups[groupIndex].cellStatus[num] = (choice === qObj.answer) ? 'correct' : 'wrong';
@@ -1679,7 +1860,6 @@
       const num = state.currentNum;
       const qObj = getCurrentQuestions().find(q => q.num === num) || normalizeQuestion(null, num);
 
-      // 檢查是否有組別尚未作答
       const activeGroups = state.groups.slice(0, state.groupCount);
       const unpickedGroups = activeGroups.filter(g => !g.picks[num]);
       if (unpickedGroups.length > 0 && !state.revealedQuestions[num]) {
@@ -1689,7 +1869,6 @@
         }
       }
 
-      // 記錄批改前各組的連線數
       const prevLines = activeGroups.map(g => evaluateGroupLines(g).completedLines.length);
 
       state.revealedQuestions[num] = true;
@@ -1711,7 +1890,6 @@
       saveLocalState();
       renderAll();
 
-      // 檢查哪些組別新增了連線
       const newlyBingoGroups = [];
       for (let i = 0; i < state.groupCount; i++) {
         const newCount = evaluateGroupLines(state.groups[i]).completedLines.length;
@@ -1837,10 +2015,15 @@
     }
 
     // ==========================================
-    // 6. 老師題庫管理後台 (1~25 題，支援選擇題 & 是非題)
+    // 6. 老師題庫管理後台 (圖片上傳/貼圖 & 容錯批次解析)
     // ==========================================
     function openEditorDialog() {
       document.getElementById('workerUrlInput').value = state.workerUrl || DEFAULT_WORKER_URL;
+      editorImagesCache = {};
+      const questions = getCurrentQuestions();
+      questions.forEach(q => {
+        editorImagesCache[q.num] = q.image || '';
+      });
       populateUnitSelect();
       renderEditorInputs();
       document.getElementById('editorDialog').showModal();
@@ -1864,6 +2047,10 @@
       state.currentUnitIndex = idx;
       const unit = getCurrentUnit();
       document.getElementById('unitTitleInput').value = unit ? unit.title : '';
+      editorImagesCache = {};
+      unit.questions.forEach(q => {
+        editorImagesCache[q.num] = q.image || '';
+      });
       renderEditorInputs();
       renderAll();
     }
@@ -1890,6 +2077,70 @@
       }
     }
 
+    async function handleImageFileSelect(num, file) {
+      if (!file) return;
+      try {
+        const compressedBase64 = await compressImageFile(file, 800, 0.75);
+        editorImagesCache[num] = compressedBase64;
+        updateImageThumbDisplay(num);
+      } catch (err) {
+        alert('圖片讀取失敗，請確認檔案格式是否正確');
+      }
+    }
+
+    function handlePasteScreenshot(num) {
+      // 聚焦提示
+      const box = document.getElementById(`imageRow_${num}`);
+      box.style.borderColor = '#2563eb';
+      box.style.background = '#eff6ff';
+      const originalText = document.getElementById(`pasteBtnText_${num}`).textContent;
+      document.getElementById(`pasteBtnText_${num}`).textContent = '👉 現在請按 Cmd+V / Ctrl+V 貼上截圖';
+
+      const pasteHandler = async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            await handleImageFileSelect(num, blob);
+            e.preventDefault();
+            break;
+          }
+        }
+        cleanup();
+      };
+
+      const cleanup = () => {
+        window.removeEventListener('paste', pasteHandler);
+        box.style.borderColor = '#cbd5e1';
+        box.style.background = '#ffffff';
+        document.getElementById(`pasteBtnText_${num}`).textContent = originalText;
+      };
+
+      window.addEventListener('paste', pasteHandler, { once: true });
+      setTimeout(cleanup, 12000); // 12秒超時自動還原
+    }
+
+    function clearQuestionImage(num) {
+      editorImagesCache[num] = '';
+      updateImageThumbDisplay(num);
+    }
+
+    function updateImageThumbDisplay(num) {
+      const imgData = editorImagesCache[num] || '';
+      const thumb = document.getElementById(`imgThumb_${num}`);
+      const clearBtn = document.getElementById(`clearImgBtn_${num}`);
+      if (imgData) {
+        thumb.src = imgData;
+        thumb.style.display = 'inline-block';
+        clearBtn.style.display = 'inline-block';
+      } else {
+        thumb.src = '';
+        thumb.style.display = 'none';
+        clearBtn.style.display = 'none';
+      }
+    }
+
     function renderEditorInputs() {
       const questions = normalizeQuestionsArray(getCurrentQuestions());
       const container = document.getElementById('editorQuestionsList');
@@ -1900,6 +2151,7 @@
         const safeText = (q.text || '').replace(/"/g, '&quot;');
         const opts = q.options || ['選項 A', '選項 B', '選項 C', '選項 D'];
         const isTf = q.type === 'tf';
+        const imgData = editorImagesCache[i] || q.image || '';
 
         const ansOptionsHtml = isTf
           ? `<option value="O" ${q.answer === 'O' ? 'selected' : ''}>正解：⭕ 是</option>
@@ -1917,7 +2169,7 @@
                 <option value="mc" ${!isTf ? 'selected' : ''}>選擇題(A~D)</option>
                 <option value="tf" ${isTf ? 'selected' : ''}>是非題(⭕/❌)</option>
               </select>
-              <input type="text" id="editQText_${i}" value="${safeText}" placeholder="輸入第 ${i} 題題目...">
+              <input type="text" id="editQText_${i}" value="${safeText}" placeholder="輸入第 ${i} 題文字題目（若純放圖片題可留空）...">
               <select id="editQAns_${i}">
                 ${ansOptionsHtml}
               </select>
@@ -1926,6 +2178,19 @@
                 <option value="en-US" ${q.lang === 'en-US' ? 'selected' : ''}>英文語音</option>
               </select>
             </div>
+
+            <!-- 題目圖片上傳與截圖貼上列 -->
+            <div id="imageRow_${i}" class="q-edit-image-row">
+              <span style="font-weight:800;color:#1e40af;">🖼️ 題目圖片：</span>
+              <button type="button" class="btn btn-outline" style="padding:3px 8px;font-size:0.75rem;" onclick="document.getElementById('fileInput_${i}').click()">📁 選取圖檔</button>
+              <input type="file" id="fileInput_${i}" accept="image/*" onchange="handleImageFileSelect(${i}, this.files[0])">
+              <button type="button" class="btn btn-outline" style="padding:3px 8px;font-size:0.75rem;background:#f0fdf4;border-color:#86efac;color:#166534;" onclick="handlePasteScreenshot(${i})">
+                <span id="pasteBtnText_${i}">📋 貼上截圖 (Cmd+V)</span>
+              </button>
+              <img id="imgThumb_${i}" src="${imgData}" class="image-thumb-preview" style="${imgData ? '' : 'display:none;'}">
+              <button type="button" id="clearImgBtn_${i}" class="btn btn-outline" style="padding:2px 6px;font-size:0.72rem;color:#e11d48;${imgData ? '' : 'display:none;'}" onclick="clearQuestionImage(${i})">✕ 移除圖片</button>
+            </div>
+
             <div id="editQOptsRow_${i}" class="q-edit-opts ${isTf ? 'hidden' : ''}">
               <span style="font-size:0.75rem;color:var(--text-muted);text-align:right;">選項：</span>
               <input type="text" id="editQOptA_${i}" value="${(opts[0] || '').replace(/"/g, '&quot;')}" placeholder="(A) 選項內容">
@@ -1943,6 +2208,88 @@
       document.getElementById('batchPasteBox').classList.toggle('open');
     }
 
+    // 智慧多層容錯字串解析器 (完美解決題目含逗號、題號、括號問題)
+    function parseSingleQuestionLine(line) {
+      if (!line || !line.trim()) return null;
+      let text = line.trim();
+
+      // 去除開頭題號（如 "1. " 或 "1、" 或 "【1】"）
+      text = text.replace(/^([0-9]{1,2}[\.、\s\-\:]+|【[0-9]{1,2}】\s*)/, '');
+
+      let parts = [];
+      if (text.includes('\t')) {
+        // 1. 優先以 Excel Tab 分割
+        parts = text.split('\t').map(s => s.trim()).filter(s => s.length > 0);
+      } else if (text.includes('|')) {
+        // 2. 以直線符號分割
+        parts = text.split('|').map(s => s.trim()).filter(s => s.length > 0);
+      } else {
+        // 3. 逗號分割，配合倒數計算法
+        parts = text.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 0);
+      }
+
+      if (parts.length === 0) return null;
+
+      // 檢查最後一個欄位是否為是非題答案
+      const lastRaw = parts[parts.length - 1].toUpperCase();
+      const isTfAns = ['O', 'X', '是', '非', 'TRUE', 'FALSE', '⭕', '❌'].includes(lastRaw);
+      if (isTfAns && parts.length >= 2) {
+        const qText = parts.slice(0, parts.length - 1).join('，');
+        const ans = ['X', '非', 'FALSE', '❌'].includes(lastRaw) ? 'X' : 'O';
+        return { type: 'tf', text: qText, options: ['是', '非'], answer: ans };
+      }
+
+      // 轉換答案標記：①②③④ 或 1234 轉為 A/B/C/D
+      const convertAnsKey = (k) => {
+        const map = { '1': 'A', '①': 'A', '(1)': 'A', '2': 'B', '②': 'B', '(2)': 'B', '3': 'C', '③': 'C', '(3)': 'C', '4': 'D', '④': 'D', '(4)': 'D' };
+        const upper = (k || '').toUpperCase();
+        return map[k] || map[upper] || (['A', 'B', 'C', 'D'].includes(upper) ? upper : 'A');
+      };
+
+      // 選擇題倒數法：若 parts >= 6，最後一個為答案，倒數 2~5 為選項，前面所有逗號合併為題幹！
+      if (parts.length >= 6) {
+        const ans = convertAnsKey(parts[parts.length - 1]);
+        const optD = parts[parts.length - 2];
+        const optC = parts[parts.length - 3];
+        const optB = parts[parts.length - 4];
+        const optA = parts[parts.length - 5];
+        const qText = parts.slice(0, parts.length - 5).join('，');
+        return { type: 'mc', text: qText, options: [optA, optB, optC, optD], answer: ans };
+      }
+
+      // 如果格式不符，預設當作題目純文字
+      return { type: 'mc', text: text, options: ['選項 A', '選項 B', '選項 C', '選項 D'], answer: 'A' };
+    }
+
+    function updateBatchPastePreview() {
+      const raw = document.getElementById('batchPasteTextarea').value.trim();
+      const wrap = document.getElementById('pastePreviewWrap');
+      const tbody = document.getElementById('pastePreviewTbody');
+
+      if (!raw) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
+      wrap.style.display = 'block';
+
+      tbody.innerHTML = lines.slice(0, 25).map((line, idx) => {
+        const parsed = parseSingleQuestionLine(line);
+        if (!parsed) return '';
+        const optPreview = parsed.type === 'tf' ? '⭕ 是 / ❌ 非' : parsed.options.join(' | ');
+        return `
+          <tr>
+            <td><strong>#${idx + 1}</strong></td>
+            <td><span style="font-size:0.7rem;padding:2px 5px;border-radius:4px;background:#e0e7ff;color:#3730a3;">${parsed.type === 'tf' ? '是非' : '選擇'}</span></td>
+            <td style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${parsed.text}</td>
+            <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#64748b;">${optPreview}</td>
+            <td><strong style="color:#047857;">${parsed.answer}</strong></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     function applyBatchPaste() {
       const raw = document.getElementById('batchPasteTextarea').value.trim();
       if (!raw) return;
@@ -1950,36 +2297,34 @@
 
       lines.slice(0, 25).forEach((line, idx) => {
         const num = idx + 1;
-        const parts = line.split(/[\t,，]/).map(s => s.trim());
+        const parsed = parseSingleQuestionLine(line);
+        if (!parsed) return;
+
         const textInput = document.getElementById(`editQText_${num}`);
         const typeSelect = document.getElementById(`editQType_${num}`);
         const ansSelect = document.getElementById(`editQAns_${num}`);
 
-        if (!textInput || parts.length === 0) return;
-        textInput.value = parts[0];
-
-        if (parts.length >= 6) {
-          // 選擇題：題目,A,B,C,D,正解
-          typeSelect.value = 'mc';
+        if (textInput) textInput.value = parsed.text;
+        if (typeSelect) {
+          typeSelect.value = parsed.type;
           onEditorQTypeChange(num);
-          document.getElementById(`editQOptA_${num}`).value = parts[1];
-          document.getElementById(`editQOptB_${num}`).value = parts[2];
-          document.getElementById(`editQOptC_${num}`).value = parts[3];
-          document.getElementById(`editQOptD_${num}`).value = parts[4];
-          const ansUpper = (parts[5] || 'A').toUpperCase();
-          ansSelect.value = ['A', 'B', 'C', 'D'].includes(ansUpper) ? ansUpper : 'A';
-        } else if (parts.length >= 2) {
-          // 是非題：題目,O 或 題目,X
-          const p1 = parts[1].toUpperCase();
-          if (['O', 'X', '是', '非', 'TRUE', 'FALSE', '⭕', '❌'].includes(p1)) {
-            typeSelect.value = 'tf';
-            onEditorQTypeChange(num);
-            ansSelect.value = (['X', '非', 'FALSE', '❌'].includes(p1)) ? 'X' : 'O';
-          }
+        }
+        if (ansSelect) ansSelect.value = parsed.answer;
+
+        if (parsed.type === 'mc' && Array.isArray(parsed.options)) {
+          const optA = document.getElementById(`editQOptA_${num}`);
+          const optB = document.getElementById(`editQOptB_${num}`);
+          const optC = document.getElementById(`editQOptC_${num}`);
+          const optD = document.getElementById(`editQOptD_${num}`);
+          if (optA && parsed.options[0]) optA.value = parsed.options[0];
+          if (optB && parsed.options[1]) optB.value = parsed.options[1];
+          if (optC && parsed.options[2]) optC.value = parsed.options[2];
+          if (optD && parsed.options[3]) optD.value = parsed.options[3];
         }
       });
 
       document.getElementById('batchPasteBox').classList.remove('open');
+      alert(`已成功解析並填入前 ${Math.min(lines.length, 25)} 道題目！確認無誤後請按下方「💾 儲存題庫並套用」。`);
     }
 
     function createNewUnit() {
@@ -2026,22 +2371,26 @@
       const updatedQuestions = [];
       for (let i = 1; i <= 25; i++) {
         const typeVal = document.getElementById(`editQType_${i}`).value;
-        const textVal = document.getElementById(`editQText_${i}`).value.trim() || `第 ${i} 題`;
+        const textVal = document.getElementById(`editQText_${i}`).value.trim();
         const ansVal = document.getElementById(`editQAns_${i}`).value;
         const langVal = document.getElementById(`editQLang_${i}`).value;
+        const imgVal = editorImagesCache[i] || '';
+
         const opts = [
-          document.getElementById(`editQOptA_${i}`).value.trim() || '選項 A',
-          document.getElementById(`editQOptB_${i}`).value.trim() || '選項 B',
-          document.getElementById(`editQOptC_${i}`).value.trim() || '選項 C',
-          document.getElementById(`editQOptD_${i}`).value.trim() || '選項 D'
+          document.getElementById(`editQOptA_${i}`)?.value.trim() || '選項 A',
+          document.getElementById(`editQOptB_${i}`)?.value.trim() || '選項 B',
+          document.getElementById(`editQOptC_${i}`)?.value.trim() || '選項 C',
+          document.getElementById(`editQOptD_${i}`)?.value.trim() || '選項 D'
         ];
+
         updatedQuestions.push({
           num: i,
           type: typeVal,
           text: textVal,
           options: typeVal === 'tf' ? ['是', '非'] : opts,
           answer: ansVal,
-          lang: langVal
+          lang: langVal,
+          image: imgVal
         });
       }
       unit.questions = updatedQuestions;
