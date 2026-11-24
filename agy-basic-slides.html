@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AGY 基礎篇｜讓 AI 在你的資料夾裡幫你做事</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
+  <style>
+    :root { --accent:#e8643a; --accent2:#4fc3f7; --success:#81c784; --warn:#ffb74d; }
+    .reveal { font-family:'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif; }
+    .reveal h1,.reveal h2,.reveal h3 { font-family:inherit; font-weight:700; text-transform:none; }
+    .reveal h1 { font-size:2em; }
+    .reveal h2 { font-size:1.4em; color:var(--accent2); }
+    .reveal p,.reveal li { font-size:0.62em; line-height:1.7; }
+    .reveal ul,.reveal ol { display:block; }
+    .tag { display:inline-block; background:var(--accent); color:#fff; padding:4px 14px; border-radius:20px; font-size:0.5em; font-weight:600; margin-bottom:.8em; }
+    .sub { font-size:.7em; color:#aaa; }
+    .grid { display:grid; gap:14px; margin-top:.6em; }
+    .g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:1fr 1fr 1fr; }
+    .card { background:rgba(255,255,255,.06); border-top:4px solid var(--accent2); border-radius:8px; padding:14px; font-size:.5em; line-height:1.6; text-align:left; }
+    .card b { color:var(--accent2); font-size:1.15em; }
+    .card.warn { border-top-color:var(--warn); } .card.warn b { color:var(--warn); }
+    .card.red { border-top-color:var(--accent); } .card.red b { color:var(--accent); }
+    .card.ok { border-top-color:var(--success); } .card.ok b { color:var(--success); }
+    .big { font-size:2.6em; }
+    .box { background:rgba(255,255,255,.06); border-left:4px solid var(--accent); border-radius:8px; padding:14px 20px; font-size:.55em; text-align:left; line-height:1.7; }
+    code { color:var(--warn); }
+    table { font-size:.5em; margin:0 auto; }
+    table th { color:var(--accent2); }
+    .foot { position:fixed; bottom:6px; left:0; right:0; text-align:center; font-size:11px; color:#777; z-index:20; pointer-events:none; }
+    .path { font-family:Consolas,monospace; background:rgba(0,0,0,.4); padding:10px 16px; border-radius:8px; font-size:.55em; text-align:left; }
+  </style>
+</head>
+<body>
+<div class="foot">本教材部分內容由生成式 AI 協助產生，經講師審閱｜範例資料皆為虛構</div>
+<div class="reveal"><div class="slides">
+
+<!-- 1 封面 -->
+<section>
+  <div class="tag">2026.12.24 · 教師實作課程 · 基礎篇</div>
+  <h1>讓 AI 在你的資料夾裡<br>幫你做事</h1>
+  <h2 style="color:var(--accent)">Antigravity（AGY）本地端入門</h2>
+  <p class="sub">安裝 → 中文化 → 資料夾即專案 → md 檔 → 開工收工 → 實戰</p>
+</section>
+
+<!-- 2 今天做什麼 -->
+<section>
+  <h2>今天，你會帶走什麼</h2>
+  <div class="grid g3">
+    <div class="card ok"><b>🛠 一個能用的 AGY</b><br>裝好、中文化、權限設定好</div>
+    <div class="card ok"><b>📁 一個有記憶的專案</b><br>agents.md + handoff.md + 開工收工</div>
+    <div class="card ok"><b>📄 一份真的成品</b><br>學習單／通知單／會議紀錄 三選一</div>
+  </div>
+  <p class="sub" style="margin-top:1em">全程本機操作、全程假資料。</p>
+</section>
+
+<!-- 3 M0 -->
+<section>
+  <h2>M0｜聊天型 AI vs 代理型 AI</h2>
+  <div class="grid g2">
+    <div class="card warn"><b>聊天型（網頁版）</b><br>你問 → 它答<br>你複製貼上、自己存檔<br>它看不到你的資料夾</div>
+    <div class="card"><b>代理型（AGY）</b><br>你交代 → 它動手<br>讀檔、改檔、建檔<br><b style="color:var(--accent)">會直接動你的檔案</b></div>
+  </div>
+  <p class="fragment">能力變大 → 責任也變大：<b style="color:var(--accent)">人下指令、人把關、人決定</b></p>
+</section>
+
+<section>
+  <h2>為什麼現在學？</h2>
+  <ul>
+    <li>教育部《教師數位與 AI 教學指引》已把 <b>AI Agent</b> 納入：AI 是教學<b>協作夥伴</b></li>
+    <li>方向是「輔助思考，不取代思考」</li>
+    <li>今天的做法：AI 做初稿 → <b>你</b>審 → <b>你</b>決定</li>
+  </ul>
+  <p class="sub">參考：教育部 AI 人才方舟計畫入口網</p>
+</section>
+
+<!-- 4 M1 -->
+<section>
+  <h2>M1｜該下載哪一個？</h2>
+  <table>
+    <tr><th></th><th>Antigravity App（2.0）</th><th>Antigravity IDE</th><th>CLI（agy）</th><th>編輯器外掛</th></tr>
+    <tr><td>形式</td><td>桌面應用程式（圖形介面）</td><td>獨立程式碼編輯器</td><td>終端機文字介面</td><td>VS Code 等內嵌</td></tr>
+    <tr><td>主要對象</td><td>一般使用者、專案管理、多代理</td><td>寫程式的人</td><td>工程師、遠端 SSH</td><td>已有 IDE 的開發者</td></tr>
+    <tr><td>安裝</td><td>下載 .exe，點兩下</td><td>另外下載安裝</td><td>貼 PowerShell 指令</td><td>在市集安裝</td></tr>
+    <tr><td>排程／技能／檔案預覽</td><td>✅ 側邊欄直接管理</td><td>偏程式編輯</td><td>用指令</td><td>—</td></tr>
+    <tr><td>老師上手難度</td><td style="color:var(--success)">★ 最低</td><td>中</td><td>高</td><td>高</td></tr>
+    <tr><td><b>本課程</b></td><td style="color:var(--success)"><b>✅ 選這個</b></td><td>❌</td><td>❌（進階再提）</td><td>❌</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>M1｜為什麼選 Antigravity App</h2>
+  <div class="grid g2">
+    <div class="card ok"><b>① 免寫程式、免開終端機</b><br>資料夾＝專案，點選即可，老師不用懂指令</div>
+    <div class="card ok"><b>② 要教的功能都在這裡</b><br>專案、技能、規則、排程（Scheduled Tasks）、Artifact</div>
+    <div class="card ok"><b>③ 一個 .exe 就裝好</b><br>Windows 10／11 64 位元，點兩下跟著精靈走</div>
+    <div class="card warn"><b>④ 進階篇可延伸</b><br>CLI 與 App 共用同一個核心與設定，之後想學不用重來</div>
+  </div>
+</section>
+
+<section>
+  <h2>M1｜安裝步驟（Windows）</h2>
+  <ol>
+    <li>開啟 <code>antigravity.google/download</code></li>
+    <li>選 <b>Windows → Download for x64</b>（一般電腦；ARM 筆電才選 ARM64）</li>
+    <li>執行下載的 <code>Antigravity-x64.exe</code>，照精靈安裝</li>
+    <li>啟動 → 用瀏覽器登入 Google 帳號</li>
+    <li>「What best describes your work?」→ 選 <b>Knowledge Work</b>（或 Other）</li>
+  </ol>
+  <p class="sub">不確定電腦是哪種？設定 → 系統 → 關於 → 系統類型</p>
+</section>
+
+<section>
+  <h2>M1｜用哪個 Google 帳號？</h2>
+  <div class="grid g2">
+    <div class="card ok"><b>個人 Google 帳號（@gmail.com）</b><br>免費額度即可上課<br>可自行關閉遙測（telemetry）<br>依 Antigravity 服務條款</div>
+    <div class="card warn"><b>學校／Workspace 帳號</b><br>只有<b>有限的入門額度</b>，Workspace 方案不含 Antigravity 方案<br>可能被管理員限制，需事先實測</div>
+  </div>
+  <div class="box" style="margin-top:1em"><b style="color:var(--warn)">⚠ 合規提醒</b><br>不管哪種帳號，AGY 都是雲端服務：個資、機密、帳密照樣<b>不能</b>放。學生帳號須遵守年齡與帳號申請規定。裝不起來 → 看備援影片，先跟著看。</div>
+</section>
+
+<section>
+  <h2>M1｜介面中文化：官方沒有，社群有</h2>
+  <div class="grid g2">
+    <div class="card warn"><b>官方現況</b><br>Antigravity App 設定裡<b>沒有</b>語言切換，介面預設英文<br>（IDE 版才能裝 VS Code 中文語言包）</div>
+    <div class="card"><b>社群繁中套件（GitHub）</b><br>原理：解開 <code>app.asar</code> 換掉介面文字<br>① <code>atonnyshen/antigravity2-TW</code>（MIT）<br>② <code>workkkkkkez00m/antigravity2.0-zh-tw</code></div>
+  </div>
+  <div class="box" style="margin-top:.8em"><b style="color:var(--warn)">⚠ 課堂做法</b><br>非官方、會改動程式本體、<b>官方更新後會被覆蓋</b>、需執行第三方腳本。→ <b>講師示範，學員自願回家再裝</b>；課堂上用「全域規則」讓 <b>AI 的回答</b>變繁中，介面維持英文也不影響使用。</div>
+</section>
+
+<section>
+  <h2>M1｜全域規則：讓 AI 說繁體中文</h2>
+  <div class="grid g2">
+    <div class="card"><b>介面語言 ≠ AI 回答語言</b><br>介面英文，照樣可以用中文下指令、用中文收答案</div>
+    <div class="card ok"><b>貼上起始包的<code>全域規則範本.md</code></b><br>一律繁中、刪檔先問、遇到個資先提醒</div>
+  </div>
+  <div class="box" style="margin-top:1em">🎯 <b>練習 5 分鐘</b>：貼上規則 → 隨便問一句 → 確認它用繁體中文回</div>
+</section>
+
+<!-- 5 M2 -->
+<section>
+  <h2>M2｜畫面長這樣</h2>
+  <div style="display:grid;grid-template-columns:190px 1fr 210px;gap:8px;height:360px;font-size:.45em;text-align:left">
+    <div style="background:rgba(79,195,247,.1);border:2px solid var(--accent2);border-radius:8px;padding:10px">
+      <b style="color:var(--accent2)">① 左側欄</b><br>
+      • New Conversation 新對話<br>• Projects 專案（資料夾）<br>• Scheduled Tasks 排程<br>• Skills &amp; Customizations 技能／規則<br>• Settings 設定
+    </div>
+    <div style="background:rgba(232,100,58,.1);border:2px solid var(--accent);border-radius:8px;padding:10px;display:flex;flex-direction:column;justify-content:space-between">
+      <div><b style="color:var(--accent)">② 對話區（Chat Canvas）</b><br>你下指令、看 AI 的計畫與進度<br>輸入 <code>/</code> 叫出指令、<code>@</code> 指定檔案或資料夾<br>可拖曳圖片／檔案進來</div>
+      <div style="background:rgba(0,0,0,.4);border-radius:6px;padding:8px;color:#aaa">③ 輸入框｜模型選擇｜權限模式（自動／逐步核准）</div>
+    </div>
+    <div style="background:rgba(129,199,132,.1);border:2px solid var(--success);border-radius:8px;padding:10px">
+      <b style="color:var(--success)">④ 右側面板</b><br>
+      • Artifacts 產出文件<br>• Files Changed 改了哪些檔<br>• Terminals 終端機<br>• Background Tasks 背景工作<br>• Subagents 子代理
+    </div>
+  </div>
+  <p class="sub">📸 示意圖（依官方文件整理）；講師現場以實機畫面對照</p>
+</section>
+
+<section>
+  <h2>M2｜介面與權限</h2>
+  <table>
+    <tr><th>功能</th><th>你要知道的</th></tr>
+    <tr><td>對話區</td><td>下指令、看它的計畫</td></tr>
+    <tr><td>模型切換</td><td>快 vs 深思，依任務選</td></tr>
+    <tr><td>Artifact</td><td>AI 產出的文件／計畫，可檢視修改</td></tr>
+    <tr><td style="color:var(--accent)">執行權限</td><td><b>自動執行 vs 逐步核准</b></td></tr>
+  </table>
+  <div class="box" style="margin-top:1em">新手設定：<b>會動檔案、會執行指令的動作，先審再跑</b></div>
+</section>
+
+<!-- 6 M3 -->
+<section>
+  <h2>M3｜資料夾 = 專案</h2>
+  <div class="grid g2">
+    <div class="card ok"><b>✅ 好做法</b><br>一件事一個資料夾<br>例：<span class="path">三年級自然學習單\</span><br>AI 只看得到這裡</div>
+    <div class="card red"><b>❌ 壞做法</b><br>把整個 D 槽／文件夾當工作區<br>AI 什麼都讀得到（含帳密、學生資料）</div>
+  </div>
+  <p class="fragment">🔒 帳號密碼檔 <b>絕對不要</b>放在工作區裡</p>
+</section>
+
+<section>
+  <h2>M3 練習｜開第一個專案</h2>
+  <ol>
+    <li>複製「學員起始包」到你的電腦</li>
+    <li>AGY → 開啟資料夾 → 選 <code>範例專案</code></li>
+    <li>問 AGY：「這個資料夾裡有什麼？用三句話說明」</li>
+  </ol>
+</section>
+
+<!-- 7 M4 -->
+<section>
+  <h2>M4｜五種 md 檔，各管一件事</h2>
+  <p class="sub">比喻：新來的代課老師</p>
+  <table>
+    <tr><th>檔案</th><th>比喻</th><th>誰看</th></tr>
+    <tr><td>全域規則</td><td>校規</td><td>AI（每次都讀）</td></tr>
+    <tr><td><code>agents.md</code></td><td>課程計畫</td><td>AI</td></tr>
+    <tr><td><code>handoff.md</code></td><td>交接本</td><td>AI + 你</td></tr>
+    <tr><td><code>README.md</code></td><td>說明書</td><td>人</td></tr>
+    <tr><td><code>SKILL.md</code></td><td>SOP 手冊</td><td>AI（需要時才讀）</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>M4｜agents.md 長什麼樣</h2>
+  <pre style="font-size:.5em"><code># agents.md
+## 目標
+做一份「植物的構造」學習單
+## 規則
+- 用語適合三年級
+- 不使用真實學生資料
+## 任務清單
+- [ ] 列出學習目標
+- [ ] 產出學習單初稿
+- [ ] 人工檢查事實</code></pre>
+  <p class="sub">打開起始包的 <code>範例專案/agents.md</code> 對照看</p>
+</section>
+
+<!-- 8 M5 -->
+<section>
+  <h2>M5｜開工・收工 = 讓 AI 有記憶</h2>
+  <div class="grid g3">
+    <div class="card"><b>初始化</b><br>第一次：建 agents / handoff / README</div>
+    <div class="card ok"><b>開工</b><br>讀交接 → 列待辦 → 建議先做哪項</div>
+    <div class="card warn"><b>收工</b><br>確認完成項 → 寫交接 → 提醒檢核</div>
+  </div>
+  <p class="fragment">明天、下週、換電腦：說一句「開工」，接著做。</p>
+</section>
+
+<section>
+  <h2>M5 練習</h2>
+  <ol>
+    <li>把 <code>skills/開工收工</code> 放進 AGY 技能資料夾（講師示範位置）</li>
+    <li>在 <code>範例專案</code> 說：<b>開工</b></li>
+    <li>做完一項任務 → 說：<b>收工</b></li>
+    <li>打開 <code>handoff.md</code> 看它寫了什麼</li>
+  </ol>
+</section>
+
+<!-- 9 M6 -->
+<section>
+  <h2>M6｜實戰：三選一</h2>
+  <div class="grid g3">
+    <div class="card"><b>📝 學習單</b><br>「植物的構造」國小三年級<br>附答案＋評分規準</div>
+    <div class="card"><b>📨 親師通知單</b><br>讀<code>虛構親師通知需求.md</code><br>產出通知單＋回條</div>
+    <div class="card"><b>📋 會議紀錄</b><br>處理<code>虛構會議錄音.mp3</code><br>轉逐字稿→整理決議＋待辦＋負責人</div>
+  </div>
+  <p class="sub" style="margin-top:1em">素材都是虛構的，放心用。</p>
+</section>
+
+<section>
+  <h2>好指令的 4 個零件</h2>
+  <div class="grid g2">
+    <div class="card"><b>① 角色</b><br>你是國小自然老師</div>
+    <div class="card"><b>② 任務</b><br>做一份 20 分鐘的學習單</div>
+    <div class="card"><b>③ 限制</b><br>三年級用語、A4 一頁、不要真實資料</div>
+    <div class="card"><b>④ 輸出</b><br>存成 <code>學習單.md</code>，另存答案</div>
+  </div>
+</section>
+
+<section>
+  <h2>M6 最後一步：抓 AI 的錯</h2>
+  <div class="box">
+    <b style="color:var(--warn)">AI 的產出 ≠ 最終答案</b>（行政院指引：不可完全信任）<br><br>
+    ☐ 事實對嗎？（學習單的科學內容）<br>
+    ☐ 數字對嗎？（會議紀錄：經費「八千」是 AI 確定的嗎？原文是「還要再確認」）<br>
+    ☐ 日期對嗎？（通知單：AI 有沒有把 12/14 週一改掉？）<br>
+    ☐ 用語適齡嗎？
+  </div>
+  <p class="fragment">🎯 找出至少一處要修改的地方，告訴旁邊的人。</p>
+</section>
+
+<!-- 10 M7 -->
+<section>
+  <h2>M7｜六條紅線</h2>
+  <div class="grid g3">
+    <div class="card red"><b>1 個資不進 AI</b><br>學生、家長、同事的姓名與可識別資料<br><code>指引第 4、7 點</code></div>
+    <div class="card red"><b>2 機密不用 AI 寫</b><br>機密文書、未公開公文<br><code>指引第 3、4 點</code></div>
+    <div class="card red"><b>3 帳密不放工作區</b><br>密碼、金鑰、token<br><code>指引第 7 點（資通安全）</code></div>
+    <div class="card warn"><b>4 畫面要去識別化</b><br>截圖也算資料；素材注意著作權、肖像<br><code>指引第 4、7 點</code></div>
+    <div class="card warn"><b>5 產出要人工審</b><br>最終判斷在你<br><code>指引第 2、5 點</code></div>
+    <div class="card warn"><b>6 對外要揭露</b><br>註明 AI 協助<br><code>指引第 6 點</code></div>
+  </div>
+  <p class="sub">另：學生端「不得輸入個資、使用 AI 須標註」見教育部《中小學使用生成式人工智慧注意事項》</p>
+</section>
+
+<section>
+  <h2>行政院〈生成式 AI 參考指引〉原文重點</h2>
+  <table style="font-size:.42em;text-align:left">
+    <tr><th style="width:60px">點次</th><th>原文</th></tr>
+    <tr><td>二</td><td>產出須由承辦人就風險進行<b>客觀且專業之最終判斷</b>，不得取代自主思維、創造力及人際互動</td></tr>
+    <tr><td>三</td><td><b>製作機密文書應親自撰寫，禁止使用生成式 AI</b></td></tr>
+    <tr><td>四</td><td>不得提供<b>公務應保密、個人及未經同意公開之資訊</b>，亦不得詢問可能涉及機密業務或個資之問題（封閉式地端部署模型為例外）</td></tr>
+    <tr><td>五</td><td><b>不可完全信任</b>產出；不得以未經確認之內容作為公務決策之唯一依據</td></tr>
+    <tr><td>六</td><td>作為輔助工具時，應<b>適當揭露</b></td></tr>
+    <tr><td>七</td><td>遵守資通安全、個資保護、<b>著作權</b>；注意侵害智慧財產權與人格權之可能</td></tr>
+    <tr><td>九</td><td><b>公立學校</b>使用生成式 AI，<b>得準用</b>本參考指引</td></tr>
+  </table>
+  <p class="sub">來源：國科會網站「行政院及所屬機關（構）使用生成式AI參考指引」總說明及規定（全文十點，PDF 已收錄於起始包「參考資料」）<br>https://www.nstc.gov.tw/folksonomy/list/c79bf57b-dc94-4aff-8d14-3262b5559cfc?l=ch</p>
+</section>
+
+<section>
+  <h2>為什麼？AGY 是雲端服務</h2>
+  <div class="box">
+    依行政院〈生成式 AI 參考指引〉第 4 點：不得向生成式 AI 提供公務應保密、個人資料或未經同意公開之資訊。<br>
+    只有「封閉式地端」（不與外部網路連線）才有例外 — <b style="color:var(--accent)">AGY 不是</b>。<br><br>
+    教育部〈中小學使用生成式 AI 注意事項〉：嚴禁輸入個人及他人隱私資料；使用 AI 協助要誠實標註。
+  </div>
+  <p class="sub">公立學校為「得準用」（第 9 點）；本課程一律從嚴。</p>
+</section>
+
+<!-- 收工 -->
+<section>
+  <h2>收工前 3 件事</h2>
+  <ol>
+    <li>說「<b>收工</b>」→ 寫入 handoff.md</li>
+    <li>跑一次起始包的 <code>紅線檢核表.md</code></li>
+    <li>把成品存好，成品檔尾加上 AI 協助揭露</li>
+  </ol>
+</section>
+
+<section>
+  <h2>進階篇預告</h2>
+  <ul>
+    <li>自製 Skill：把重複的事寫成 SOP</li>
+    <li>MCP 串接外部工具</li>
+    <li>Browser／Computer Use：<b style="color:var(--accent)">畫面會送雲端，限制更多</b></li>
+    <li>排程與手機遠端</li>
+  </ul>
+</section>
+
+<section>
+  <div class="big">🚀</div>
+  <h1 style="color:var(--accent2)">人下指令、人把關、人決定</h1>
+  <p class="sub">AI 是協作夥伴，不是決策者</p>
+  <p class="sub" style="margin-top:2em">參考：國科會〈行政院及所屬機關（構）使用生成式 AI 參考指引〉｜教育部 AI 人才方舟計畫入口網</p>
+</section>
+
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({ hash:true, transition:'slide', center:true, progress:true, controls:true, slideNumber:'c/t', width:1100, height:700 });
+</script>
+</body>
+</html>
